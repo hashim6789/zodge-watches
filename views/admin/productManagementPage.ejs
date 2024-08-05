@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Admin Demo</title>
+    <!-- Include jQuery from a CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include Bootstrap's JavaScript (requires jQuery) -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- plugins:css -->
+    <link
+      rel="stylesheet"
+      href="/assets/vendors/mdi/css/materialdesignicons.min.css"
+    />
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css" />
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <!-- End Plugin css for this page -->
+    <!-- inject:css -->
+    <!-- endinject -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="/assets/images/favicon.png" />
+    <!-- for crop the images -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+  </head>
+  <body>
+    <div class="container-scroller">
+      <!-- partial:partials/_sidebar.ejs -->
+      <%- include('partials/_sidebar') %>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_navbar.ejs -->
+        <%- include('partials/_navbar') %>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            / Admin / Products
+            <div class="row">
+              <div class="col-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <div
+                      class="d-flex justify-content-between align-items-center mb-4"
+                    >
+                      <h4 class="card-title">Product Management</h4>
+                      <button
+                        class="btn btn-success"
+                        data-toggle="modal"
+                        data-target="#createProductModal"
+                      >
+                        Create New Product
+                      </button>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% products.forEach(product => { %>
+                          <tr>
+                            <td><%= product.name %></td>
+                            <!-- / Find the category corresponding to the
+                              product's categoryId // Display the
+                              category name-->
+                            <td>
+                              <% const category = categories.find(cat =>
+                              cat._id.toString() ===
+                              product.categoryId.toString()); const categoryName
+                              = category ? category.name : 'Unknown'; %> <%=
+                              categoryName %>
+                            </td>
+                            <td><%= product.price %></td>
+                            <td>
+                              <button
+                                class="btn btn-info"
+                                data-toggle="modal"
+                                data-target="#detailsProductModal"
+                                data-id="<%= product._id %>"
+                                data-name="<%= product.name %>"
+                                data-description="<%= product.description %>"
+                                data-category="<%= product.category %>"
+                                data-price="<%= product.price %>"
+                                data-stock="<%= product.stock %>"
+                              >
+                                Details
+                              </button>
+                              <button
+                                class="btn btn-primary"
+                                data-toggle="modal"
+                                data-target="#editProductModal"
+                                data-id="<%= product._id %>"
+                                data-name="<%= product.name %>"
+                                data-description="<%= product.description %>"
+                                data-category="<%= product.category %>"
+                                data-price="<%= product.price %>"
+                                data-stock="<%= product.stock %>"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                class="btn <%= product.isListed ? 'btn-success' : 'btn-danger' %>"
+                                onclick="toggleListProduct('<%= product._id %>', '<%= product.isListed %>')"
+                              >
+                                <%= product.isListed ? 'Unlist' : 'List' %>
+                              </button>
+                            </td>
+                          </tr>
+
+                          <% }) %>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- product creating modal -->
+          <!-- Bootstrap Modal -->
+          <!-- HTML for Create Product Modal -->
+          <div
+            class="modal fade"
+            id="createProductModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="createProductModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="createProductModalLabel">
+                    Create New Product
+                  </h5>
+                  <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <form id="createProductForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                      <label for="createProductName">Product Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="createProductName"
+                        name="name"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="createProductDescription">Description</label>
+                      <textarea
+                        class="form-control"
+                        id="createProductDescription"
+                        name="description"
+                        rows="3"
+                        required
+                      ></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label for="createProductCategory">Category</label>
+                      <select
+                        class="form-control"
+                        id="createProductCategory"
+                        name="categoryId"
+                        required
+                      >
+                        <option value="" disabled selected>
+                          Select a category
+                        </option>
+                        <% categories.forEach(function(category) { %>
+                        <option value="<%= category._id %>">
+                          <%= category.name %>
+                        </option>
+                        <% }); %>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="createProductPrice">Price</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="createProductPrice"
+                        name="price"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="createProductStock">Stock</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="createProductStock"
+                        name="stock"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="createProductImages">Images</label>
+                      <input
+                        type="file"
+                        class="form-control-file"
+                        id="createProductImage1"
+                        name="images1"
+                        accept="image/*"
+                        multiple
+                        required
+                      />
+                      <!-- <input
+                        type="file"
+                        class="form-control-file"
+                        id="createProductImage2"
+                        name="images[]"
+                        accept="image/*"
+                        multiple
+                        required
+                      />
+                      <input
+                        type="file"
+                        class="form-control-file"
+                        id="createProductImage3"
+                        name="images[]"
+                        accept="image/*"
+                        multiple
+                        required
+                      /> -->
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                      Create Product
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Product Modal -->
+          <div
+            class="modal fade"
+            id="editProductModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="editProductModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="editProductModalLabel">
+                    Edit Product
+                  </h5>
+                  <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <form id="editProductForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editProductId" name="id" />
+                    <div class="form-group">
+                      <label for="editProductName">Product Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="editProductName"
+                        name="name"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="editProductDescription">Description</label>
+                      <textarea
+                        class="form-control"
+                        id="editProductDescription"
+                        name="description"
+                        rows="3"
+                        required
+                      ></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label for="editProductCategory">Category</label>
+                      <select
+                        class="form-control"
+                        id="editProductCategory"
+                        name="categoryId"
+                        required
+                      >
+                        <option value="" disabled selected>
+                          Select a category
+                        </option>
+                        <% categories.forEach(function(category) { %>
+                        <option value="<%= category._id %>">
+                          <%= category.name %>
+                        </option>
+                        <% }); %>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="editProductPrice">Price</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="editProductPrice"
+                        name="price"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="editProductStock">Stock</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="editProductStock"
+                        name="stock"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="editProductImages">Images</label>
+                      <input
+                        type="file"
+                        class="form-control-file"
+                        id="editProductImage1"
+                        name="images1"
+                        accept="image/*"
+                        multiple
+                        required
+                      />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                      Update Product
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Details Modal -->
+          <div
+            class="modal fade"
+            id="detailsProductModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="detailsProductModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="detailsProductModalLabel">
+                    Product Details
+                  </h5>
+                  <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <h5 id="detailsProductName"></h5>
+                  <p id="detailsProductDescription"></p>
+                  <p>
+                    <strong>Category:</strong>
+                    <span id="detailsProductCategory"></span>
+                  </p>
+                  <p>
+                    <strong>Price:</strong> $<span
+                      id="detailsProductPrice"
+                    ></span>
+                  </p>
+                  <p>
+                    <strong>Stock:</strong>
+                    <span id="detailsProductStock"></span>
+                  </p>
+                  <p><strong>Images:</strong></p>
+                  <ul id="detailsProductImages"></ul>
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal"
+                  >
+                    Back
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- content-wrapper ends -->
+          <!-- partial:partials/_footer.ejs -->
+          <%- include('partials/_footer') %>
+          <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+    <!-- // for creating a new product -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      document
+        .getElementById("createProductForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          // Gather data from form inputs
+          const productName =
+            document.getElementById("createProductName").value;
+          const productDescription = document.getElementById(
+            "createProductDescription"
+          ).value;
+          const productCategory = document.getElementById(
+            "createProductCategory"
+          ).value;
+          const productPrice =
+            document.getElementById("createProductPrice").value;
+          const productStock =
+            document.getElementById("createProductStock").value;
+          const productImages = document.getElementById(
+            "createProductImage1"
+          ).files;
+
+          // // Constructing the product data object
+          // const productData = {
+          //   name: productName,
+          //   description: productDescription,
+          //   categoryId: productCategory,
+          //   price: productPrice,
+          //   stock: productStock,
+          //   images: Array.from(productImages).map((file) => file.name), // Assuming you want to send file names
+          // };
+
+          // console.log(productData);
+          // Construct FormData object
+          const formData = new FormData();
+          formData.append("name", productName);
+          formData.append("description", productDescription);
+          formData.append("categoryId", productCategory);
+          formData.append("price", productPrice);
+          formData.append("stock", productStock);
+
+          Array.from(productImages).forEach((file) => {
+            formData.append("images", file);
+          });
+
+          console.log(formData);
+
+          axios
+            .post("/admin/products/create", formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            })
+            .then((response) => {
+              if (response.status === 200) {
+                location.reload(); // Reload the page to reflect changes
+              } else {
+                alert("Failed to update status");
+              }
+              // alert(response.data.message);
+              // this.reset();
+              // $("#createProductModal").modal("hide");
+            })
+            .catch((error) => {
+              console.error("Error creating product:", error);
+              alert("Product creation failed");
+            });
+        });
+    </script>
+    <!-- for edit the product -->
+    <script>
+      document
+        .getElementById("editProductForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          // Gather data from form inputs
+          const productId = document.getElementById("editProductId").value;
+          const productName = document.getElementById("editProductName").value;
+          const productDescription = document.getElementById(
+            "editProductDescription"
+          ).value;
+          const productCategory = document.getElementById(
+            "editProductCategory"
+          ).value;
+          const productPrice =
+            document.getElementById("editProductPrice").value;
+          const productStock =
+            document.getElementById("editProductStock").value;
+          const productImages =
+            document.getElementById("editProductImage1").files;
+
+          // Construct FormData object
+          const formData = new FormData();
+          formData.append("name", productName);
+          formData.append("description", productDescription);
+          formData.append("categoryId", productCategory);
+          formData.append("price", productPrice);
+          formData.append("stock", productStock);
+
+          Array.from(productImages).forEach((file) => {
+            formData.append("images", file);
+          });
+
+          console.log(formData);
+
+          axios
+            .put(`/admin/products/edit/${productId}`, formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            })
+            .then((response) => {
+              if (response.status === 200) {
+                location.reload(); // Reload the page to reflect changes
+              } else {
+                alert("Failed to update product");
+              }
+            })
+            .catch((error) => {
+              console.error("Error updating product:", error);
+              alert("Product update failed");
+            });
+        });
+    </script>
+
+    <!-- for Unlist and List -->
+    <script>
+      function toggleListProduct(productId, isListed) {
+        const newStatus = isListed === "true" ? false : true;
+        axios
+          .patch(`/admin/products/unlist/${productId}`, {
+            isListed: newStatus,
+          })
+          .then((response) => {
+            if (response.status === 200) {
+              location.reload(); // Reload the page to reflect changes
+            } else {
+              alert("Failed to update status");
+            }
+          })
+          .catch((error) => {
+            console.error("There was an error updating the status!", error);
+            alert("Error updating status");
+          });
+      }
+    </script>
+    <script>
+      // Handle edit product modal
+      $("#editProductModal").on("show.bs.modal", function (event) {
+        const button = $(event.relatedTarget);
+        const id = button.data("id");
+        const name = button.data("name");
+        const description = button.data("description");
+        const category = button.data("category");
+        const price = button.data("price");
+        const stock = button.data("stock");
+        const images = button.data("images");
+
+        const modal = $(this);
+        modal.find("#editProductId").val(id);
+        modal.find("#editProductName").val(name);
+        modal.find("#editProductDescription").val(description);
+        modal.find("#editProductCategory").val(category);
+        modal.find("#editProductPrice").val(price);
+        modal.find("#editProductStock").val(stock);
+        modal.find("#editProductImages").val(images);
+      });
+    </script>
+    <!-- partial:partials/_scripts.ejs -->
+    <%- include('partials/_scripts') %>
+    <!-- partial -->
+  </body>
+</html>

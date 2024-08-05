@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Category Management</title>
+    <!-- plugins:css -->
+    <link
+      rel="stylesheet"
+      href="/assets/vendors/mdi/css/materialdesignicons.min.css"
+    />
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css" />
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <!-- End Plugin css for this page -->
+    <!-- inject:css -->
+    <!-- endinject -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="/assets/images/favicon.png" />
+  </head>
+  <body>
+    <div class="container-scroller">
+      <!-- partial:partials/_sidebar.ejs -->
+      <%- include('partials/_sidebar') %>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_navbar.ejs -->
+        <%- include('partials/_navbar') %>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            / Admin / Category
+            <div class="row">
+              <div class="col-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <div
+                      class="d-flex justify-content-between align-items-center mb-4"
+                    >
+                      <h4 class="card-title">Category Management</h4>
+                      <button
+                        class="btn btn-success"
+                        data-toggle="modal"
+                        data-target="#createCategoryModal"
+                      >
+                        Create New Category
+                      </button>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Category Name</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% categories.forEach(category => { %>
+                          <tr>
+                            <td><%= category.name %></td>
+                            <td>
+                              <button
+                                class="btn btn-primary"
+                                data-toggle="modal"
+                                data-target="#editCategoryModal"
+                                data-id="<%= category._id %>"
+                                data-name="<%= category.name %>"
+                                onclick="populateEditCategoryModal('<%= category._id %>', '<%= category.name %>')"
+                              >
+                                Edit
+                              </button>
+
+                              <button
+                                class="btn <%= category.isListed ? 'btn-danger' : 'btn-success' %>"
+                                onclick="toggleListCategory('<%= category._id %>', '<%= category.isListed %>')"
+                              >
+                                <%= category.isListed ? `Unlist` : `List` %>
+                              </button>
+                            </td>
+                          </tr>
+                          <% }) %>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- content-wrapper ends -->
+
+          <!-- Create Category Modal -->
+          <div
+            class="modal fade"
+            id="createCategoryModal"
+            tabindex="-1"
+            aria-labelledby="createCategoryModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <form id="createCategoryForm">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="createCategoryModalLabel">
+                      Create New Category
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="form-group">
+                      <label for="newCategoryName">Category Name:</label>
+                      <input
+                        type="text"
+                        id="newCategoryName"
+                        name="categoryName"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Close
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                      Create
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Category Modal -->
+
+          <div
+            class="modal fade"
+            id="editCategoryModal"
+            tabindex="-1"
+            aria-labelledby="editCategoryModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <form id="editCategoryForm">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="editCategoryModalLabel">
+                      Edit Category
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <input
+                      type="hidden"
+                      id="editCategoryId"
+                      name="categoryId"
+                    />
+                    <div class="form-group">
+                      <label for="editCategoryName">Category Name:</label>
+                      <input
+                        type="text"
+                        id="editCategoryName"
+                        name="categoryName"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Close
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                      Save changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- content-wrapper ends -->
+
+          <!-- partial:partials/_footer.ejs -->
+          <%- include('partials/_footer') %>
+          <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+
+    <!-- for modals -->
+    <script>
+      $("#editCategoryModal").on("show.bs.modal", function (event) {
+        var button = $(event.relatedTarget);
+        var categoryId = button.data("id");
+        var categoryName = button.data("name");
+        var modal = $(this);
+        modal.find("#editCategoryId").val(categoryId);
+        modal.find("#editCategoryName").val(categoryName);
+      });
+    </script>
+    <!-- for axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      document
+        .getElementById("createCategoryForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault(); // Prevent the default form submission
+
+          const categoryName = document.getElementById("newCategoryName").value;
+
+          axios
+            .post("/admin/categories/create", {
+              categoryName: categoryName,
+            })
+            .then((response) => {
+              // Handle success (e.g., close the modal, show a success message, reload the table, etc.)
+              console.log(response);
+              alert("Category created successfully!");
+              location.reload(); // Reload the page to reflect changes
+            })
+            .catch((error) => {
+              // Handle error (e.g., show an error message)
+              console.error(error);
+              alert("An error occurred while creating the category.");
+            });
+        });
+    </script>
+
+    <!-- for edit the category -->
+    <script>
+      document
+        .getElementById("editCategoryForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault(); // Prevent the default form submission
+
+          const categoryId = document.getElementById("editCategoryId").value;
+          const categoryName =
+            document.getElementById("editCategoryName").value;
+
+          axios
+            .put(`/admin/categories/edit/${categoryId}`, {
+              categoryName: categoryName,
+            })
+            .then((response) => {
+              // Handle success (e.g., close the modal, show a success message, reload the table, etc.)
+              console.log(response);
+              alert("Category updated successfully!");
+              location.reload(); // Reload the page to reflect changes
+            })
+            .catch((error) => {
+              // Handle error (e.g., show an error message)
+              console.error(error);
+              alert("An error occurred while updating the category.");
+            });
+        });
+
+      // Function to populate the modal with category data
+      function populateEditCategoryModal(categoryId, categoryName) {
+        document.getElementById("editCategoryId").value = categoryId;
+        document.getElementById("editCategoryName").value = categoryName;
+      }
+
+      // Example usage: Call populateEditCategoryModal with the appropriate category data when opening the modal
+      // populateEditCategoryModal('someCategoryId', 'Some Category Name');
+    </script>
+
+    <!-- for Unlist and List -->
+    <script>
+      function toggleListCategory(categoryId, isListed) {
+        const newStatus = isListed === "true" ? false : true;
+        axios
+          .patch(`/admin/categories/unlist/${categoryId}`, {
+            isListed: newStatus,
+          })
+          .then((response) => {
+            if (response.status === 200) {
+              location.reload(); // Reload the page to reflect changes
+            } else {
+              alert("Failed to update status");
+            }
+          })
+          .catch((error) => {
+            console.error("There was an error updating the status!", error);
+            alert("Error updating status");
+          });
+      }
+    </script>
+
+    <!-- partial:partials/_footer.ejs -->
+    <%- include('partials/_scripts') %>
+    <!-- partial -->
+  </body>
+</html>

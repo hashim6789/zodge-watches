@@ -1,0 +1,50 @@
+<%- include('partials/header') %> <%- include('partials/sidebar') %> <%-
+include('partials/main') %>
+
+<!-- Render page-specific content -->
+<div class="row">
+  <div class="col-12 grid-margin">
+    <div class="col-12 grid-margin">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">User List</h4>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>First Name</th>
+                  <th>Second Name</th>
+                  <th>Email</th>
+                  <th>DOB</th>
+                  <th>Phone No</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% users.forEach(user => { %>
+                <tr>
+                  <td><%= user.firstName %></td>
+                  <td><%= user.lastName %></td>
+                  <td><%= user.email %></td>
+                  <td><%= formatDate(user.dob) %></td>
+                  <td><%= user.phoneno %></td>
+                  <td>
+                    <button
+                      class="btn <%= user.isBlocked ? 'btn-success' : 'btn-danger' %>"
+                      onclick="toggleBlock('<%= user._id %>', '<%= user.isBlocked %>')"
+                    >
+                      > <%= user.isBlocked ? 'Unblock' : 'Block' %>
+                    </button>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
