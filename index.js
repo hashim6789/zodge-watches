@@ -6,6 +6,8 @@ require("dotenv").config();
 const adminRouter = require("./routes/adminRoute"); //import the local module router for admin
 const categoryRouter = require("./routes/admin/categoryRoute"); //import the local module router for admin/categories
 const productRouter = require("./routes/admin/productRoute"); //import the local module router for admin/products
+const dummyRouter = require("./routes/user/dummyRoute"); //import the local module router for user/dummy for testing
+const authRouter = require("./routes/user/authRoute"); //import the local module router for user/auth
 // const session = require("express-session"); //import session
 // const { v4: uuidv4 } = require("uuid"); //import unique id
 // const MongoDbSession = require("connect-mongodb-session")(session);
@@ -56,6 +58,9 @@ app.use(express.static(path.join(__dirname, "public"))); //for static
 app.use("/admin/products", productRouter); // for admin router url
 app.use("/admin/categories", categoryRouter); // for admin router url
 app.use("/admin", adminRouter); // for admin router url
+
+app.use("/user/dummy", dummyRouter); // for testing the router
+app.use("/user/auth", authRouter); // for testing the router
 
 //server listener
 app.listen(port, () => {
