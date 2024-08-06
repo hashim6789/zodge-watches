@@ -52,7 +52,8 @@ app.use(express.urlencoded({ extended: true })); // for url encode
 //   next();
 // });
 
-app.use(express.static(path.join(__dirname, "public"))); //for static
+// Middleware to serve static files
+app.use("/public", express.static(path.join(__dirname, "public")));
 
 // app.use("/", userRouter); // for user router url
 app.use("/admin/products", productRouter); // for admin router url
