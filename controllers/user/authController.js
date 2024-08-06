@@ -1,17 +1,16 @@
-const bcrypt = require("bcryptjs");
-require("dotenv").config();
 const nodemailer = require("nodemailer");
+const bcrypt = require("bcryptjs");
 const UserModel = require("../../models/User");
 const OtpModel = require("../../models/Otp");
-const { text } = require("body-parser");
+const ProductModel = require("../../models/ProductModel");
+const CategoryModel = require("../../models/Category");
+require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  service: "Gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Use environment variables for security
+    pass: process.env.EMAIL_PASS,
   },
   tls: {
     rejectUnauthorized: false,
@@ -22,21 +21,19 @@ const sendVerificationMail = async ({ _id, email }, res) => {
   try {
     const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
 
-    //mail option
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Verify your Email",
-      text: `Enter ${otp} in the appto verify your email and complete this code is expires in 1 hour.`,
+      html: `<p>Enter <b>${otp}</b> in the app to verify your email and complete the signup process. This code <b>expires in 1 hour</b>.</p>`,
     };
 
-    //for hash the otp
-    const hashedOtp = await bcrypt.hash(otp, 15);
-    const newOtp = await new OtpModel({
+    const hashedOtp = await bcrypt.hash(otp, 10);
+    const newOtp = new OtpModel({
       userId: _id,
       otp: hashedOtp,
       createdAt: Date.now(),
-      expiresAt: Date.now() + 3600000,
+      expiresAt: Date.now() + 3600000, // 1 hour
     });
 
     //for save otp records
@@ -48,14 +45,11 @@ const sendVerificationMail = async ({ _id, email }, res) => {
         console.log("Email sent: " + info.response);
       }
     });
-    res.json({
-      status: "Pending",
-      message: "Verification otp main sent",
-      data: {
-        userId: _id,
-        email,
-      },
-    });
+    // return res.json({
+    //   status: "Pending",
+    //   message: "Verification OTP email sent",
+    //   data: { userId: _id, email },
+    // });
   } catch (error) {
     res.status(500).json({
       status: "Failed",
@@ -76,11 +70,10 @@ const getSignup = (req, res) => {
 const postSignup = async (req, res) => {
   try {
     const { firstName, lastName, email, dob, phone, password } = req.body;
-    console.log(req.body);
+
     let user = await UserModel.findOne({ email });
-    console.log(user);
     if (!user) {
-      const hashPassword = await bcrypt.hash(password, 15);
+      const hashPassword = await bcrypt.hash(password, 10);
       user = new UserModel({
         firstName,
         lastName,
@@ -90,20 +83,11 @@ const postSignup = async (req, res) => {
         password: hashPassword,
         isVerified: false,
       });
-      await user
-        .save()
-        .then((result) => {
-          //for send the verification mail
-          sendVerificationMail(result, res);
-        })
-        .catch((err) => {
-          console.log(err);
-          res.json({
-            status: "Failed",
-            message: "An error occured while saving user account!",
-          });
-        });
-      // return res.status(201).rendirect("/user/pages/home");
+      await user.save();
+      sendVerificationMail(user, res);
+      return res.redirect(
+        `/user/auth/verify-otp?userId=${user._id}&email=${email}`
+      );
     } else {
       return res.status(404).json({
         status: "error",
@@ -113,7 +97,56 @@ const postSignup = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       status: "error",
-      message: "Error creating the category",
+      message: "Error signup failed",
+    });
+  }
+};
+
+//get the otp page
+const getOtpPage = (req, res) => {
+  const { email, userId } = req.query;
+  res.render("user/otpGeneratePage", { email, userId, msg: null });
+};
+
+//post the otp (verifying)
+const postOtp = async (req, res) => {
+  const { otp1, otp2, otp3, otp4, userId, email } = req.body;
+  const otp = `${otp1}${otp2}${otp3}${otp4}`;
+
+  try {
+    const otpRecord = await OtpModel.findOne({ userId });
+    console.log(req.body);
+
+    if (otpRecord && Date.now() < otpRecord.expiresAt) {
+      const isValidOtp = await bcrypt.compare(otp, otpRecord.otp);
+
+      if (isValidOtp) {
+        //verified the user
+        await UserModel.findByIdAndUpdate(
+          userId,
+          { isVerified: true },
+          { new: true } // Return the updated document
+        );
+        // OTP is correct, navigate to the home page
+        res.redirect("/user/auth/home");
+      } else {
+        res.render("user/otpGeneratePage", {
+          email,
+          userId,
+          msg: "Invalid OTP",
+        });
+      }
+    } else {
+      res.render("user/otpGeneratePage", {
+        email,
+        userId,
+        msg: "OTP expired or not found",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: "Failed",
+      message: error.message,
     });
   }
 };
@@ -145,4 +178,19 @@ const postLogin = async (req, res) => {
   }
 };
 
-module.exports = { getSignup, postSignup, getLogin, postLogin };
+const getHome = async (req, res) => {
+  const products = await ProductModel.find({ isListed: true });
+  const categories = await CategoryModel.find({ isListed: true });
+
+  res.render("user/home", { products, categories });
+};
+
+module.exports = {
+  getSignup,
+  postSignup,
+  getOtpPage,
+  postOtp,
+  getLogin,
+  postLogin,
+  getHome,
+};
