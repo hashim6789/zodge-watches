@@ -96,9 +96,9 @@
                   </a>
                 </div>
                 <h2 class="fs-6 fw-normal text-center mb-4">
-                  Enter the OTP sent to your email
+                  Enter the OTP sent to your email <%= email %>
                 </h2>
-                <form id="otpForm" action="/verify-otp" method="post">
+                <form id="otpForm" action="/user/auth/verify-otp" method="post">
                   <div class="row gy-2 justify-content-center">
                     <div class="col-auto">
                       <input
@@ -135,6 +135,12 @@
                         name="otp4"
                         maxlength="1"
                         required
+                      />
+                      <input
+                        type="hidden"
+                        class="user"
+                        name="userId"
+                        value="<%= userId %>"
                       />
                     </div>
                   </div>
