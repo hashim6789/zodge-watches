@@ -1,0 +1,203 @@
+<div class="wrap-header-wishlist js-panel-wishlist">
+  <div class="s-full js-hide-wishlist"></div>
+
+  <div class="header-wishlist flex-col-l p-l-65 p-r-25">
+    <div class="header-wishlist-title flex-w flex-sb-m p-b-8">
+      <span class="mtext-103 cl2"> Your Wishlist </span>
+
+      <div
+        class="fs-35 lh-10 cl2 p-lr-5 pointer hov-cl1 trans-04 js-hide-wishlist"
+      >
+        <i class="zmdi zmdi-close"></i>
+      </div>
+    </div>
+
+    <div class="header-wishlist-content flex-w js-pscroll">
+      <ul class="header-wishlist-wrapitem w-full">
+        <li class="header-wishlist-item flex-w flex-t m-b-12">
+          <div class="header-wishlist-item-img">
+            <img src="images/item-wishlist-01.jpg" alt="IMG" />
+          </div>
+
+          <div class="header-wishlist-item-txt p-t-8">
+            <a
+              href="#"
+              class="header-wishlist-item-name m-b-18 hov-cl1 trans-04"
+            >
+              White Shirt Pleat
+            </a>
+
+            <span class="header-wishlist-item-info"> $19.00 </span>
+          </div>
+        </li>
+
+        <li class="header-wishlist-item flex-w flex-t m-b-12">
+          <div class="header-wishlist-item-img">
+            <img src="images/item-wishlist-02.jpg" alt="IMG" />
+          </div>
+
+          <div class="header-wishlist-item-txt p-t-8">
+            <a
+              href="#"
+              class="header-wishlist-item-name m-b-18 hov-cl1 trans-04"
+            >
+              Converse All Star
+            </a>
+
+            <span class="header-wishlist-item-info"> $39.00 </span>
+          </div>
+        </li>
+
+        <li class="header-wishlist-item flex-w flex-t m-b-12">
+          <div class="header-wishlist-item-img">
+            <img src="images/item-wishlist-03.jpg" alt="IMG" />
+          </div>
+
+          <div class="header-wishlist-item-txt p-t-8">
+            <a
+              href="#"
+              class="header-wishlist-item-name m-b-18 hov-cl1 trans-04"
+            >
+              Nixon Porter Leather
+            </a>
+
+            <span class="header-wishlist-item-info"> $17.00 </span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="w-full">
+        <div class="header-wishlist-total w-full p-tb-40">Total: $75.00</div>
+
+        <div class="header-wishlist-buttons flex-w w-full">
+          <a
+            href="wishlist.html"
+            class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-r-8 m-b-10"
+          >
+            View Wishlist
+          </a>
+
+          <a
+            href="shop.html"
+            class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-b-10"
+          >
+            Continue Shopping
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--===============================================================================================-->
+<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+<script src="vendor/animsition/js/animsition.min.js"></script>
+<!--===============================================================================================-->
+<script src="vendor/bootstrap/js/popper.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+<script src="vendor/select2/select2.min.js"></script>
+<script>
+  $(".js-select2").each(function () {
+    $(this).select2({
+      minimumResultsForSearch: 20,
+      dropdownParent: $(this).next(".dropDownSelect2"),
+    });
+  });
+</script>
+<!--===============================================================================================-->
+<script src="vendor/daterangepicker/moment.min.js"></script>
+<script src="vendor/daterangepicker/daterangepicker.js"></script>
+<!--===============================================================================================-->
+<script src="vendor/slick/slick.min.js"></script>
+<script src="js/slick-custom.js"></script>
+<!--===============================================================================================-->
+<script src="vendor/parallax100/parallax100.js"></script>
+<script>
+  $(".parallax100").parallax100();
+</script>
+<!--===============================================================================================-->
+<script src="vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
+<script>
+  $(".gallery-lb").each(function () {
+    // the containers for all your galleries
+    $(this).magnificPopup({
+      delegate: "a", // the selector for gallery item
+      type: "image",
+      gallery: {
+        enabled: true,
+      },
+      mainClass: "mfp-fade",
+    });
+  });
+</script>
+<!--===============================================================================================-->
+<script src="vendor/isotope/isotope.pkgd.min.js"></script>
+<!--===============================================================================================-->
+<script src="vendor/sweetalert/sweetalert.min.js"></script>
+<script>
+  $(".js-addwish-b2").on("click", function (e) {
+    e.preventDefault();
+  });
+
+  $(".js-addwish-b2").each(function () {
+    var nameProduct = $(this).parent().parent().find(".js-name-b2").html();
+    $(this).on("click", function () {
+      swal(nameProduct, "is added to wishlist !", "success");
+
+      $(this).addClass("js-addedwish-b2");
+      $(this).off("click");
+    });
+  });
+
+  $(".js-addwish-detail").each(function () {
+    var nameProduct = $(this)
+      .parent()
+      .parent()
+      .parent()
+      .find(".js-name-detail")
+      .html();
+
+    $(this).on("click", function () {
+      swal(nameProduct, "is added to wishlist !", "success");
+
+      $(this).addClass("js-addedwish-detail");
+      $(this).off("click");
+    });
+  });
+
+  /*---------------------------------------------*/
+
+  $(".js-addcart-detail").each(function () {
+    var nameProduct = $(this)
+      .parent()
+      .parent()
+      .parent()
+      .parent()
+      .find(".js-name-detail")
+      .html();
+    $(this).on("click", function () {
+      swal(nameProduct, "is added to cart !", "success");
+    });
+  });
+</script>
+<!--===============================================================================================-->
+<script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+<script>
+  $(".js-pscroll").each(function () {
+    $(this).css("position", "relative");
+    $(this).css("overflow", "hidden");
+    var ps = new PerfectScrollbar(this, {
+      wheelSpeed: 1,
+      scrollingThreshold: 1000,
+      wheelPropagation: false,
+    });
+
+    $(window).on("resize", function () {
+      ps.update();
+    });
+  });
+</script>
+<!--===============================================================================================-->
+<script src="js/main.js"></script>
