@@ -8,6 +8,7 @@ const categoryRouter = require("./routes/admin/categoryRoute"); //import the loc
 const productRouter = require("./routes/admin/productRoute"); //import the local module router for admin/products
 const dummyRouter = require("./routes/user/dummyRoute"); //import the local module router for user/dummy for testing
 const authRouter = require("./routes/user/authRoute"); //import the local module router for user/auth
+const shopRouter = require("./routes/user/shopRoute"); //import the local module router for user/auth
 // const session = require("express-session"); //import session
 // const { v4: uuidv4 } = require("uuid"); //import unique id
 // const MongoDbSession = require("connect-mongodb-session")(session);
@@ -61,7 +62,8 @@ app.use("/admin/categories", categoryRouter); // for admin router url
 app.use("/admin", adminRouter); // for admin router url
 
 app.use("/user/dummy", dummyRouter); // for testing the router
-app.use("/user/auth", authRouter); // for testing the router
+app.use("/user/auth", authRouter); // for authentication the router
+app.use("/user/shop", shopRouter); // for shopping the router
 
 //server listener
 app.listen(port, () => {

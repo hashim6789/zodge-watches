@@ -21,16 +21,17 @@ const upload = multer({ storage: storage });
 //   { name: "productImgThree", maxCount: 1 },
 // ]);
 
-//for testing purposes
-// const test = (req, res, next) => {
-//   console.log(req.url);
-//   next();
-// };
+// for testing purposes
+const test = (req, res, next) => {
+  console.log(req.url);
+  next();
+};
 const {
   getAllProducts,
   createProduct,
   updateProduct,
   unlistProduct,
+  getDetails,
 } = require("../../controllers/productController");
 
 // Route to get all products
@@ -43,5 +44,7 @@ router.post("/create", upload.array("images", 3), createProduct);
 router.put("/edit/:id", upload.array("images", 3), updateProduct);
 
 router.patch("/unlist/:id", unlistProduct);
+
+router.get("/details/:id", test, getDetails);
 
 module.exports = router;
