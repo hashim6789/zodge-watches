@@ -38,7 +38,9 @@
         <!-- partial -->
         <div class="main-panel">
           <div class="content-wrapper">
-            / Admin / Category
+            <a href="/admin/dashboard">Admin</a>
+            >
+            <a href="/admin/categories">Category Management</a>
             <div class="row">
               <div class="col-12 grid-margin">
                 <div class="card">
@@ -81,9 +83,9 @@
 
                               <button
                                 class="btn <%= category.isListed ? 'btn-danger' : 'btn-success' %>"
-                                onclick="toggleListCategory('<%= category._id %>', '<%= category.isListed %>')"
+                                onclick="confirmAndToggleListCategory('<%= category._id %>', '<%= category.isListed %>')"
                               >
-                                <%= category.isListed ? `Unlist` : `List` %>
+                                <%= category.isListed ? 'Unlist' : 'List' %>
                               </button>
                             </td>
                           </tr>
@@ -299,8 +301,17 @@
       // populateEditCategoryModal('someCategoryId', 'Some Category Name');
     </script>
 
-    <!-- for Unlist and List -->
     <script>
+      function confirmAndToggleListCategory(categoryId, isListed) {
+        const action = isListed === "true" ? "unlist" : "list";
+        const confirmAction = confirm(
+          `Are you sure you want to ${action} this category?`
+        );
+        if (confirmAction) {
+          toggleListCategory(categoryId, isListed);
+        }
+      }
+
       function toggleListCategory(categoryId, isListed) {
         const newStatus = isListed === "true" ? false : true;
         axios
