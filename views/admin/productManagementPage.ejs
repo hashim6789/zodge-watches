@@ -48,7 +48,9 @@
         <!-- partial -->
         <div class="main-panel">
           <div class="content-wrapper">
-            / Admin / Products
+            <a href="/admin/dashboard">Admin</a>
+            >
+            <a href="/admin/products">Product Management</a>
             <div class="row">
               <div class="col-12 grid-margin">
                 <div class="card">
@@ -119,7 +121,7 @@
                               </button>
                               <button
                                 class="btn <%= product.isListed ? 'btn-success' : 'btn-danger' %>"
-                                onclick="toggleListProduct('<%= product._id %>', '<%= product.isListed %>')"
+                                onclick="confirmAndToggleListProduct('<%= product._id %>', '<%= product.isListed %>')"
                               >
                                 <%= product.isListed ? 'Unlist' : 'List' %>
                               </button>
@@ -223,36 +225,23 @@
                       />
                     </div>
                     <div class="form-group">
-                      <label for="createProductImages">Images</label>
+                      <label for="createProductImages"
+                        >Images (at least 3)</label
+                      >
                       <input
                         type="file"
                         class="form-control-file"
-                        id="createProductImage1"
-                        name="images1"
+                        id="createProductImages"
+                        name="images"
                         accept="image/*"
                         multiple
                         required
                       />
-                      <!-- <input
-                        type="file"
-                        class="form-control-file"
-                        id="createProductImage2"
-                        name="images[]"
-                        accept="image/*"
-                        multiple
-                        required
-                      />
-                      <input
-                        type="file"
-                        class="form-control-file"
-                        id="createProductImage3"
-                        name="images[]"
-                        accept="image/*"
-                        multiple
-                        required
-                      /> -->
+                      <small
+                        id="imageError"
+                        class="form-text text-danger"
+                      ></small>
                     </div>
-
                     <button type="submit" class="btn btn-primary">
                       Create Product
                     </button>
@@ -441,6 +430,17 @@
         .addEventListener("submit", function (event) {
           event.preventDefault();
 
+          // Validate the number of images
+          const imageInput = document.getElementById("createProductImages");
+          const files = imageInput.files;
+          if (files.length < 3) {
+            document.getElementById("imageError").textContent =
+              "Please select at least 3 images.";
+            return; // Stop form submission if validation fails
+          } else {
+            document.getElementById("imageError").textContent = "";
+          }
+
           // Gather data from form inputs
           const productName =
             document.getElementById("createProductName").value;
@@ -454,21 +454,7 @@
             document.getElementById("createProductPrice").value;
           const productStock =
             document.getElementById("createProductStock").value;
-          const productImages = document.getElementById(
-            "createProductImage1"
-          ).files;
 
-          // // Constructing the product data object
-          // const productData = {
-          //   name: productName,
-          //   description: productDescription,
-          //   categoryId: productCategory,
-          //   price: productPrice,
-          //   stock: productStock,
-          //   images: Array.from(productImages).map((file) => file.name), // Assuming you want to send file names
-          // };
-
-          // console.log(productData);
           // Construct FormData object
           const formData = new FormData();
           formData.append("name", productName);
@@ -477,11 +463,9 @@
           formData.append("price", productPrice);
           formData.append("stock", productStock);
 
-          Array.from(productImages).forEach((file) => {
+          Array.from(files).forEach((file) => {
             formData.append("images", file);
           });
-
-          console.log(formData);
 
           axios
             .post("/admin/products/create", formData, {
@@ -495,9 +479,6 @@
               } else {
                 alert("Failed to update status");
               }
-              // alert(response.data.message);
-              // this.reset();
-              // $("#createProductModal").modal("hide");
             })
             .catch((error) => {
               console.error("Error creating product:", error);
@@ -505,6 +486,7 @@
             });
         });
     </script>
+
     <!-- for edit the product -->
     <script>
       document
@@ -562,14 +544,21 @@
         });
     </script>
 
-    <!-- for Unlist and List -->
     <script>
+      function confirmAndToggleListProduct(productId, isListed) {
+        const action = isListed === "true" ? "unlist" : "list";
+        const confirmAction = confirm(
+          `Are you sure you want to ${action} this product?`
+        );
+        if (confirmAction) {
+          toggleListProduct(productId, isListed);
+        }
+      }
+
       function toggleListProduct(productId, isListed) {
         const newStatus = isListed === "true" ? false : true;
         axios
-          .patch(`/admin/products/unlist/${productId}`, {
-            isListed: newStatus,
-          })
+          .patch(`/admin/products/unlist/${productId}`, { isListed: newStatus })
           .then((response) => {
             if (response.status === 200) {
               location.reload(); // Reload the page to reflect changes
@@ -605,6 +594,7 @@
         modal.find("#editProductImages").val(images);
       });
     </script>
+
     <!-- partial:partials/_scripts.ejs -->
     <%- include('partials/_scripts') %>
     <!-- partial -->

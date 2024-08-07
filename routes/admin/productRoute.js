@@ -2,6 +2,13 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
+const {
+  getAllProducts,
+  createProduct,
+  updateProduct,
+  unlistProduct,
+  getDetails,
+} = require("../../controllers/productController");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -13,38 +20,38 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
-// // Middleware to handle multiple file uploads
-// const uploadFields = upload.fields([
-//   { name: "productImgOne", maxCount: 1 },
-//   { name: "productImgTwo", maxCount: 1 },
-//   { name: "productImgThree", maxCount: 1 },
-// ]);
-
 // for testing purposes
 const test = (req, res, next) => {
   console.log(req.url);
   next();
 };
-const {
-  getAllProducts,
-  createProduct,
-  updateProduct,
-  unlistProduct,
-  getDetails,
-} = require("../../controllers/productController");
+
+const validateImageCount = (req, res, next) => {
+  if (req.files.length < 3) {
+    return res
+      .status(400)
+      .json({ message: "Please upload at least 3 images." });
+  }
+  next();
+};
 
 // Route to get all products
 router.get("/", getAllProducts);
 
 // Route to create product
-router.post("/create", upload.array("images", 3), createProduct);
+router.post(
+  "/create",
+  test,
+  upload.array("images", 10),
+  validateImageCount,
+  createProduct
+);
 
 //Route to edit product
 router.put("/edit/:id", upload.array("images", 3), updateProduct);
 
 router.patch("/unlist/:id", unlistProduct);
 
-router.get("/details/:id", test, getDetails);
+router.get("/details/:id", getDetails);
 
 module.exports = router;

@@ -38,7 +38,9 @@
         <!-- partial -->
         <div class="main-panel">
           <div class="content-wrapper">
-            / Admin / User
+            <a href="/admin/dashboard">Admin</a>
+            >
+            <a href="/admin/users">User Management</a>
             <div class="row">
               <div class="col-12 grid-margin">
                 <div class="card">
@@ -67,7 +69,7 @@
                             <td>
                               <button
                                 class="btn <%= user.isBlocked ? 'btn-success' : 'btn-danger' %>"
-                                onclick="toggleBlock('<%= user._id %>', '<%= user.isBlocked %>')"
+                                onclick="confirmAndToggleBlock('<%= user._id %>', '<%= user.isBlocked %>')"
                               >
                                 <%= user.isBlocked ? 'Unblock' : 'Block' %>
                               </button>
@@ -95,6 +97,16 @@
     <!-- for axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
+      function confirmAndToggleBlock(userId, isBlocked) {
+        const action = isBlocked === "true" ? "unblock" : "block";
+        const confirmAction = confirm(
+          `Are you sure you want to ${action} this user?`
+        );
+        if (confirmAction) {
+          toggleBlock(userId, isBlocked);
+        }
+      }
+
       function toggleBlock(userId, isBlocked) {
         const newStatus = isBlocked === "true" ? false : true;
         axios
