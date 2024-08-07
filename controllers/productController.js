@@ -160,9 +160,26 @@ const updateProduct = async (req, res) => {
   }
 };
 
+const getDetails = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await ProductModel.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(product);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = {
   getAllProducts,
   createProduct,
   updateProduct,
   unlistProduct,
+  getDetails,
 };

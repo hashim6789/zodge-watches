@@ -86,6 +86,17 @@
     <link rel="stylesheet" type="text/css" href="/public/user/css/util.css" />
     <link rel="stylesheet" type="text/css" href="/public/user/css/main.css" />
     <!--===============================================================================================-->
+
+    <!-- for modal visibility -->
+    <style>
+      .wrap-modal1 {
+        display: none; /* Hidden by default */
+      }
+
+      .wrap-modal1.show {
+        display: block; /* Show when the show class is added */
+      }
+    </style>
   </head>
   <body class="animsition">
     <!-- Header -->
@@ -335,16 +346,17 @@
             <div class="block2">
               <div class="block2-pic hov-img0">
                 <img
-                  src="/public/user/images/product-01.jpg"
+                  src="/public/uploads/<%= product.images[0] %>"
                   alt="IMG-PRODUCT"
                 />
-
-                <a
-                  href="#"
-                  class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1"
-                >
-                  Quick View
-                </a>
+                <form action="/user/shop/quickview/<%= product._id %>">
+                  <button
+                    class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04"
+                    type="submit"
+                  >
+                    Quick View
+                  </button>
+                </form>
               </div>
 
               <div class="block2-txt flex-w flex-t p-t-14">
@@ -405,7 +417,7 @@
       </span>
     </div>
 
-    <!-- Modal1 -->
+    <!--Modal1
     <div class="wrap-modal1 js-modal1 p-t-60 p-b-20">
       <div class="overlay-modal1 js-hide-modal1"></div>
 
@@ -422,83 +434,21 @@
                   <div class="wrap-slick3-dots"></div>
                   <div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
 
-                  <div class="slick3 gallery-lb">
-                    <div
-                      class="item-slick3"
-                      data-thumb="/public/user/images/product-detail-01.jpg"
-                    >
-                      <div class="wrap-pic-w pos-relative">
-                        <img
-                          src="/public/user/images/product-detail-01.jpg"
-                          alt="IMG-PRODUCT"
-                        />
-
-                        <a
-                          class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04"
-                          href="/public/user/images/product-detail-01.jpg"
-                        >
-                          <i class="fa fa-expand"></i>
-                        </a>
-                      </div>
-                    </div>
-
-                    <div
-                      class="item-slick3"
-                      data-thumb="/public/user/images/product-detail-02.jpg"
-                    >
-                      <div class="wrap-pic-w pos-relative">
-                        <img
-                          src="/public/user/images/product-detail-02.jpg"
-                          alt="IMG-PRODUCT"
-                        />
-
-                        <a
-                          class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04"
-                          href="/public/user/images/product-detail-02.jpg"
-                        >
-                          <i class="fa fa-expand"></i>
-                        </a>
-                      </div>
-                    </div>
-
-                    <div
-                      class="item-slick3"
-                      data-thumb="/public/user/images/product-detail-03.jpg"
-                    >
-                      <div class="wrap-pic-w pos-relative">
-                        <img
-                          src="/public/user/images/product-detail-03.jpg"
-                          alt="IMG-PRODUCT"
-                        />
-
-                        <a
-                          class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04"
-                          href="/public/user/images/product-detail-03.jpg"
-                        >
-                          <i class="fa fa-expand"></i>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
+                  <div class="slick3 gallery-lb"></div>
                 </div>
               </div>
             </div>
 
             <div class="col-md-6 col-lg-5 p-b-30">
               <div class="p-r-50 p-t-5 p-lr-0-lg">
-                <h4 class="mtext-105 cl2 js-name-detail p-b-14">
-                  Lightweight Jacket
-                </h4>
+                <h4 class="mtext-105 cl2 js-name-detail p-b-14"></h4>
 
-                <span class="mtext-106 cl2"> $58.79 </span>
+                <span class="mtext-106 cl2 js-price-detail"></span>
 
-                <p class="stext-102 cl3 p-t-23">
-                  Nulla eget sem vitae eros pharetra viverra. Nam vitae luctus
-                  ligula. Mauris consequat ornare feugiat.
-                </p>
+                <p class="stext-102 cl3 p-t-23 js-description-detail"></p> -->
 
-                <!--  -->
-                <div class="p-t-33">
+    <!--  -->
+    <!-- <div class="p-t-33">
                   <div class="flex-w flex-r-m p-b-10">
                     <div class="size-204 flex-w flex-m respon6-next">
                       <div class="wrap-num-product flex-w m-r-20 m-tb-10">
@@ -529,10 +479,10 @@
                       </button>
                     </div>
                   </div>
-                </div>
+                </div> -->
 
-                <!--  -->
-                <div class="flex-w flex-m p-l-100 p-t-40 respon7">
+    <!--  -->
+    <!-- <div class="flex-w flex-m p-l-100 p-t-40 respon7">
                   <div class="flex-m bor9 p-r-10 m-r-11">
                     <a
                       href="#"
@@ -542,37 +492,113 @@
                       <i class="zmdi zmdi-favorite"></i>
                     </a>
                   </div>
-
-                  <!-- <a
-                    href="#"
-                    class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100"
-                    data-tooltip="Facebook"
-                  >
-                    <i class="fa fa-facebook"></i>
-                  </a>
-
-                  <a
-                    href="#"
-                    class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100"
-                    data-tooltip="Twitter"
-                  >
-                    <i class="fa fa-twitter"></i>
-                  </a>
-
-                  <a
-                    href="#"
-                    class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100"
-                    data-tooltip="Google Plus"
-                  >
-                    <i class="fa fa-google-plus"></i>
-                  </a> -->
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
+    <!-- <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(".js-show-modal1");
+
+        buttons.forEach((button) => {
+          button.addEventListener("click", function (event) {
+            event.preventDefault();
+            const productId = this.getAttribute("data-product-id");
+
+            // Fetch product details using Axios
+            axios
+              .get(`/admin/products/details/${productId}`)
+              .then((response) => {
+                const product = response.data;
+                console.log(product);
+                // Update modal content
+                updateModal(product);
+                // Show the modal
+                document.querySelector(".js-modal1").classList.add("show");
+              })
+              .catch((error) => {
+                console.error("Error fetching product:", error);
+              });
+          });
+        });
+
+        function updateModal(product) {
+          // Update modal title
+          document.querySelector(".js-name-detail").textContent = product.name;
+          // Update modal price
+          document.querySelector(".js-price-detail").textContent =
+            product.price;
+          // Update modal description
+          document.querySelector(".js-description-detail").textContent =
+            product.description;
+
+          // Update modal images
+          const slick3 = document.querySelector(".slick3");
+          slick3.innerHTML = ""; // Clear existing images
+
+          // Add new images
+          product.images.forEach((image) => {
+            const item = document.createElement("div");
+            item.className = "item-slick3";
+            item.innerHTML = `
+        <div class="wrap-pic-w pos-relative">
+          <img src="/public/uploads/${image}" alt="IMG-PRODUCT" />
+          <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/public/uploads/${image}">
+            <i class="fa fa-expand"></i>
+          </a>
+        </div>
+      `;
+            slick3.appendChild(item);
+          });
+
+          // Ensure Slick carousel is initialized properly
+          if ($(".slick3").hasClass("slick-initialized")) {
+            $(".slick3").slick("unslick");
+          }
+          $(".slick3").slick({
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            fade: true,
+            arrows: false,
+            dots: true,
+          });
+        }
+
+        // Hide modal when the close button or overlay is clicked
+        document.querySelectorAll(".js-hide-modal1").forEach((closeBtn) => {
+          closeBtn.addEventListener("click", function () {
+            document.querySelector(".js-modal1").classList.remove("show");
+            window.location.reload(); // Reload the page when the modal is hidden
+          });
+        });
+
+        // Hide modal when the overlay is clicked
+        document
+          .querySelector(".overlay-modal1")
+          .addEventListener("click", function () {
+            document.querySelector(".js-modal1").classList.remove("show");
+            window.location.reload(); // Reload the page when the modal is hidden
+          });
+      });
+    </script> -->
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Reinitialize Slick carousel in the modal
+        $(".slick3").slick({
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          fade: true,
+          arrows: false,
+          dots: true,
+        });
+      });
+    </script>
 
     <!--===============================================================================================-->
     <script src="/public/user/vendor/jquery/jquery-3.2.1.min.js"></script>

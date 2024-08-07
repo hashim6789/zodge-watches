@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= product.name %> - Product Detail</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="/public/user/images/icons/favicon.png"
+    />
+    <!--===============================================================================================-->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/vendor/bootstrap/css/bootstrap.min.css"
+    />
+    <!--===============================================================================================-->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/fonts/font-awesome-4.7.0/css/font-awesome.min.css"
+    />
+    <!--===============================================================================================-->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/fonts/iconic/css/material-design-iconic-font.min.css"
+    />
+    <!--===============================================================================================-->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/fonts/linearicons-v1.0.0/icon-font.min.css"
+    />
+    <!--===============================================================================================-->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/vendor/animate/animate.css"
+    />
+    <!--===============================================================================================-->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/vendor/css-hamburgers/hamburgers.min.css"
+    />
+    <!--===============================================================================================-->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/vendor/animsition/css/animsition.min.css"
+    />
+    <!--===============================================================================================-->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/vendor/select2/select2.min.css"
+    />
+    <!--===============================================================================================-->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/vendor/daterangepicker/daterangepicker.css"
+    />
+    <!--===============================================================================================-->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/vendor/slick/slick.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/vendor/slick/slick-theme.css"
+    />
+    <!--===============================================================================================-->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/vendor/MagnificPopup/magnific-popup.css"
+    />
+    <!--===============================================================================================-->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/public/user/vendor/perfect-scrollbar/perfect-scrollbar.css"
+    />
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="/public/user/css/util.css" />
+    <link rel="stylesheet" type="text/css" href="/public/user/css/main.css" />
+    <style>
+      .gallery-container {
+        display: flex;
+        align-items: center;
+      }
+
+      .image-sidebar {
+        width: 100px; /* Set width of the sidebar */
+        height: 600px; /* Set height of the sidebar */
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-right: 1px solid #ddd;
+        margin-right: 20px;
+      }
+
+      .image-sidebar img {
+        width: 80px; /* Set width of the thumbnail images */
+        height: 80px; /* Set height of the thumbnail images */
+        object-fit: cover;
+        margin-bottom: 10px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 4px;
+      }
+
+      .image-sidebar img.active {
+        border-color: #333; /* Highlight border for the active thumbnail */
+      }
+
+      .main-image {
+        flex: 1;
+        position: relative;
+        width: 600px; /* Set width of the main image area */
+        height: 600px; /* Set height of the main image area */
+      }
+
+      .main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .slick-arrows {
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        transform: translateY(-50%);
+      }
+
+      .slick-prev,
+      .slick-next {
+        background-color: black;
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+      }
+
+      .slick-prev {
+        left: -15px;
+      }
+
+      .slick-next {
+        right: -15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="bg0 p-t-60 p-b-30 p-lr-15-lg how-pos3-parent">
+        <div class="row">
+          <div class="col-md-6 col-lg-7 p-b-30">
+            <div class="gallery-container">
+              <!-- Sidebar with thumbnail images -->
+              <div class="image-sidebar">
+                <% product.images.forEach(function(image, index) {
+                console.log(image,index); %>
+                <img
+                  src="/public/uploads/<%= image %>"
+                  alt="Thumbnail"
+                  class="<%= index === 0 ? 'active' : '' %>"
+                  data-index="<%= index %>"
+                  data-id="<%= product._id %>"
+                />
+                <% }) %>
+              </div>
+
+              <!-- Main image -->
+              <div class="main-image">
+                <img
+                  id="main-image"
+                  src="/public/uploads/<%= product.images[0] %>"
+                  alt="Main Image"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-5 p-b-30">
+            <div class="p-r-50 p-t-5 p-lr-0-lg">
+              <!-- Breadcrumbs -->
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">Home</a></li>
+                  <li class="breadcrumb-item"><a href="#">shop</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">
+                    <%= product.name %>
+                  </li>
+                </ol>
+              </nav>
+
+              <!-- Product Name -->
+              <h4 class="mtext-105 cl2 js-name-detail p-b-14">
+                <%= product.name %>
+              </h4>
+
+              <!-- Ratings -->
+              <div class="row">
+                <div class="ratings col-6">
+                  <%= ratings %> stars
+                  <span
+                    class="fa fa-star <%= ratings >= 1 ? 'checked' : '' %>"
+                  ></span>
+                  <span
+                    class="fa fa-star <%= ratings >= 2 ? 'checked' : '' %>"
+                  ></span>
+                  <span
+                    class="fa fa-star <%= ratings >= 3 ? 'checked' : '' %>"
+                  ></span>
+                  <span
+                    class="fa fa-star <%= ratings >= 4 ? 'checked' : '' %>"
+                  ></span>
+                  <span
+                    class="fa fa-star <%= ratings >= 5 ? 'checked' : '' %>"
+                  ></span>
+                </div>
+                <div class="flex-m bor9 p-r-10 m-r-11">
+                  <a
+                    href="#"
+                    class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100"
+                    data-tooltip="Add to Wishlist"
+                  >
+                    <i class="zmdi zmdi-favorite"></i>
+                  </a>
+                </div>
+              </div>
+
+              <!-- Price -->
+              <!-- <span class="mtext-106 cl2">
+                $<%= product.price %> <% if(product.discount) { %>
+                <span class="discount">-$<%= product.discount %></span>
+                <% } %>
+              </span> -->
+
+              <!-- Discounts or Coupons Applied -->
+              <!-- <% if(product.discount) { %>
+              <div class="discounts">
+                <span class="badge badge-success"
+                  >Discount Applied: $<%= product.discount %></span
+                >
+              </div>
+              <% } %> -->
+
+              <!-- Product Description -->
+              <p class="stext-102 cl3 p-t-23"><%= product.description %></p>
+
+              <!-- Stock Status -->
+              <% if(product.stock > 0) { %>
+              <p class="stock-status text-success">
+                In Stock: <%= product.stock %> available
+              </p>
+              <% } else { %>
+              <p class="stock-status text-danger">Out of Stock</p>
+              <% } %>
+
+              <!-- Add to Cart -->
+              <div class="p-t-33">
+                <div class="flex-w flex-r-m p-b-10">
+                  <div class="size-204 flex-w flex-m respon6-next">
+                    <div class="wrap-num-product flex-w m-r-20 m-tb-10">
+                      <div
+                        class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m"
+                      >
+                        <i class="fs-16 zmdi zmdi-minus"></i>
+                      </div>
+                      <input
+                        class="mtext-104 cl3 txt-center num-product"
+                        type="number"
+                        name="num-product"
+                        value="1"
+                      />
+                      <div
+                        class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m"
+                      >
+                        <i class="fs-16 zmdi zmdi-plus"></i>
+                      </div>
+                    </div>
+                    <button
+                      class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
+                    >
+                      Add to cart
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reviews -->
+
+              <!-- Highlights/Specs of Product -->
+
+              <!-- Related Product Recommendations -->
+
+              <!-- Social Media and Wishlist -->
+              <div class="flex-w flex-m p-l-100 p-t-40 respon7">
+                <a
+                  href="#"
+                  class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100"
+                  data-tooltip="Facebook"
+                >
+                  <i class="fa fa-facebook"></i>
+                </a>
+                <a
+                  href="#"
+                  class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100"
+                  data-tooltip="Twitter"
+                >
+                  <i class="fa fa-twitter"></i>
+                </a>
+                <a
+                  href="#"
+                  class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100"
+                  data-tooltip="Google Plus"
+                >
+                  <i class="fa fa-google-plus"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Include Axios library (if not already included) -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const thumbnails = document.querySelectorAll(".image-sidebar img");
+        const mainImage = document.getElementById("main-image");
+
+        thumbnails.forEach((thumbnail) => {
+          thumbnail.addEventListener("click", function () {
+            const index = this.getAttribute("data-index");
+            const productId = this.getAttribute("data-id");
+
+            // Make an Axios request to get the image path
+            axios
+              .get(`/user/shop/getImagePath?index=${index}&id=${productId}`)
+              .then((response) => {
+                const newSrc = response.data.src;
+                mainImage.src = newSrc;
+                thumbnails.forEach((img) => img.classList.remove("active"));
+                this.classList.add("active");
+              })
+              .catch((error) => {
+                console.error("Error fetching the image path:", error);
+              });
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

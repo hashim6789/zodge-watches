@@ -1,0 +1,60 @@
+/* slick-theme.css */
+.slick-prev,
+.slick-next {
+  position: absolute;
+  display: block;
+  height: 40px;
+  width: 40px;
+  line-height: 0;
+  font-size: 0;
+  cursor: pointer;
+  background: black;
+  border-radius: 50%;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  top: 50%;
+  transform: translate(0, -50%);
+  z-index: 1000;
+  opacity: 0.75;
+}
+Z .slick-prev:hover,
+.slick-next:hover {
+  background: rgb(128, 0, 0);
+  opacity: 1;
+}
+
+.slick-prev {
+  left: -50px;
+}
+
+.slick-next {
+  right: -50px;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  font-family: "slick";
+  font-size: 20px;
+  line-height: 1;
+  color: rgb(255, 0, 0);
+  display: inline-block;
+  transform: translateY(-50%);
+}
+
+.slick-prev:before {
+  content: "←";
+}
+
+.slick-next:before {
+  content: "→";
+}
+
+.wrap-pic-w {
+  position: relative;
+}
+
+.wrap-pic-w .slick-prev,
+.wrap-pic-w .slick-next {
+  top: 50%;
+  transform: translateY(-50%);
+}
