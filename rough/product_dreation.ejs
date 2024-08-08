@@ -1,0 +1,176 @@
+<!-- product creating modal -->
+<!-- Bootstrap Modal -->
+<!-- HTML for Create Product Modal -->
+<!-- <div
+            class="modal fade"
+            id="createProductModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="createProductModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="createProductModalLabel">
+                    Create New Product
+                  </h5>
+                  <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <form id="createProductForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                      <label for="createProductName">Product Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="createProductName"
+                        name="name"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="createProductDescription">Description</label>
+                      <textarea
+                        class="form-control"
+                        id="createProductDescription"
+                        name="description"
+                        rows="3"
+                        required
+                      ></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label for="createProductCategory">Category</label>
+                      <select
+                        class="form-control"
+                        id="createProductCategory"
+                        name="categoryId"
+                        required
+                      >
+                        <option value="" disabled selected>
+                          Select a category
+                        </option>
+                        <% categories.forEach(function(category) { %>
+                        <option value="<%= category._id %>">
+                          <%= category.name %>
+                        </option>
+                        <% }); %>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="createProductPrice">Price</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="createProductPrice"
+                        name="price"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="createProductStock">Stock</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="createProductStock"
+                        name="stock"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="createProductImages"
+                        >Images (at least 3)</label
+                      >
+                      <input
+                        type="file"
+                        class="form-control-file"
+                        id="createProductImages"
+                        name="images"
+                        accept="image/*"
+                        multiple
+                        required
+                      />
+                      <small
+                        id="imageError"
+                        class="form-text text-danger"
+                      ></small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                      Create Product
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div> -->
+
+<!-- for creating the product -->
+<!-- <script>
+      document
+        .getElementById("createProductForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          // Validate the number of images
+          const imageInput = document.getElementById("createProductImages");
+          const files = imageInput.files;
+          if (files.length < 3) {
+            document.getElementById("imageError").textContent =
+              "Please select at least 3 images.";
+            return; // Stop form submission if validation fails
+          } else {
+            document.getElementById("imageError").textContent = "";
+          }
+
+          // Gather data from form inputs
+          const productName =
+            document.getElementById("createProductName").value;
+          const productDescription = document.getElementById(
+            "createProductDescription"
+          ).value;
+          const productCategory = document.getElementById(
+            "createProductCategory"
+          ).value;
+          const productPrice =
+            document.getElementById("createProductPrice").value;
+          const productStock =
+            document.getElementById("createProductStock").value;
+
+          // Construct FormData object
+          const formData = new FormData();
+          formData.append("name", productName);
+          formData.append("description", productDescription);
+          formData.append("categoryId", productCategory);
+          formData.append("price", productPrice);
+          formData.append("stock", productStock);
+
+          Array.from(files).forEach((file) => {
+            formData.append("images", file);
+          });
+
+          axios
+            .post("/admin/products/create", formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            })
+            .then((response) => {
+              if (response.status === 200) {
+                location.reload(); // Reload the page to reflect changes
+              } else {
+                alert("Failed to update status");
+              }
+            })
+            .catch((error) => {
+              console.error("Error creating product:", error);
+              alert("Product creation failed");
+            });
+        });
+    </script> -->
