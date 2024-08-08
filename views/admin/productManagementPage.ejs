@@ -31,11 +31,13 @@
     <!-- End layout styles -->
     <link rel="shortcut icon" href="/public/assets/images/favicon.png" />
     <!-- for crop the images -->
+    <!-- Included Cropper.js CSS -->
     <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"
+      href="https://unpkg.com/cropperjs/dist/cropper.css"
       rel="stylesheet"
     />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <!-- Included Cropper.js JS -->
+    <script src="https://unpkg.com/cropperjs/dist/cropper.js"></script>
   </head>
   <body>
     <div class="container-scroller">
@@ -74,6 +76,7 @@
                             <th>Name</th>
                             <th>Category</th>
                             <th>Price</th>
+                            <th>Stock</th>
                             <th>Action</th>
                           </tr>
                         </thead>
@@ -92,8 +95,9 @@
                               categoryName %>
                             </td>
                             <td><%= product.price %></td>
+                            <td><%= product.stock %></td>
                             <td>
-                              <button
+                              <!-- <button
                                 class="btn btn-info"
                                 data-toggle="modal"
                                 data-target="#detailsProductModal"
@@ -105,8 +109,9 @@
                                 data-stock="<%= product.stock %>"
                               >
                                 Details
-                              </button>
+                              </button> -->
                               <button
+                                id="editClick"
                                 class="btn btn-primary"
                                 data-toggle="modal"
                                 data-target="#editProductModal"
@@ -138,9 +143,6 @@
             </div>
           </div>
 
-          <!-- product creating modal -->
-          <!-- Bootstrap Modal -->
-          <!-- HTML for Create Product Modal -->
           <div
             class="modal fade"
             id="createProductModal"
@@ -149,7 +151,7 @@
             aria-labelledby="createProductModalLabel"
             aria-hidden="true"
           >
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-lg" role="document">
               <div class="modal-content">
                 <div class="modal-header">
                   <h5 class="modal-title" id="createProductModalLabel">
@@ -242,7 +244,10 @@
                         class="form-text text-danger"
                       ></small>
                     </div>
-                    <button type="submit" class="btn btn-primary">
+
+                    <div id="cropperContainers" class="row"></div>
+
+                    <button type="submit" class="btn btn-primary" disabled>
                       Create Product
                     </button>
                   </form>
@@ -253,6 +258,120 @@
 
           <!-- Edit Product Modal -->
           <div
+            class="modal fade"
+            id="editProductModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="editProductModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="editProductModalLabel">
+                    Edit Product
+                  </h5>
+                  <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <form id="editProductForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editProductId" name="id" />
+                    <div class="form-group">
+                      <label for="editProductName">Product Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="editProductName"
+                        name="name"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="editProductDescription">Description</label>
+                      <textarea
+                        class="form-control"
+                        id="editProductDescription"
+                        name="description"
+                        rows="3"
+                        required
+                      ></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label for="editProductCategory">Category</label>
+                      <select
+                        class="form-control"
+                        id="editProductCategory"
+                        name="categoryId"
+                        required
+                      >
+                        <option value="" disabled selected>
+                          Select a category
+                        </option>
+                        <% categories.forEach(function(category) { %>
+                        <option value="<%= category._id %>">
+                          <%= category.name %>
+                        </option>
+                        <% }); %>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="editProductPrice">Price</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="editProductPrice"
+                        name="price"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="editProductStock">Stock</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="editProductStock"
+                        name="stock"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Existing Images</label>
+                      <div id="existingImagesContainer" class="row mb-3"></div>
+                    </div>
+                    <div class="form-group">
+                      <label for="editProductImages">Add New Images</label>
+                      <input
+                        type="file"
+                        class="form-control-file"
+                        id="editProductImages"
+                        name="images"
+                        accept="image/*"
+                        multiple
+                      />
+                      <small
+                        id="imageError"
+                        class="form-text text-danger"
+                      ></small>
+                    </div>
+                    <div id="editCropperContainers" class="row"></div>
+                    <button type="submit" class="btn btn-primary">
+                      Update Product
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Product Modal -->
+          <!-- <div
             class="modal fade"
             id="editProductModal"
             tabindex="-1"
@@ -356,7 +475,7 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
 
           <!-- Product Details Modal -->
           <div
@@ -424,47 +543,110 @@
     <!-- container-scroller -->
     <!-- // for creating a new product -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
     <script>
+      const cropperInstances = [];
+      const croppedImages = [];
+
+      // Handle file input and initialize croppers
+      document
+        .getElementById("createProductImages")
+        .addEventListener("change", function (event) {
+          const files = event.target.files;
+          const cropperContainers =
+            document.getElementById("cropperContainers");
+          cropperContainers.innerHTML = ""; // Clear previous croppers
+
+          if (files.length < 3) {
+            document.getElementById("imageError").textContent =
+              "Please select at least 3 images.";
+            document.querySelector(
+              '#createProductForm button[type="submit"]'
+            ).disabled = true;
+            return;
+          }
+          document.getElementById("imageError").textContent = "";
+          document.querySelector(
+            '#createProductForm button[type="submit"]'
+          ).disabled = false;
+
+          for (let i = 0; i < files.length; i++) {
+            const reader = new FileReader();
+            const cropperContainerId = `cropper-container-${i + 1}`;
+            const cropperImgId = `imageCrop${i + 1}`;
+            const cropBtnId = `cropImageBtn${i + 1}`;
+
+            // Create cropper container
+            const cropperContainer = document.createElement("div");
+            cropperContainer.className = "col-md-4 mb-3";
+            cropperContainer.id = cropperContainerId;
+            cropperContainer.innerHTML = `
+      <label for="${cropperImgId}">Image ${i + 1}</label>
+      <img id="${cropperImgId}" style="max-width: 100%;" />
+      <button type="button" class="btn btn-primary mt-2" id="${cropBtnId}">Crop</button>
+    `;
+            cropperContainers.appendChild(cropperContainer);
+
+            reader.onload = function (e) {
+              document.getElementById(cropperImgId).src = e.target.result;
+
+              const cropper = new Cropper(
+                document.getElementById(cropperImgId),
+                {
+                  aspectRatio: 1, // Change the aspect ratio as needed
+                  viewMode: 2,
+                }
+              );
+
+              cropperInstances.push(cropper);
+            };
+            reader.readAsDataURL(files[i]);
+
+            // Handle cropping for each image
+            document
+              .getElementById(cropBtnId)
+              .addEventListener("click", function () {
+                const cropper = cropperInstances[i];
+                const canvas = cropper.getCroppedCanvas();
+
+                canvas.toBlob(function (blob) {
+                  croppedImages[i] = blob;
+                  alert(`Image ${i + 1} cropped and saved!`);
+                }, "image/png");
+              });
+          }
+        });
+
+      // Handle form submission
       document
         .getElementById("createProductForm")
         .addEventListener("submit", function (event) {
           event.preventDefault();
 
-          // Validate the number of images
-          const imageInput = document.getElementById("createProductImages");
-          const files = imageInput.files;
-          if (files.length < 3) {
-            document.getElementById("imageError").textContent =
-              "Please select at least 3 images.";
-            return; // Stop form submission if validation fails
-          } else {
-            document.getElementById("imageError").textContent = "";
-          }
-
-          // Gather data from form inputs
-          const productName =
-            document.getElementById("createProductName").value;
-          const productDescription = document.getElementById(
-            "createProductDescription"
-          ).value;
-          const productCategory = document.getElementById(
-            "createProductCategory"
-          ).value;
-          const productPrice =
-            document.getElementById("createProductPrice").value;
-          const productStock =
-            document.getElementById("createProductStock").value;
-
-          // Construct FormData object
           const formData = new FormData();
-          formData.append("name", productName);
-          formData.append("description", productDescription);
-          formData.append("categoryId", productCategory);
-          formData.append("price", productPrice);
-          formData.append("stock", productStock);
+          formData.append(
+            "name",
+            document.getElementById("createProductName").value
+          );
+          formData.append(
+            "description",
+            document.getElementById("createProductDescription").value
+          );
+          formData.append(
+            "categoryId",
+            document.getElementById("createProductCategory").value
+          );
+          formData.append(
+            "price",
+            document.getElementById("createProductPrice").value
+          );
+          formData.append(
+            "stock",
+            document.getElementById("createProductStock").value
+          );
 
-          Array.from(files).forEach((file) => {
-            formData.append("images", file);
+          croppedImages.forEach((image, index) => {
+            formData.append("images", image, `croppedImage${index + 1}.png`);
           });
 
           axios
@@ -475,9 +657,9 @@
             })
             .then((response) => {
               if (response.status === 200) {
-                location.reload(); // Reload the page to reflect changes
+                location.reload();
               } else {
-                alert("Failed to update status");
+                alert("Failed to create product");
               }
             })
             .catch((error) => {
@@ -487,8 +669,189 @@
         });
     </script>
 
-    <!-- for edit the product -->
     <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const editCropperInstances = [];
+        const editCroppedImages = [];
+
+        // Fetch and display product details when edit button is clicked
+        function openEditProductModal(productId) {
+          axios
+            .get(`/admin/products/details/${productId}`)
+            .then((response) => {
+              const product = response.data;
+              document.getElementById("editProductId").value = product._id;
+              document.getElementById("editProductName").value = product.name;
+              document.getElementById("editProductDescription").value =
+                product.description;
+              document.getElementById("editProductCategory").value =
+                product.categoryId;
+              document.getElementById("editProductPrice").value = product.price;
+              document.getElementById("editProductStock").value = product.stock;
+
+              // Display existing images
+              const existingImagesContainer = document.getElementById(
+                "existingImagesContainer"
+              );
+              existingImagesContainer.innerHTML = "";
+              product.images.forEach((image) => {
+                const imgElement = document.createElement("img");
+                imgElement.src = `/public/uploads/${image}`;
+                imgElement.style.maxWidth = "100px";
+                imgElement.className = "mr-2 mb-2";
+                existingImagesContainer.appendChild(imgElement);
+              });
+
+              // Clear previous croppers
+              editCropperInstances.length = 0;
+              editCroppedImages.length = 0;
+              document.getElementById("editCropperContainers").innerHTML = "";
+              document.getElementById("imageError").textContent = "";
+              document.querySelector(
+                '#editProductForm button[type="submit"]'
+              ).disabled = false;
+
+              // Open the modal
+              $("#editProductModal").modal("show");
+            })
+            .catch((error) => {
+              console.error("Error fetching product details:", error);
+            });
+        }
+
+        // Event listener for edit buttons
+        document.querySelectorAll("#editClick").forEach((button) => {
+          button.addEventListener("click", function () {
+            const productId = this.getAttribute("data-id");
+            openEditProductModal(productId);
+          });
+        });
+
+        // Handle new file input and initialize croppers
+        document
+          .getElementById("editProductImages")
+          .addEventListener("change", function (event) {
+            const files = event.target.files;
+            const cropperContainers = document.getElementById(
+              "editCropperContainers"
+            );
+            cropperContainers.innerHTML = ""; // Clear previous croppers
+
+            if (files.length > 0) {
+              document.getElementById("imageError").textContent = "";
+              document.querySelector(
+                '#editProductForm button[type="submit"]'
+              ).disabled = false;
+
+              for (let i = 0; i < files.length; i++) {
+                const reader = new FileReader();
+                const cropperContainerId = `edit-cropper-container-${i + 1}`;
+                const cropperImgId = `editImageCrop${i + 1}`;
+                const cropBtnId = `editCropImageBtn${i + 1}`;
+
+                // Create cropper container
+                const cropperContainer = document.createElement("div");
+                cropperContainer.className = "col-md-4 mb-3";
+                cropperContainer.id = cropperContainerId;
+                cropperContainer.innerHTML = `
+              <label for="${cropperImgId}">Image ${i + 1}</label>
+              <img id="${cropperImgId}" style="max-width: 100%;" />
+              <button type="button" class="btn btn-primary mt-2" id="${cropBtnId}">Crop</button>
+            `;
+                cropperContainers.appendChild(cropperContainer);
+
+                reader.onload = function (e) {
+                  document.getElementById(cropperImgId).src = e.target.result;
+
+                  const cropper = new Cropper(
+                    document.getElementById(cropperImgId),
+                    {
+                      aspectRatio: 1, // Change the aspect ratio as needed
+                      viewMode: 2,
+                    }
+                  );
+
+                  editCropperInstances.push(cropper);
+                };
+                reader.readAsDataURL(files[i]);
+
+                // Handle cropping for each image
+                document
+                  .getElementById(cropBtnId)
+                  .addEventListener("click", function () {
+                    const cropper = editCropperInstances[i];
+                    const canvas = cropper.getCroppedCanvas();
+
+                    canvas.toBlob(function (blob) {
+                      editCroppedImages[i] = blob;
+                      alert(`Image ${i + 1} cropped and saved!`);
+                    }, "image/png");
+                  });
+              }
+            }
+          });
+
+        // Handle form submission
+        document
+          .getElementById("editProductForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const formData = new FormData();
+            formData.append(
+              "name",
+              document.getElementById("editProductName").value
+            );
+            formData.append(
+              "description",
+              document.getElementById("editProductDescription").value
+            );
+            formData.append(
+              "categoryId",
+              document.getElementById("editProductCategory").value
+            );
+            formData.append(
+              "price",
+              document.getElementById("editProductPrice").value
+            );
+            formData.append(
+              "stock",
+              document.getElementById("editProductStock").value
+            );
+
+            editCroppedImages.forEach((image, index) => {
+              formData.append("images", image, `croppedImage${index + 1}.png`);
+            });
+
+            axios
+              .put(
+                `/admin/products/edit/${
+                  document.getElementById("editProductId").value
+                }`,
+                formData,
+                {
+                  headers: {
+                    "Content-Type": "multipart/form-data",
+                  },
+                }
+              )
+              .then((response) => {
+                if (response.status === 200) {
+                  location.reload();
+                } else {
+                  alert("Failed to update product");
+                }
+              })
+              .catch((error) => {
+                console.error("Error updating product:", error);
+                alert("Product update failed");
+              });
+          });
+      });
+    </script>
+
+    <!-- for edit the product -->
+    <!-- <script>
       document
         .getElementById("editProductForm")
         .addEventListener("submit", function (event) {
@@ -542,7 +905,7 @@
               alert("Product update failed");
             });
         });
-    </script>
+    </script> -->
 
     <script>
       function confirmAndToggleListProduct(productId, isListed) {
@@ -572,6 +935,7 @@
           });
       }
     </script>
+
     <script>
       // Handle edit product modal
       $("#editProductModal").on("show.bs.modal", function (event) {
