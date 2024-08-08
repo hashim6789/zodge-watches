@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
+const passport = require("passport");
 const UserModel = require("../../models/User");
 const OtpModel = require("../../models/Otp");
 const ProductModel = require("../../models/ProductModel");
@@ -178,11 +179,45 @@ const postLogin = async (req, res) => {
   }
 };
 
+/**-----------------google--------------- */
+
+const googleSignup = passport.authenticate("google-signup", {
+  scope: ["profile", "email"],
+});
+
+const googleLogin = passport.authenticate("google-login", {
+  scope: ["profile"],
+});
+
+// Corrected way to define the googleSignupCallback
+const googleSignupCallback = (req, res, next) => {
+  passport.authenticate("google-signup", {
+    failureRedirect: "/user/auth/login",
+  })(req, res, next);
+};
+
+// Corrected way to define the googleLoginCallback
+const googleLoginCallback = (req, res, next) => {
+  passport.authenticate("google-login", {
+    failureRedirect: "/user/auth/login",
+  })(req, res, next);
+};
+
+// After authentication, redirect to profile in a separate function
+const redirectToProfile = (req, res) => {
+  res.redirect("/user/auth/home");
+};
+
 const getHome = async (req, res) => {
   const products = await ProductModel.find({ isListed: true });
   const categories = await CategoryModel.find({ isListed: true });
 
   res.render("user/home", { products, categories });
+};
+
+const logout = (req, res) => {
+  req.logout();
+  res.redirect("/");
 };
 
 module.exports = {
@@ -192,5 +227,11 @@ module.exports = {
   postOtp,
   getLogin,
   postLogin,
+  googleSignup,
+  googleLogin,
+  googleSignupCallback,
+  googleLoginCallback,
+  redirectToProfile,
   getHome,
+  logout,
 };

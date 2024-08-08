@@ -9,8 +9,10 @@ const productRouter = require("./routes/admin/productRoute"); //import the local
 const dummyRouter = require("./routes/user/dummyRoute"); //import the local module router for user/dummy for testing
 const authRouter = require("./routes/user/authRoute"); //import the local module router for user/auth
 const shopRouter = require("./routes/user/shopRoute"); //import the local module router for user/auth
-// const session = require("express-session"); //import session
-// const { v4: uuidv4 } = require("uuid"); //import unique id
+const passportSetup = require("./config/passport-setup");
+const session = require("express-session"); //import session
+const passport = require("passport");
+const { v4: uuidv4 } = require("uuid"); //import unique id
 // const MongoDbSession = require("connect-mongodb-session")(session);
 const connecDB = require("./db");
 const mongoose = require("mongoose");
@@ -31,15 +33,18 @@ app.use(express.json()); //for parse to json
 app.use(express.urlencoded({ extended: true })); // for url encode
 // app.use(methodOverride("_method")); // for method spoofing (delete, put, patch)
 
-//session handling
-// app.use(
-//   session({
-//     secret: uuidv4(),
-//     resave: false,
-//     saveUninitialized: false,
-//     store: store,
-//   })
-// );
+// session handling
+app.use(
+  session({
+    secret: uuidv4(),
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 //for cache handling
 // app.use((req, res, next) => {
