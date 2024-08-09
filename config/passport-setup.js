@@ -11,20 +11,20 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser((obj, done) => {
-  // Deserialize based on the role
-  if (obj.role === "admin") {
-    // If role is admin, find the admin in the database
-    User.findById(obj.id).then((user) => {
-      // You might have a separate Admin model if you have one
-      // For simplicity, assuming Admins are stored in the User model
-      done(null, user);
-    });
-  } else {
-    // Handle user role
-    User.findById(obj.id).then((user) => {
-      done(null, user);
-    });
-  }
+  // // Deserialize based on the role
+  // if (obj.role === "admin") {
+  //   // If role is admin, find the admin in the database
+  //   User.findById(obj.id).then((user) => {
+  //     // You might have a separate Admin model if you have one
+  //     // For simplicity, assuming Admins are stored in the User model
+  //     done(null, user);
+  //   });
+  // } else {
+  // Handle user role
+  User.findById(obj.id).then((user) => {
+    done(null, user);
+  });
+  // }
 });
 
 /**----------------------GOOGLE STRATEGIES------------------ */

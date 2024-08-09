@@ -1,18 +1,14 @@
 const express = require("express");
+const router = express.Router();
 
 //for Authentication
 const {
-  isAuthenticatedAdmin,
   isAuthenticatedUser,
   redirectIfAuthenticated,
-} = require("../../middlewares/authMiddlewares");
+} = require("../../middlewares/authenticationMiddlewares");
 
 //for Authorization
-const {
-  authorizeUser,
-  authorizeAdmin,
-  authorizeAdminForModule,
-} = require("../../middlewares/authorizationMiddlewares");
+const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
 
 const {
   getSignup,
@@ -30,7 +26,6 @@ const {
   getHome,
   logout,
 } = require("../../controllers/user/authController");
-const router = express.Router();
 
 const test = (req, res, next) => {
   console.log(req.url);
@@ -59,18 +54,23 @@ router.get("/login", redirectIfAuthenticated, getLogin);
 router.post("/login", redirectIfAuthenticated, postLogin);
 
 // Auth with Google for signup
-router.get("/google/signup", googleSignup);
+router.get("/google/signup", redirectIfAuthenticated, googleSignup);
 
 // Auth with Google for login
-router.get("/google/login", test, googleLogin);
+router.get("/google/login", redirectIfAuthenticated, googleLogin);
 
 // Callback route for Google to redirect to for signup
-router.get("/google/signup/callback", googleSignupCallback, redirectToProfile);
+router.get(
+  "/google/signup/callback",
+  redirectIfAuthenticated,
+  googleSignupCallback,
+  redirectToProfile
+);
 
 // Callback route for Google to redirect to for login
 router.get(
   "/google/login/callback",
-  test,
+  redirectIfAuthenticated,
   googleLoginCallback,
   redirectToProfile
 );
@@ -79,6 +79,6 @@ router.get(
 router.get("/logout", isAuthenticatedUser, authorizeUser, logout);
 
 //get home page
-router.get("/home", getHome);
+router.get("/home", isAuthenticatedUser, authorizeUser, getHome);
 
 module.exports = router;

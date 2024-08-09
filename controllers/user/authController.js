@@ -233,6 +233,7 @@ const redirectToProfile = (req, res) => {
 };
 
 const getHome = async (req, res) => {
+  console.log(req.session);
   const products = await ProductModel.find({ isListed: true });
   const categories = await CategoryModel.find({ isListed: true });
 

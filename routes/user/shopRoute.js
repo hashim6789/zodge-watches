@@ -1,6 +1,14 @@
 const express = require("express");
 const router = express.Router();
 
+//for Authentication
+const {
+  isAuthenticatedUser,
+} = require("../../middlewares/authenticationMiddlewares");
+
+//for Authorization
+const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
+
 const {
   quickView,
   getImage,
@@ -12,9 +20,11 @@ const test = (req, res, next) => {
 };
 
 //get the product details
-router.get("/quickview/:productId", quickView);
+//get - /user/shop/quickview/:id
+router.get("/quickview/:id", isAuthenticatedUser, authorizeUser, quickView);
 
 //get the product image url
-router.get("/getImagePath", getImage);
+//get - /user/shop/getImagePath
+router.get("/getImagePath", isAuthenticatedUser, authorizeUser, getImage);
 
 module.exports = router;

@@ -2,7 +2,11 @@
 
 // Check if the user has access to user-specific routes
 function authorizeUser(req, res, next) {
-  if (req.session.user.role === "User") {
+  if (
+    req.session.user?.role === "User" ||
+    req.session.passport?.user?.role === "User"
+  ) {
+    console.log("testing 2");
     return next(); // User is authorized, proceed
   } else {
     return res.status(403).send("Access denied"); // Forbidden
@@ -11,7 +15,7 @@ function authorizeUser(req, res, next) {
 
 // Check if the admin has access to admin-specific modules
 function authorizeAdmin(req, res, next) {
-  if (req.session.admin.role === "Admin") {
+  if (req.session.admin?.role === "Admin") {
     return next(); // Admin is authorized, proceed
   } else {
     return res.status(403).send("Access denied"); // Forbidden
@@ -22,8 +26,8 @@ function authorizeAdmin(req, res, next) {
 function authorizeAdminForModule(module) {
   return function (req, res, next) {
     if (
-      req.session.admin.role === "Admin" &&
-      req.session.admin.permissions.includes(module)
+      req.session.admin?.role === "Admin" &&
+      req.session.admin?.permissions.includes(module)
     ) {
       return next(); // Admin has permission for this module, proceed
     } else {

@@ -3,9 +3,10 @@ const path = require("path");
 require("dotenv").config();
 // const methodOverride = require("method-override");
 const adminRouter = require("./routes/adminRoute"); //import the local module router for admin
+const userRouter = require("./routes/userRoute"); //import the local module router for admin/products
 const categoryRouter = require("./routes/categoryRoute"); //import the local module router for admin/categories
 const productRouter = require("./routes/productRoute"); //import the local module router for admin/products
-const dummyRouter = require("./routes/user/dummyRoute"); //import the local module router for user/dummy for testing
+// const dummyRouter = require("./routes/user/dummyRoute"); //import the local module router for user/dummy for testing
 const authRouter = require("./routes/user/authRoute"); //import the local module router for user/auth
 const shopRouter = require("./routes/user/shopRoute"); //import the local module router for user/auth
 const passportSetup = require("./config/passport-setup");
@@ -61,13 +62,14 @@ app.use((req, res, next) => {
 app.use("/public", express.static(path.join(__dirname, "public")));
 
 // app.use("/", userRouter); // for user router url
-app.use("/admin/products", productRouter); // for admin router url
-app.use("/admin/categories", categoryRouter); // for admin router url
+app.use("/admin/users", userRouter); // for admin - user management router url
+app.use("/admin/categories", categoryRouter); // for admin - category management router url
+app.use("/admin/products", productRouter); // for admin product management router url
 app.use("/admin", adminRouter); // for admin router url
 
-app.use("/user/dummy", dummyRouter); // for testing the router
-app.use("/user/auth", authRouter); // for authentication the router
-app.use("/user/shop", shopRouter); // for shopping the router
+// app.use("/user/dummy", dummyRouter); // for testing the router
+app.use("/user/auth", authRouter); // for user authentication router url
+app.use("/user/shop", shopRouter); // for user shopping router url
 
 //server listener
 app.listen(port, () => {

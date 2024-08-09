@@ -6,13 +6,10 @@ const router = express.Router();
 //for Authentication
 const {
   isAuthenticatedAdmin,
-  isAuthenticatedUser,
-  redirectIfAuthenticated,
-} = require("../middlewares/authMiddlewares");
+} = require("../middlewares/authenticationMiddlewares");
 
 //for Authorization
 const {
-  authorizeUser,
   authorizeAdmin,
   authorizeAdminForModule,
 } = require("../middlewares/authorizationMiddlewares");

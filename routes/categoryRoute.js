@@ -1,15 +1,13 @@
 const express = require("express");
+const router = express.Router();
 
 //for Authentication
 const {
   isAuthenticatedAdmin,
-  isAuthenticatedUser,
-  redirectIfAuthenticated,
-} = require("../middlewares/authMiddlewares");
+} = require("../middlewares/authenticationMiddlewares");
 
 //for Authorization
 const {
-  authorizeUser,
   authorizeAdmin,
   authorizeAdminForModule,
 } = require("../middlewares/authorizationMiddlewares");
@@ -21,13 +19,11 @@ const {
   unlistCategory,
 } = require("../controllers/categoryController");
 
-const router = express.Router();
-
 //for testing purpose
-// const test = (req, res, next) => {
-//   console.log(req.url);
-//   next();
-// };
+const test = (req, res, next) => {
+  console.log(req.url);
+  next();
+};
 
 //get - admin/categories/
 router.get(
