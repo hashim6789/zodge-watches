@@ -3,6 +3,21 @@ const multer = require("multer");
 const path = require("path");
 const router = express.Router();
 
+//for Authentication
+const {
+  isAuthenticatedAdmin,
+  isAuthenticatedUser,
+  redirectIfAuthenticated,
+} = require("../middlewares/authMiddlewares");
+
+//for Authorization
+const {
+  authorizeUser,
+  authorizeAdmin,
+  authorizeAdminForModule,
+} = require("../middlewares/authorizationMiddlewares");
+
+//for product functions
 const {
   getAllProducts,
   createProduct,
@@ -11,6 +26,7 @@ const {
   getDetails,
 } = require("../controllers/productController");
 
+//for uploading the images of the products
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, "../../public/uploads"));
@@ -27,6 +43,7 @@ const test = (req, res, next) => {
   next();
 };
 
+//validate the image count at least 3
 const validateImageCount = (req, res, next) => {
   if (req.files.length < 3) {
     return res
@@ -36,23 +53,52 @@ const validateImageCount = (req, res, next) => {
   next();
 };
 
-// Route to get all products
-router.get("/", getAllProducts);
+// get - /admin/products
+router.get(
+  "/",
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("productManagement"),
+  getAllProducts
+);
 
-// Route to create product
+// post - /admin/products/create
 router.post(
   "/create",
-  test,
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("productManagement"),
   upload.array("images", 10),
   validateImageCount,
   createProduct
 );
 
-//Route to edit product
-router.put("/edit/:id", upload.array("images", 3), updateProduct);
+//put - /admin/products/edit/:id
+router.put(
+  "/edit/:id",
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("productManagement"),
+  upload.array("images", 3),
+  updateProduct
+);
 
-router.patch("/unlist/:id", unlistProduct);
+//patch - /admin/products/unlist/:id
+router.patch(
+  "/unlist/:id",
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("productManagement"),
+  unlistProduct
+);
 
-router.get("/details/:id", getDetails);
+//get - /admin/products/details/:id
+router.get(
+  "/details/:id",
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("productManagement"),
+  getDetails
+);
 
 module.exports = router;

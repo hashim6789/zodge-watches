@@ -84,6 +84,8 @@ const postSignup = async (req, res) => {
         isVerified: false,
       });
       await user.save();
+      req.session.user = user;
+      console.log(req.session);
       sendVerificationMail(user, res);
       return res.redirect(
         `/user/auth/verify-otp?userId=${user._id}&email=${email}`

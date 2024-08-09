@@ -11,7 +11,7 @@ const UsersSchema = new Schema({
   password: { type: String }, // Optional for Google signups
   role: { type: String, default: "USER" },
   isBlocked: { type: Boolean, default: false },
-  isVerified: { type: Boolean, default: false }, // Mark Google signups as verified
+  isVerified: { type: Boolean, default: false }, // Marked the true when the otp is verified and signup with google
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

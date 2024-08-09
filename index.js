@@ -46,16 +46,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //for cache handling
-// app.use((req, res, next) => {
-//   res.set(
-//     "Cache-Control",
-//     "no-store, no-cache, must-revalidate, proxy-revalidate"
-//   );
-//   res.set("Pragma", "no-cache");
-//   res.set("Expires", "0");
-//   res.set("Surrogate-Control", "no-store");
-//   next();
-// });
+app.use((req, res, next) => {
+  res.set(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate"
+  );
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
+  res.set("Surrogate-Control", "no-store");
+  next();
+});
 
 // Middleware to serve static files
 app.use("/public", express.static(path.join(__dirname, "public")));

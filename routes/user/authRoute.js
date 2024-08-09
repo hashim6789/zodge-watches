@@ -1,5 +1,19 @@
 const express = require("express");
 
+//for Authentication
+const {
+  isAuthenticatedAdmin,
+  isAuthenticatedUser,
+  redirectIfAuthenticated,
+} = require("../../middlewares/authMiddlewares");
+
+//for Authorization
+const {
+  authorizeUser,
+  authorizeAdmin,
+  authorizeAdminForModule,
+} = require("../../middlewares/authorizationMiddlewares");
+
 const {
   getSignup,
   postSignup,
@@ -24,25 +38,25 @@ const test = (req, res, next) => {
 };
 
 //get the signup page
-router.get("/signup", getSignup);
+router.get("/signup", redirectIfAuthenticated, getSignup);
 
 //post the signup page
-router.post("/signup", postSignup);
+router.post("/signup", redirectIfAuthenticated, postSignup);
 
 //get otp entering page
-router.get("/verify-otp", getOtpPage);
+router.get("/verify-otp", isAuthenticatedUser, authorizeUser, getOtpPage);
 
 //post otp generator
-router.post("/verify-otp", postOtp);
+router.post("/verify-otp", isAuthenticatedUser, authorizeUser, postOtp);
 
 //post otp resend
-router.post("/resend-otp", test, resendOtp);
+router.post("/resend-otp", isAuthenticatedUser, authorizeUser, resendOtp);
 
 //get the login page
-router.get("/login", getLogin);
+router.get("/login", redirectIfAuthenticated, getLogin);
 
 //post the login page
-router.post("/login", postLogin);
+router.post("/login", redirectIfAuthenticated, postLogin);
 
 // Auth with Google for signup
 router.get("/google/signup", googleSignup);
@@ -62,7 +76,7 @@ router.get(
 );
 
 // Auth logout
-router.get("/logout", logout);
+router.get("/logout", isAuthenticatedUser, authorizeUser, logout);
 
 //get home page
 router.get("/home", getHome);
