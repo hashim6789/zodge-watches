@@ -5,6 +5,7 @@ const {
   postSignup,
   getOtpPage,
   postOtp,
+  resendOtp,
   getLogin,
   postLogin,
   googleSignup,
@@ -33,6 +34,9 @@ router.get("/verify-otp", getOtpPage);
 
 //post otp generator
 router.post("/verify-otp", postOtp);
+
+//post otp resend
+router.post("/resend-otp", test, resendOtp);
 
 //get the login page
 router.get("/login", getLogin);

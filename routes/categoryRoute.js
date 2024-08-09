@@ -10,7 +10,7 @@ const {
   createCategory,
   editCategory,
   unlistCategory,
-} = require("../../controllers/categoryController");
+} = require("../controllers/categoryController");
 
 const router = express.Router();
 

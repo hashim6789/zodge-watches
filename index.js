@@ -2,10 +2,9 @@ const express = require("express"); //import the express
 const path = require("path");
 require("dotenv").config();
 // const methodOverride = require("method-override");
-// const userRouter = require("./routes/userRoute"); //import the local module router for user
 const adminRouter = require("./routes/adminRoute"); //import the local module router for admin
-const categoryRouter = require("./routes/admin/categoryRoute"); //import the local module router for admin/categories
-const productRouter = require("./routes/admin/productRoute"); //import the local module router for admin/products
+const categoryRouter = require("./routes/categoryRoute"); //import the local module router for admin/categories
+const productRouter = require("./routes/productRoute"); //import the local module router for admin/products
 const dummyRouter = require("./routes/user/dummyRoute"); //import the local module router for user/dummy for testing
 const authRouter = require("./routes/user/authRoute"); //import the local module router for user/auth
 const shopRouter = require("./routes/user/shopRoute"); //import the local module router for user/auth

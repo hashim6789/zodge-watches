@@ -20,6 +20,7 @@ const transporter = nodemailer.createTransport({
 
 const sendVerificationMail = async ({ _id, email }, res) => {
   try {
+    console.log(_id, email);
     const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
 
     const mailOptions = {
@@ -59,9 +60,9 @@ const sendVerificationMail = async ({ _id, email }, res) => {
   }
 };
 
-// Verify environment variables (for debugging)
-console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
+// // Verify environment variables (for debugging)
+// console.log("EMAIL_USER:", process.env.EMAIL_USER);
+// console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
 //for get signup
 const getSignup = (req, res) => {
   res.render("user/signup", { msg: null });
@@ -70,7 +71,7 @@ const getSignup = (req, res) => {
 //for post signup
 const postSignup = async (req, res) => {
   try {
-    const { firstName, lastName, email, dob, phone, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     let user = await UserModel.findOne({ email });
     if (!user) {
@@ -79,8 +80,6 @@ const postSignup = async (req, res) => {
         firstName,
         lastName,
         email,
-        dob,
-        phoneno: phone,
         password: hashPassword,
         isVerified: false,
       });
@@ -148,6 +147,29 @@ const postOtp = async (req, res) => {
     res.status(500).json({
       status: "Failed",
       message: error.message,
+    });
+  }
+};
+
+//for resend otp
+const resendOtp = async (req, res) => {
+  try {
+    const { _id, email } = req.body;
+    // Invoke the sendVerificationMail function to resend the OTP
+    await sendVerificationMail({ _id, email }, res);
+    console.log("Hi", _id, email);
+
+    // Return a success response
+    return res.status(200).json({
+      status: "Success",
+      message: "OTP resent successfully",
+      data: { userId: _id, email: email },
+    });
+  } catch (error) {
+    // Handle any errors during the resend process
+    res.status(500).json({
+      status: "Failed",
+      message: "Failed to resend OTP. Please try again.",
     });
   }
 };
@@ -225,6 +247,7 @@ module.exports = {
   postSignup,
   getOtpPage,
   postOtp,
+  resendOtp,
   getLogin,
   postLogin,
   googleSignup,

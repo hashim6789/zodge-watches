@@ -88,7 +88,7 @@
                 <div class="text-center mb-3">
                   <a href="#!">
                     <img
-                      src="/images/user_logo.png"
+                      src="/public/user/images/user_logo.png"
                       alt="User Logo"
                       width="100"
                       height="100"
@@ -101,6 +101,18 @@
                 <form id="otpForm" action="/user/auth/verify-otp" method="post">
                   <div class="row gy-2 justify-content-center">
                     <div class="col-auto">
+                      <input
+                        type="hidden"
+                        id="current-email"
+                        name="current-email"
+                        value="<%= email %>"
+                      />
+                      <input
+                        type="hidden"
+                        id="current-id"
+                        name="current-id"
+                        value="<%= userId %>"
+                      />
                       <input
                         type="text"
                         class="otp-input"
@@ -161,6 +173,8 @@
         </div>
       </div>
     </section>
+    <!-- Include Axios library (if not already included) -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const otpInputs = document.querySelectorAll(".otp-input");
@@ -181,10 +195,41 @@
             timerElement.textContent = `Resend OTP in ${timeLeft}s`;
             if (timeLeft <= 0) {
               clearInterval(interval);
-              timerElement.textContent = "Resend OTP";
-              // Enable resend button if needed
+              timerElement.innerHTML =
+                '<a href="#" id="resendLink">Resend OTP</a>';
+              document
+                .getElementById("resendLink")
+                .addEventListener("click", function (e) {
+                  e.preventDefault();
+                  resendOTP();
+                });
             }
           }, 1000);
+        }
+
+        function resendOTP() {
+          const email = document.getElementById("current-email").value;
+          const id = document.getElementById("current-id").value;
+          console.log(email);
+          // Call your API to resend the OTP using Axios
+          axios
+            .post("/user/auth/resend-otp", {
+              email: email, // Replace with actual email
+              _id: id,
+            })
+            .then((response) => {
+              if (response.data) {
+                alert("OTP resent successfully!");
+                timeLeft = 60; // Reset the timer
+                startTimer(); // Restart the timer
+              } else {
+                alert("Failed to resend OTP. Please try again.");
+              }
+            })
+            .catch((error) => {
+              console.error("Error resending OTP:", error);
+              alert("An error occurred. Please try again.");
+            });
         }
 
         startTimer();
