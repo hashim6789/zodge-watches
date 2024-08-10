@@ -73,6 +73,7 @@
                       <table class="table">
                         <thead>
                           <tr>
+                            <th>SI</th>
                             <th>Name</th>
                             <th>Category</th>
                             <th>Price</th>
@@ -81,12 +82,13 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <% products.forEach(product => { %>
+                          <% products.forEach((product, idx) => { %>
                           <tr>
+                            <td>
+                              <%= ((current - 1) * perPage) + (idx + 1) %>
+                            </td>
                             <td><%= product.name %></td>
-                            <!-- / Find the category corresponding to the
-                              product's categoryId // Display the
-                              category name-->
+
                             <td>
                               <% const category = categories.find(cat =>
                               cat._id.toString() ===
@@ -141,6 +143,36 @@
                 </div>
               </div>
             </div>
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+                <% if (current > 1) { %>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page=<%= current - 1 %>"
+                    aria-label="Previous"
+                  >
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+                <% } %> <% for (let i = 1; i <= pages; i++) { %>
+                <li class="page-item <%= current == i ? 'active' : '' %>">
+                  <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                </li>
+                <% } %> <% if (current < pages) { %>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page=<%= ++current %>"
+                    aria-label="Next"
+                  >
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+                <% } %>
+              </ul>
+            </nav>
           </div>
 
           <div

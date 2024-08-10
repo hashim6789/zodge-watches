@@ -3,16 +3,29 @@ const CategoryModel = require("../models/Category");
 //category
 const getCategory = async (req, res) => {
   try {
-    const categories = await CategoryModel.find();
-    if (categories) {
-      return res.render("admin/categoryManagementPage", { categories });
+    const page = req.query.page || 1;
+    const perPage = 6;
+    const categories = await CategoryModel.find()
+      .skip((page - 1) * perPage)
+      .limit(perPage);
+    if (!categories) {
+      return res.render("admin/categoryManagementPage", {
+        categories: null,
+        current: page,
+        pages: null,
+      });
       //return res.status(200).json({
       //   status: "Success",
       //   message: "The page rendered successfully",
       // });
-    } else {
-      return res.render("admin/categoryManagementPage", { categories: null });
     }
+    const count = await CategoryModel.countDocuments();
+    res.render("admin/categoryManagementPage", {
+      categories,
+      current: page,
+      perPage,
+      pages: Math.ceil(count / perPage),
+    });
   } catch (err) {
     res.status(404).json({ status: "Success", message: "Server error!!!" });
   }

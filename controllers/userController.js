@@ -3,16 +3,24 @@ const UserModel = require("../models/User");
 //get all users
 const getUsers = async (req, res) => {
   try {
-    const usersList = await UserModel.find();
+    const page = req.query.page || 1;
+    const perPage = 6;
+    const usersList = await UserModel.find()
+      .skip((page - 1) * perPage)
+      .limit(perPage);
     if (!usersList) {
       return res.status(404).json({
         status: "success",
         message: "the users are not found...",
       });
     }
-    return res
-      .status(200)
-      .render("admin/userManagementPage", { users: usersList });
+    const count = await UserModel.countDocuments();
+    return res.status(200).render("admin/userManagementPage", {
+      users: usersList,
+      current: page,
+      perPage,
+      pages: Math.ceil(count / 6),
+    });
     // return res.status(200).json({
     //   status: "Success",
     //   message: "The page rendered successfully",

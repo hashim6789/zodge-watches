@@ -66,24 +66,31 @@ const createProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    let products = await ProductModel.find();
+    const page = req.query.page || 1;
+    const perPage = 6;
+    let products = await ProductModel.find()
+      .skip((page - 1) * perPage)
+      .limit(perPage);
     let categories = await CategoryModel.find({ isListed: true });
 
-    if (products) {
-      return res.render("admin/productManagementPage", {
-        products,
-        categories,
-      });
-      //return res.status(200).json({
-      //   status: "Success",
-      //   message: "The page rendered successfully",
-      // });
-    } else {
+    if (!products) {
       return res.render("admin/productManagementPage", {
         products: null,
         categories,
       });
     }
+    const count = await ProductModel.countDocuments();
+    return res.render("admin/productManagementPage", {
+      products,
+      categories,
+      current: page,
+      perPage,
+      pages: Math.ceil(count / perPage),
+    });
+    //return res.status(200).json({
+    //   status: "Success",
+    //   message: "The page rendered successfully",
+    // });
   } catch (err) {
     res.status(404).json({ status: "Success", message: "Server error!!!" });
   }

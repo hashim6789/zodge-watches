@@ -241,10 +241,19 @@ const redirectToProfile = (req, res) => {
 
 const getHome = async (req, res) => {
   console.log(req.session);
-  const products = await ProductModel.find({ isListed: true });
+  const page = req.query.page || 1;
+  const perPage = 8;
+  const products = await ProductModel.find({ isListed: true })
+    .skip((page - 1) * perPage)
+    .limit(perPage);
   const categories = await CategoryModel.find({ isListed: true });
-
-  res.render("user/home", { products, categories });
+  const count = await ProductModel.countDocuments();
+  res.render("user/home", {
+    products,
+    categories,
+    current: page,
+    pages: Math.ceil(count / perPage),
+  });
 };
 
 const logout = (req, res) => {

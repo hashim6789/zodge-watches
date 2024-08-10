@@ -50,20 +50,21 @@
                       <table class="table">
                         <thead>
                           <tr>
-                            <th>First Name</th>
-                            <th>Second Name</th>
+                            <th>SI</th>
+                            <th>Name</th>
                             <th>Email</th>
-                            <th>Phone No</th>
                             <th>Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <% users.forEach(user => { %>
+                          <% users.forEach((user, idx) => { %>
                           <tr>
-                            <td><%= user.firstName %></td>
-                            <td><%= user.lastName %></td>
+                            <td>
+                              <%= ((current - 1) * perPage) + (idx + 1) %>
+                            </td>
+                            <td><%= user.firstName %> <%= user.lastName %></td>
+
                             <td><%= user.email %></td>
-                            <td><%= user.phoneno %></td>
                             <td>
                               <button
                                 class="btn <%= user.isBlocked ? 'btn-success' : 'btn-danger' %>"
@@ -81,6 +82,36 @@
                 </div>
               </div>
             </div>
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+                <% if (current > 1) { %>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page=<%= current - 1 %>"
+                    aria-label="Previous"
+                  >
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+                <% } %> <% for (let i = 1; i <= pages; i++) { %>
+                <li class="page-item <%= current == i ? 'active' : '' %>">
+                  <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                </li>
+                <% } %> <% if (current < pages) { %>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page=<%= ++current %>"
+                    aria-label="Next"
+                  >
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+                <% } %>
+              </ul>
+            </nav>
           </div>
           <!-- content-wrapper ends -->
           <!-- partial:partials/_footer.ejs -->
