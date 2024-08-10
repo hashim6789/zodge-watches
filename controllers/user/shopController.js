@@ -2,7 +2,7 @@ const ProductModel = require("../../models/ProductModel"); // Adjust the path as
 
 const quickView = async (req, res) => {
   try {
-    const product = await ProductModel.findById(req.params.productId);
+    const product = await ProductModel.findById(req.params.id);
     res.render("user/quickview", { product, ratings: 4 });
   } catch (error) {
     console.error("Error fetching product:", error);

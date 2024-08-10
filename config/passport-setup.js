@@ -76,13 +76,10 @@ passport.use(
       callbackURL: "/user/auth/google/login/callback",
     },
     (accessToken, refreshToken, profile, done) => {
-      // Check if user already exists in our database
       User.findOne({ googleId: profile.id }).then((currentUser) => {
         if (currentUser) {
-          // User exists, log them in
           done(null, currentUser);
         } else {
-          // User does not exist, handle as an error or redirect to signup
           return done(null, false, {
             message: "User does not exist. Please sign up.",
           });

@@ -65,7 +65,8 @@ const sendVerificationMail = async ({ _id, email }, res) => {
 // console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
 //for get signup
 const getSignup = (req, res) => {
-  res.render("user/signup", { msg: null });
+  const error = req.query.error;
+  res.render("user/signup", { msg: error });
 };
 
 //for post signup
@@ -178,7 +179,8 @@ const resendOtp = async (req, res) => {
 
 //for get signup
 const getLogin = (req, res) => {
-  res.render("user/login", { msg: null });
+  const error = req.query.error;
+  res.render("user/login", { msg: error });
 };
 
 //for post Login
@@ -192,11 +194,16 @@ const postLogin = async (req, res) => {
       user.isBlocked === false
     ) {
       console.log(user);
-      // req.session.userId = user._id;
-      // res.redirect("/user/pages/home");
-      res.status(200).json({ message: "user login successfully" });
+      req.session.user = user;
+      res.redirect("/user/pages/home");
+      // res.status(200).json({ message: "user login successfully" });
     } else {
-      res.status(404).json({ message: "No user found the database!!!" });
+      res.redirect(
+        "/user/auth/login?error=username or password is incorrect or the user blocked"
+      );
+      // res
+      //   .status(404)
+      //   .json({ message: "No user found the database or blocked the user!!!" });
     }
   } catch (err) {
     res.status(500).json({ message: "server error!!!" });
@@ -223,7 +230,7 @@ const googleSignupCallback = (req, res, next) => {
 // Corrected way to define the googleLoginCallback
 const googleLoginCallback = (req, res, next) => {
   passport.authenticate("google-login", {
-    failureRedirect: "/user/auth/login",
+    failureRedirect: `/user/auth/signup?error=The user is not exist!!!`,
   })(req, res, next);
 };
 
