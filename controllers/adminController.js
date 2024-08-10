@@ -44,8 +44,22 @@ const getDashboard = (req, res) => {
   res.render("admin/demo-page");
 };
 
+//for logout
+const getLogout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log("logout error:", err);
+      return res.redirect("/admin/dashboard");
+    }
+    console.log(req.session);
+    res.clearCookie("connect-cookie");
+    res.redirect("/admin/login");
+  });
+};
+
 module.exports = {
   getLogin,
   postLogin,
   getDashboard,
+  getLogout,
 };

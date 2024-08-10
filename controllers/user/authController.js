@@ -195,7 +195,7 @@ const postLogin = async (req, res) => {
     ) {
       console.log(user);
       req.session.user = user;
-      res.redirect("/user/pages/home");
+      res.redirect("/user/auth/home");
       // res.status(200).json({ message: "user login successfully" });
     } else {
       res.redirect(
@@ -257,8 +257,21 @@ const getHome = async (req, res) => {
 };
 
 const logout = (req, res) => {
-  req.logout();
-  res.redirect("/");
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+
+    req.session.destroy((err) => {
+      if (err) {
+        return next(err);
+      }
+
+      // Redirect to the homepage or login page after logout
+      res.clearCookie("connect.sid"); // Clear the session cookie (if using sessions)
+      res.redirect("/user/auth/login"); // Redirect to the login page
+    });
+  });
 };
 
 module.exports = {

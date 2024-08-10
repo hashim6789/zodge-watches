@@ -13,6 +13,7 @@ const {
   getLogin,
   postLogin,
   getDashboard,
+  getLogout,
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -30,4 +31,6 @@ router.post("/login", redirectIfAuthenticated, postLogin);
 //dashboard
 router.get("/dashboard", isAuthenticatedAdmin, authorizeAdmin, getDashboard);
 
+//get - /admin/logout
+router.get("/logout", isAuthenticatedAdmin, authorizeAdmin, getLogout);
 module.exports = router;
