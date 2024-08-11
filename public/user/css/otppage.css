@@ -1,0 +1,56 @@
+body {
+  background-color: #ffffff;
+  color: #000000;
+}
+.form-control,
+.form-floating > .form-control-plaintext ~ label,
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+  color: #000000;
+}
+.form-floating > .form-control:focus {
+  border-color: #000000;
+  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.25);
+}
+.btn-primary {
+  background-color: #000000;
+  border-color: #000000;
+}
+.btn-primary:hover {
+  background-color: #333333;
+  border-color: #333333;
+}
+.btn-google {
+  background-color: #4285f4;
+  color: #ffffff;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+}
+.btn-google:hover {
+  background-color: #357ae8;
+  color: #ffffff;
+}
+.btn-google .icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+.otp-input {
+  width: 3rem;
+  height: 3rem;
+  text-align: center;
+  font-size: 1.25rem;
+  border-radius: 0.375rem;
+  border: 1px solid #000000;
+  margin: 0.25rem;
+  background-color: #f8f9fa;
+}
+.otp-input:focus {
+  border-color: #000000;
+  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.25);
+}
+.timer {
+  font-size: 0.875rem;
+  color: #000000;
+}

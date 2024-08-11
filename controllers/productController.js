@@ -1,28 +1,5 @@
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
-
 const ProductModel = require("../models/ProductModel");
 const CategoryModel = require("../models/Category");
-
-// // Configure multer for file uploads
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     const uploadPath = path.join(__dirname, "../uploads");
-//     if (!fs.existsSync(uploadPath)) {
-//       fs.mkdirSync(uploadPath, { recursive: true });
-//     }
-//     cb(null, uploadPath);
-//   },
-//   filename: (req, file, cb) => {
-//     const ext = path.extname(file.originalname);
-//     const filename = Date.now() + "-" + Math.round(Math.random() * 1e9) + ext;
-//     cb(null, filename);
-//   },
-// });
-
-// // Configure multer to handle the 'images[]' field
-// const upload = multer({ storage }).array("images", 3); // 'images' must match the name attribute in the HTML form
 
 // Handle product creation
 const createProduct = async (req, res) => {
