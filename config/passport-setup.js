@@ -6,25 +6,13 @@ require("dotenv").config();
 
 /**----------------------USER SERIALIZERS------------------ */
 passport.serializeUser((user, done) => {
-  // Serialize user ID and role to manage different user types
   done(null, { id: user._id, role: user.role });
 });
 
 passport.deserializeUser((obj, done) => {
-  // // Deserialize based on the role
-  // if (obj.role === "admin") {
-  //   // If role is admin, find the admin in the database
-  //   User.findById(obj.id).then((user) => {
-  //     // You might have a separate Admin model if you have one
-  //     // For simplicity, assuming Admins are stored in the User model
-  //     done(null, user);
-  //   });
-  // } else {
-  // Handle user role
   User.findById(obj.id).then((user) => {
     done(null, user);
   });
-  // }
 });
 
 /**----------------------GOOGLE STRATEGIES------------------ */
@@ -37,18 +25,37 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: "/user/auth/google/signup/callback",
     },
-    (accessToken, refreshToken, profile, done) => {
-      console.log("testing");
-      // Check if user already exists in our database
-      User.findOne({ googleId: profile.id }).then((currentUser) => {
-        if (currentUser) {
-          // User already exists, handle as an error or redirect to login
-          return done(null, false, {
-            message: "User already exists. Please log in.",
-          });
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        console.log("testing");
+        // Check if user already exists in our database
+        let existingUser = User.findOne({ email: profile.emails[0].value });
+        if (existingUser) {
+          if (!existingUser.googleId) {
+            existingUser = await User.findOneAndUpdate(
+              { email: profile.emails[0].value },
+              {
+                $set: {
+                  googleId: profile.id,
+                  thumbnail: profile.photos[0].value,
+                  firstName: profile.name.givenName,
+                  lastName: profile.name.familyName,
+                  isVerified: true,
+                },
+              },
+              { new: true }
+            );
+
+            return done(null, existingUser);
+          } else {
+            // If the user already exists and has a googleId, handle it as an error
+            return done(null, false, {
+              message: "User already exists. Please log in.",
+            });
+          }
         } else {
           // If not, create a new user
-          new User({
+          const newUser = new User({
             googleId: profile.id,
             username: profile.displayName,
             thumbnail: profile.photos[0].value,
@@ -56,13 +63,13 @@ passport.use(
             lastName: profile.name.familyName,
             isVerified: true,
             email: profile.emails[0].value,
-          })
-            .save()
-            .then((newUser) => {
-              done(null, newUser);
-            });
+          });
+          await newUser.save();
+          done(null, newUser);
         }
-      });
+      } catch (err) {
+        done(err);
+      }
     }
   )
 );
@@ -75,16 +82,33 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: "/user/auth/google/login/callback",
     },
-    (accessToken, refreshToken, profile, done) => {
-      User.findOne({ googleId: profile.id }).then((currentUser) => {
-        if (currentUser) {
-          done(null, currentUser);
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        // Check if a user exists by googleId
+        let existingUser = await User.findOne({ googleId: profile.id });
+
+        if (existingUser) {
+          return done(null, existingUser);
+        }
+
+        // If no googleId is found, check by email
+        existingUser = await User.findOne({ email: profile.emails[0].value });
+
+        if (existingUser) {
+          // Update the user with the googleId
+          existingUser.googleId = profile.id;
+          existingUser.thumbnail = profile.photos[0].value;
+          await existingUser.save();
+
+          return done(null, existingUser);
         } else {
           return done(null, false, {
             message: "User does not exist. Please sign up.",
           });
         }
-      });
+      } catch (error) {
+        done(error);
+      }
     }
   )
 );

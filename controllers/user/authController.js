@@ -69,7 +69,7 @@ const getSignup = (req, res) => {
   res.render("user/signup", { msg: error });
 };
 
-//for post signup
+// For post signup
 const postSignup = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
@@ -77,6 +77,7 @@ const postSignup = async (req, res) => {
     let user = await UserModel.findOne({ email });
     if (!user) {
       const hashPassword = await bcrypt.hash(password, 10);
+
       user = new UserModel({
         firstName,
         lastName,
@@ -84,23 +85,22 @@ const postSignup = async (req, res) => {
         password: hashPassword,
         isVerified: false,
       });
+
       await user.save();
+
       req.session.user = user;
-      console.log(req.session);
       sendVerificationMail(user, res);
       return res.redirect(
         `/user/auth/verify-otp?userId=${user._id}&email=${email}`
       );
     } else {
-      return res.status(404).json({
-        status: "error",
-        message: "The user is already exists",
-      });
+      res.redirect("/user/auth/signup?error=The user already exists!!!");
     }
   } catch (error) {
+    console.error("Signup error:", error); // Log the actual error
     return res.status(500).json({
       status: "error",
-      message: "Error signup failed",
+      message: "Signup failed. Please try again later.",
     });
   }
 };
