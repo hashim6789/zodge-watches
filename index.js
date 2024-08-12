@@ -6,7 +6,7 @@ const adminRouter = require("./routes/adminRoute"); //import the local module ro
 const userRouter = require("./routes/userRoute"); //import the local module router for admin/products
 const categoryRouter = require("./routes/categoryRoute"); //import the local module router for admin/categories
 const productRouter = require("./routes/productRoute"); //import the local module router for admin/products
-// const dummyRouter = require("./routes/user/dummyRoute"); //import the local module router for user/dummy for testing
+const dummyRouter = require("./routes/user/dummyRoute"); //import the local module router for user/dummy for testing
 const authRouter = require("./routes/user/authRoute"); //import the local module router for user/auth
 const shopRouter = require("./routes/user/shopRoute"); //import the local module router for user/auth
 const passportSetup = require("./config/passport-setup");
@@ -67,7 +67,7 @@ app.use("/admin/categories", categoryRouter); // for admin - category management
 app.use("/admin/products", productRouter); // for admin product management router url
 app.use("/admin", adminRouter); // for admin router url
 
-// app.use("/user/dummy", dummyRouter); // for testing the router
+app.use("/user/dummy", dummyRouter); // for testing the router
 app.use("/user/auth", authRouter); // for user authentication router url
 app.use("/user/shop", shopRouter); // for user shopping router url
 
