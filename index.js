@@ -8,7 +8,8 @@ const categoryRouter = require("./routes/categoryRoute"); //import the local mod
 const productRouter = require("./routes/productRoute"); //import the local module router for admin/products
 const dummyRouter = require("./routes/user/dummyRoute"); //import the local module router for user/dummy for testing
 const authRouter = require("./routes/user/authRoute"); //import the local module router for user/auth
-const shopRouter = require("./routes/user/shopRoute"); //import the local module router for user/auth
+const shopRouter = require("./routes/user/shopRoute"); //import the local module router for user/shop
+const profileRouter = require("./routes/user/profileRoute"); //import the local module router for user/profile
 const passportSetup = require("./config/passport-setup");
 const session = require("express-session"); //import session
 const passport = require("passport");
@@ -70,6 +71,7 @@ app.use("/admin", adminRouter); // for admin router url
 app.use("/user/dummy", dummyRouter); // for testing the router
 app.use("/user/auth", authRouter); // for user authentication router url
 app.use("/user/shop", shopRouter); // for user shopping router url
+app.use("/user/profile", profileRouter); // for user shopping router url
 
 //server listener
 app.listen(port, () => {

@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
+const crypto = require("crypto");
 const UserModel = require("../../models/User");
 const OtpModel = require("../../models/Otp");
 const ProductModel = require("../../models/ProductModel");
@@ -241,6 +242,8 @@ const redirectToProfile = (req, res) => {
 
 const getHome = async (req, res) => {
   console.log(req.session);
+  const id = req.session?.user?._id || req.session?.passport.user.id;
+  const user = await UserModel.findById(id);
   const page = req.query.page || 1;
   const perPage = 8;
   const products = await ProductModel.find({ isListed: true })
@@ -252,8 +255,95 @@ const getHome = async (req, res) => {
     products,
     categories,
     current: page,
+    user,
     pages: Math.ceil(count / perPage),
   });
+};
+
+//reset password
+const resetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await UserModel.findOne({ email });
+    if (user) {
+      const token = crypto.randomBytes(20).toString("hex");
+      console.log(token);
+      user.resetPasswordToken = token;
+      user.resetPasswordExpires = Date.now() + 60 * 10 * 1000;
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Password Reset",
+        text: `Click the following link to reset your password: http://localhost:3000/user/auth/reset-password/${token}`,
+      };
+      user.save();
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+          res.status(500).send("Error sending email");
+        } else {
+          console.log(`Email sent: ${info.response}`);
+          res.status(200).json({
+            status: "Success",
+            message:
+              "Check your email for instructions on resetting your password",
+          });
+        }
+      });
+    } else {
+      res.status(404).send("Email not found");
+    }
+  } catch (err) {
+    res.status(500).json({ status: "Error", message: "Server error !!!" });
+  }
+};
+
+//for reset password page
+const getResetPasswordPage = async (req, res) => {
+  try {
+    const token = req.params.token;
+    const user = await UserModel.findOne({ resetPasswordToken: token });
+    if (user) {
+      res.status(200).render("user/resetPassword", { token });
+    } else {
+      res.status(404).json("Invalid or expired token");
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: "Failure",
+      message: "Server error!!!",
+    });
+  }
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    console.log(token);
+    const user = await UserModel.findOne({ resetPasswordToken: token });
+    if (user) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      user.password = hashedPassword;
+      user.resetExpires = undefined;
+      user.resetToken = undefined;
+
+      await user.save();
+
+      res
+        .status(200)
+        .json({ status: "Success", message: "Password updated successfully" });
+    } else {
+      res.status(404).json({ status: "Failure", message: "User not found" });
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: "Failed",
+      message: "server error!!!",
+    });
+  }
 };
 
 const logout = (req, res) => {
@@ -288,5 +378,8 @@ module.exports = {
   googleLoginCallback,
   redirectToProfile,
   getHome,
+  resetPassword,
+  changePassword,
+  getResetPasswordPage,
   logout,
 };

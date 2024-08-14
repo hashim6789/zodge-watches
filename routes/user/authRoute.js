@@ -24,6 +24,9 @@ const {
   googleLoginCallback,
   redirectToProfile,
   getHome,
+  resetPassword,
+  changePassword,
+  getResetPasswordPage,
   logout,
 } = require("../../controllers/user/authController");
 
@@ -75,10 +78,19 @@ router.get(
   redirectToProfile
 );
 
-// Auth logout
-router.get("/logout", isAuthenticatedUser, authorizeUser, logout);
-
 //get home page
 router.get("/home", isAuthenticatedUser, authorizeUser, getHome);
+
+//post - /user/auth/reset-password
+router.post("/reset-password", resetPassword);
+
+//post - /user/auth/reset-password
+router.get("/reset-password/:token", getResetPasswordPage);
+
+//post - /user/auth/verify-password
+router.post("/change-password", changePassword);
+
+// Auth logout
+router.get("/logout", isAuthenticatedUser, authorizeUser, logout);
 
 module.exports = router;

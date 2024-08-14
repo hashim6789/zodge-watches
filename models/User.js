@@ -8,11 +8,14 @@ const UsersSchema = new Schema({
   thumbnail: { type: String },
   firstName: { type: String, required: true },
   lastName: { type: String },
-  email: { type: String, required: true }, // Ensure email is unique
-  password: { type: String }, // Optional for Google signups
+  email: { type: String, required: true },
+  password: { type: String },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: String },
+
   role: { type: String, default: "User" },
   isBlocked: { type: Boolean, default: false },
-  isVerified: { type: Boolean, default: false }, // Mark as true when the OTP is verified or signup is with Google
+  isVerified: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
