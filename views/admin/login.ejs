@@ -34,53 +34,63 @@
           <div
             class="content-wrapper full-page-wrapper d-flex align-items-center auth login-bg"
           >
+            <a href="/" class="btn btn-prymary align-items-center mb-3">
+              <i class="mdi mdi-arrow-left"></i> Back
+            </a>
             <div class="card col-lg-4 mx-auto">
               <div class="card-body px-5 py-5">
+                <!-- Back Button -->
+                <!-- Back Button Ends -->
+
                 <h3 class="card-title text-left mb-3">Login</h3>
                 <% if (err) { %>
                 <div class="alert alert-danger" role="alert"><%= err %></div>
                 <% } %>
-                <form action="/admin/login" method="post">
-                  <div class="form-group">
-                    <label>Username or email *</label>
-                    <input
-                      type="text"
-                      class="form-control p_input"
-                      name="email"
-                      required
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>Password *</label>
-                    <input
-                      type="password"
-                      class="form-control p_input"
-                      name="password"
-                      required
-                    />
-                  </div>
-                  <!-- <div
-                    class="form-group d-flex align-items-center justify-content-between"
-                  >
-                    <div class="form-check">
-                      <label class="form-check-label">
+                <form id="loginForm" action="/admin/login" method="post">
+                  <div class="row gy-2 overflow-hidden">
+                    <div class="col-12">
+                      <div class="form-floating mb-3">
                         <input
-                          type="checkbox"
-                          class="form-check-input"
-                          name="remember"
+                          type="email"
+                          class="form-control"
+                          name="email"
+                          id="email"
+                          placeholder="name@example.com"
+                          required
                         />
-                        Remember me
-                      </label>
+                        <label for="email" class="form-label">Email</label>
+                        <div class="invalid-feedback">
+                          Please enter a valid email address.
+                        </div>
+                        <div class="valid-feedback">Looks good!</div>
+                      </div>
                     </div>
-                    <a href="#" class="forgot-pass">Forgot password</a>
-                  </div> -->
-                  <div class="text-center">
-                    <button
-                      type="submit"
-                      class="btn btn-primary btn-block enter-btn"
-                    >
-                      Login
-                    </button>
+                    <div class="col-12">
+                      <div class="form-floating mb-3">
+                        <input
+                          type="password"
+                          class="form-control"
+                          name="password"
+                          id="password"
+                          placeholder="Password"
+                          required
+                        />
+                        <label for="password" class="form-label"
+                          >Password</label
+                        >
+                        <div class="invalid-feedback">
+                          Password must be at least 6 characters long.
+                        </div>
+                        <div class="valid-feedback">Looks good!</div>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="d-grid my-3">
+                        <button class="btn btn-primary btn-lg" type="submit">
+                          Log In
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </form>
               </div>
@@ -104,6 +114,8 @@
     <script src="/public/assets/js/misc.js"></script>
     <script src="/public/assets/js/settings.js"></script>
     <script src="/public/assets/js/todolist.js"></script>
+    <script src="/public/user/js/login.js"></script>
+
     <!-- endinject -->
   </body>
 </html>

@@ -27,9 +27,9 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        console.log("testing");
-        // Check if user already exists in our database
-        let existingUser = User.findOne({ email: profile.emails[0].value });
+        let existingUser = await User.findOne({
+          email: profile.emails[0].value,
+        });
         if (existingUser) {
           if (!existingUser.googleId) {
             existingUser = await User.findOneAndUpdate(
@@ -85,14 +85,20 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
         // Check if a user exists by googleId
-        let existingUser = await User.findOne({ googleId: profile.id });
+        let existingUser = await User.findOne({
+          googleId: profile.id,
+          isBlocked: false,
+        });
 
         if (existingUser) {
           return done(null, existingUser);
         }
 
-        // If no googleId is found, check by email
-        existingUser = await User.findOne({ email: profile.emails[0].value });
+        existingUser = await User.findOne({
+          email: profile.emails[0].value,
+          isBlocked: false,
+        });
+        console.log(existingUser);
 
         if (existingUser) {
           // Update the user with the googleId
@@ -103,7 +109,7 @@ passport.use(
           return done(null, existingUser);
         } else {
           return done(null, false, {
-            message: "User does not exist. Please sign up.",
+            message: "User does not exist or blocked. Please sign up.",
           });
         }
       } catch (error) {

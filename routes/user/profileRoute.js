@@ -1,5 +1,14 @@
 const express = require("express");
 
+//for Authentication
+const {
+  isAuthenticatedUser,
+  redirectIfAuthenticated,
+} = require("../../middlewares/authenticationMiddlewares");
+
+//for Authorization
+const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
+
 const {
   getProfile,
   updatePersonal,
@@ -15,15 +24,20 @@ const test = (req, res, next) => {
 };
 
 //get - /user/profile
-router.get("/:id", getProfile);
+router.get("/:id", isAuthenticatedUser, authorizeUser, getProfile);
 
 //patch - /user/profile/personal/:id
-router.patch("/personal/:id", updatePersonal);
+router.patch(
+  "/personal/:id",
+  isAuthenticatedUser,
+  authorizeUser,
+  updatePersonal
+);
 
 //post - /user/profile/address
-router.post("/address", postAddress);
+router.post("/address", isAuthenticatedUser, authorizeUser, postAddress);
 
 //put - /user/profile/address
-router.put("/address/:id", editAddress);
+router.put("/address/:id", isAuthenticatedUser, authorizeUser, editAddress);
 
 module.exports = router;

@@ -3,9 +3,11 @@ const UserModel = require("../models/User");
 //get all users
 const getUsers = async (req, res) => {
   try {
+    const query = req.query.query || "";
     const page = req.query.page || 1;
     const perPage = 6;
-    const usersList = await UserModel.find()
+    let usersList = [];
+    usersList = await UserModel.find({ firstName: new RegExp(query, "i") })
       .skip((page - 1) * perPage)
       .limit(perPage);
     if (!usersList) {
@@ -65,4 +67,11 @@ const blockUser = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, blockUser };
+//for search users by their names
+const searchUsers = (req, res) => {
+  const query = req.query.query;
+  console.log(query);
+  res.redirect(`/admin/users?query=${query}`);
+};
+
+module.exports = { getUsers, blockUser, searchUsers };

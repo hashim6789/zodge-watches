@@ -16,11 +16,17 @@
     </button>
     <ul class="navbar-nav w-100">
       <li class="nav-item w-100">
-        <form class="nav-link mt-2 mt-md-0 d-none d-lg-flex search">
+        <form
+          id="searchForm"
+          class="nav-link mt-2 mt-md-0 d-none d-lg-flex search"
+          method="get"
+          action="/admin/<%= pageType %>/search"
+        >
           <input
             type="text"
+            name="query"
             class="form-control"
-            placeholder="Search products"
+            placeholder="Search <%= pageType %>"
           />
         </form>
       </li>

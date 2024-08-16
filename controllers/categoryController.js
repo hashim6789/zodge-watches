@@ -1,11 +1,15 @@
 const CategoryModel = require("../models/Category");
+const ProductModel = require("../models/ProductModel");
 
 //category
 const getCategory = async (req, res) => {
   try {
+    const query = req.query.query || "";
     const page = req.query.page || 1;
     const perPage = 6;
-    const categories = await CategoryModel.find()
+
+    let categories = [];
+    categories = await CategoryModel.find({ name: new RegExp(query, "i") })
       .skip((page - 1) * perPage)
       .limit(perPage);
     if (!categories) {
@@ -19,7 +23,9 @@ const getCategory = async (req, res) => {
       //   message: "The page rendered successfully",
       // });
     }
-    const count = await CategoryModel.countDocuments();
+    const count = await CategoryModel.countDocuments({
+      name: new RegExp(query, "i"),
+    });
     res.render("admin/categoryManagementPage", {
       categories,
       current: page,
@@ -109,6 +115,11 @@ const unlistCategory = async (req, res) => {
         status: "error",
         message: "category not found",
       });
+    } else {
+      const products = await ProductModel.updateMany(
+        { categoryId },
+        { $set: { isListed } }
+      );
     }
 
     return res.status(200).json({
@@ -124,4 +135,17 @@ const unlistCategory = async (req, res) => {
   }
 };
 
-module.exports = { getCategory, createCategory, editCategory, unlistCategory };
+//search categories
+const searchCategories = (req, res) => {
+  const query = req.query.query;
+  console.log(query);
+  res.redirect(`/admin/categories?query=${query}`);
+};
+
+module.exports = {
+  getCategory,
+  createCategory,
+  editCategory,
+  unlistCategory,
+  searchCategories,
+};

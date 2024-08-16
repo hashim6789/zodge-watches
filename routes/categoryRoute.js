@@ -17,6 +17,7 @@ const {
   createCategory,
   editCategory,
   unlistCategory,
+  searchCategories,
 } = require("../controllers/categoryController");
 
 //for testing purpose
@@ -60,5 +61,8 @@ router.patch(
   authorizeAdminForModule("categoryManagement"),
   unlistCategory
 );
+
+//get - /admin/categories/search
+router.get("/search", test, searchCategories);
 
 module.exports = router;

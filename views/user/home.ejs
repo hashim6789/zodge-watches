@@ -211,6 +211,7 @@
             <button
               class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1"
               data-filter="*"
+              onclick="fetchProducts()"
             >
               All Products
             </button>
@@ -219,6 +220,8 @@
             <button
               class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5"
               data-filter=". <%= category._id %>"
+              id="categorySearch"
+              onclick="fetchProducts('<%= category._id %>')"
             >
               <%= category.name %>
             </button>
@@ -254,15 +257,20 @@
           <!-- Search product -->
           <div class="dis-none panel-search w-full p-t-10 p-b-15">
             <div class="bor8 dis-flex p-l-15">
-              <button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
+              <button
+                class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04"
+                onclick="searchProducts()"
+              >
                 <i class="zmdi zmdi-search"></i>
               </button>
 
               <input
+                id="search-input"
                 class="mtext-107 cl2 size-114 plh2 p-r-15"
                 type="text"
                 name="search-product"
                 placeholder="Search"
+                onkeyup="searchProducts(event)"
               />
             </div>
           </div>
@@ -437,6 +445,128 @@
         <i class="zmdi zmdi-chevron-up"></i>
       </span>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+      function fetchProducts(categoryId = null) {
+        const endpoint = categoryId
+          ? `/user/shop/filter/category/${categoryId}`
+          : `/user/shop/filter/products`;
+        axios
+          .get(endpoint)
+          .then((response) => {
+            const products = response.data.data;
+
+            // Clear the existing content in the product-list div
+            document.getElementById("product-list").innerHTML = "";
+
+            products.forEach(function (product) {
+              const productHtml = `
+                <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item ${product.categoryId}">
+                  <div class="block2">
+                    <div class="block2-pic hov-img0">
+                      <img src="/public/uploads/${product.images[0]}" alt="IMG-PRODUCT" />
+                      <form action="/user/shop/quickview/${product._id}">
+                        <button class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04" type="submit">
+                          Quick View
+                        </button>
+                      </form>
+                    </div>
+                    <div class="block2-txt flex-w flex-t p-t-14">
+                      <div class="block2-txt-child1 flex-col-l">
+                        <a href="#" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                          ${product.name}
+                        </a>
+                        <span class="stext-105 cl3">${product.price}</span>
+                      </div>
+                      <div class="block2-txt-child2 flex-r p-t-3">
+                        <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2" data-id="${product._id}">
+                          <img class="icon-heart1 dis-block trans-04" src="/public/user/images/icons/icon-heart-01.png" alt="ICON" />
+                          <img class="icon-heart2 dis-block trans-04 ab-t-l" src="/public/user/images/icons/icon-heart-02.png" alt="ICON" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `;
+
+              // Insert the new product HTML into the product-list div
+              document
+                .getElementById("product-list")
+                .insertAdjacentHTML("beforeend", productHtml);
+            });
+          })
+          .catch((error) => {
+            console.error("There was an error searching products!", error);
+            alert("Error updating products");
+          });
+      }
+    </script>
+    <script>
+      function searchProducts(event) {
+        // Check if the Enter key is pressed or the search button is clicked
+        if (event.key === "Enter" || event.type === "click") {
+          const query = document.getElementById("search-input").value.trim();
+          console.log(query);
+
+          if (query) {
+            // If there is a query, make a GET request to the server to search products
+            axios
+              .get(`/user/shop/search?query=${encodeURIComponent(query)}`)
+              .then((response) => {
+                const products = response.data.data;
+
+                // Clear the current product list
+                document.getElementById("product-list").innerHTML = "";
+
+                // Loop through the products and generate HTML for each product
+                products.forEach(function (product) {
+                  const productHtml = `
+                    <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item ${product.categoryId}">
+                      <div class="block2">
+                        <div class="block2-pic hov-img0">
+                          <img src="/public/uploads/${product.images[0]}" alt="IMG-PRODUCT" />
+                          <form action="/user/shop/quickview/${product._id}">
+                            <button class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04" type="submit">
+                              Quick View
+                            </button>
+                          </form>
+                        </div>
+                        <div class="block2-txt flex-w flex-t p-t-14">
+                          <div class="block2-txt-child1 flex-col-l">
+                            <a href="#" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                              ${product.name}
+                            </a>
+                            <span class="stext-105 cl3">${product.price}</span>
+                          </div>
+                          <div class="block2-txt-child2 flex-r p-t-3">
+                            <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2" data-id="${product._id}">
+                              <img class="icon-heart1 dis-block trans-04" src="/public/user/images/icons/icon-heart-01.png" alt="ICON" />
+                              <img class="icon-heart2 dis-block trans-04 ab-t-l" src="/public/user/images/icons/icon-heart-02.png" alt="ICON" />
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+
+                  // Append each product's HTML to the product-list div
+                  document
+                    .getElementById("product-list")
+                    .insertAdjacentHTML("beforeend", productHtml);
+                });
+              })
+              .catch((error) => {
+                console.error(
+                  "There was an error searching for products!",
+                  error
+                );
+                alert("Error loading products");
+              });
+          }
+        }
+      }
+    </script>
 
     <!--===============================================================================================-->
     <script src="/public/user/vendor/jquery/jquery-3.2.1.min.js"></script>

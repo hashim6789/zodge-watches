@@ -13,7 +13,11 @@ const {
 } = require("../middlewares/authorizationMiddlewares");
 
 //user functions
-const { getUsers, blockUser } = require("../controllers/userController");
+const {
+  getUsers,
+  blockUser,
+  searchUsers,
+} = require("../controllers/userController");
 
 //get - /admin/users/
 router.get(
@@ -32,5 +36,8 @@ router.patch(
   authorizeAdminForModule("userManagement"),
   blockUser
 );
+
+//get - /admin/users/search
+router.get("/search", searchUsers);
 
 module.exports = router;

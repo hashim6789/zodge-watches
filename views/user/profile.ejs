@@ -104,6 +104,9 @@
 
   <body>
     <div class="container rounded bg-white mt-5 mb-5">
+      <a href="/user/auth/home">home</a>
+            >
+            <a href="/user/profile/<%= user._id %>">profile</a>
       <div class="row">
         <!-- Sidebar Navigation -->
         <div class="col-md-3">
@@ -222,7 +225,7 @@
                       <%= address.city %>, <%= address.state %>, <%=
                       address.pincode %>,<%= address.flatNo %><br />
                       <%= address.country %><br />
-                      <small><%= address.phoneNo %></small>
+                      <small><%= address.phoneNo %> <br><%= address.email %> </small>
                     </p>
                   </div>
                   <button
@@ -363,12 +366,12 @@
              </div>
 
              <div class="mb-3">
-               <label for="email" class="form-label">Email</label>
+               <label for="addressEmail" class="form-label">Email</label>
                <input
-                 type="email"
+                 type="AddressEmail"
                  class="form-control"
-                 id="email"
-                 name="email"
+                 id="AddressEmail"
+                 name="AddressEmail"
                  required
                />
              </div>
@@ -636,7 +639,7 @@ const userId = document.getElementById('userId').value;
 const firstName = document.getElementById('firstName').value;
 const secondName = document.getElementById('secondName').value;
 const phoneNo = document.getElementById('phoneNo').value;
-const email = document.getElementById('email').value;
+const email = document.getElementById('AddressEmail').value;
 const addressLine = document.getElementById('addressLine').value;
 const pincode = document.getElementById('pincode').value;
 const state = document.getElementById('state').value;

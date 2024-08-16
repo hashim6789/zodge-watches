@@ -43,12 +43,13 @@ const createProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
+    const query = req.query.query || "";
     const page = req.query.page || 1;
     const perPage = 6;
-    let products = await ProductModel.find()
+    let products = await ProductModel.find({ name: new RegExp(query, "i") })
       .skip((page - 1) * perPage)
       .limit(perPage);
-    let categories = await CategoryModel.find({ isListed: true });
+    let categories = await CategoryModel.find();
 
     if (!products) {
       return res.render("admin/productManagementPage", {
@@ -56,7 +57,9 @@ const getAllProducts = async (req, res) => {
         categories,
       });
     }
-    const count = await ProductModel.countDocuments();
+    const count = await ProductModel.countDocuments({
+      name: new RegExp(query, "i"),
+    });
     return res.render("admin/productManagementPage", {
       products,
       categories,
@@ -160,10 +163,18 @@ const getDetails = async (req, res) => {
   }
 };
 
+//for search products by name
+const searchProducts = (req, res) => {
+  const query = req.query.query;
+  console.log(query);
+  res.redirect(`/admin/products?query=${query}`);
+};
+
 module.exports = {
   getAllProducts,
   createProduct,
   updateProduct,
   unlistProduct,
   getDetails,
+  searchProducts,
 };

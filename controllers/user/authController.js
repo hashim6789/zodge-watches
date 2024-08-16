@@ -36,7 +36,7 @@ const sendVerificationMail = async ({ _id, email }, res) => {
       userId: _id,
       otp: hashedOtp,
       createdAt: Date.now(),
-      expiresAt: Date.now() + 3600000, // 1 hour
+      expiresAt: Date.now() + 3600000,
     });
 
     //for save otp records
@@ -61,9 +61,6 @@ const sendVerificationMail = async ({ _id, email }, res) => {
   }
 };
 
-// // Verify environment variables (for debugging)
-// console.log("EMAIL_USER:", process.env.EMAIL_USER);
-// console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
 //for get signup
 const getSignup = (req, res) => {
   const error = req.query.error;
@@ -98,7 +95,7 @@ const postSignup = async (req, res) => {
       res.redirect("/user/auth/signup?error=The user already exists!!!");
     }
   } catch (error) {
-    console.error("Signup error:", error); // Log the actual error
+    console.error("Signup error:", error);
     return res.status(500).json({
       status: "error",
       message: "Signup failed. Please try again later.",
@@ -108,8 +105,8 @@ const postSignup = async (req, res) => {
 
 //get the otp page
 const getOtpPage = (req, res) => {
-  const { email, userId } = req.query;
-  res.render("user/otpGeneratePage", { email, userId, msg: null });
+  const { email, userId, message } = req.query;
+  res.render("user/otpGeneratePage", { email, userId, msg: message });
 };
 
 //post the otp (verifying)
@@ -125,20 +122,16 @@ const postOtp = async (req, res) => {
       const isValidOtp = await bcrypt.compare(otp, otpRecord.otp);
 
       if (isValidOtp) {
-        //verified the user
         await UserModel.findByIdAndUpdate(
           userId,
           { isVerified: true },
-          { new: true } // Return the updated document
+          { new: true }
         );
-        // OTP is correct, navigate to the home page
         res.redirect("/user/auth/home");
       } else {
-        res.render("user/otpGeneratePage", {
-          email,
-          userId,
-          msg: "Invalid OTP",
-        });
+        res.redirect(
+          `/user/auth/verify-otp?userId=${userId}&email=${email}&message=Invalid otp`
+        );
       }
     } else {
       res.render("user/otpGeneratePage", {
@@ -159,18 +152,15 @@ const postOtp = async (req, res) => {
 const resendOtp = async (req, res) => {
   try {
     const { _id, email } = req.body;
-    // Invoke the sendVerificationMail function to resend the OTP
     await sendVerificationMail({ _id, email }, res);
     console.log("Hi", _id, email);
 
-    // Return a success response
     return res.status(200).json({
       status: "Success",
       message: "OTP resent successfully",
       data: { userId: _id, email: email },
     });
   } catch (error) {
-    // Handle any errors during the resend process
     res.status(500).json({
       status: "Failed",
       message: "Failed to resend OTP. Please try again.",
@@ -218,28 +208,29 @@ const googleSignup = passport.authenticate("google-signup", {
 });
 
 const googleLogin = passport.authenticate("google-login", {
-  scope: ["profile"],
+  scope: ["profile", "email"],
 });
 
-// Corrected way to define the googleSignupCallback
+//googleSignupCallback
 const googleSignupCallback = (req, res, next) => {
   passport.authenticate("google-signup", {
-    failureRedirect: "/user/auth/login",
+    failureRedirect: "/user/auth/login?error=The user is already exist",
   })(req, res, next);
 };
 
-// Corrected way to define the googleLoginCallback
+//googleLoginCallback
 const googleLoginCallback = (req, res, next) => {
   passport.authenticate("google-login", {
-    failureRedirect: `/user/auth/signup?error=The user is not exist!!!`,
+    failureRedirect: `/user/auth/signup?error=The user is not exist or blocked!!!`,
   })(req, res, next);
 };
 
-// After authentication, redirect to profile in a separate function
+//for redirect the home page after the otp validation
 const redirectToProfile = (req, res) => {
   res.redirect("/user/auth/home");
 };
 
+//for get the home page
 const getHome = async (req, res) => {
   console.log(req.session);
   const id = req.session?.user?._id || req.session?.passport.user.id;
@@ -250,7 +241,8 @@ const getHome = async (req, res) => {
     .skip((page - 1) * perPage)
     .limit(perPage);
   const categories = await CategoryModel.find({ isListed: true });
-  const count = await ProductModel.countDocuments();
+  const count = await ProductModel.countDocuments({ isListed: true });
+  console.log(count);
   res.render("user/home", {
     products,
     categories,
@@ -332,9 +324,11 @@ const changePassword = async (req, res) => {
 
       await user.save();
 
-      res
-        .status(200)
-        .json({ status: "Success", message: "Password updated successfully" });
+      res.render("user/password_success");
+
+      // res
+      //   .status(200)
+      //   .json({ status: "Success", message: "Password updated successfully" });
     } else {
       res.status(404).json({ status: "Failure", message: "User not found" });
     }
@@ -357,9 +351,8 @@ const logout = (req, res) => {
         return next(err);
       }
 
-      // Redirect to the homepage or login page after logout
-      res.clearCookie("connect.sid"); // Clear the session cookie (if using sessions)
-      res.redirect("/user/auth/login"); // Redirect to the login page
+      res.clearCookie("connect.sid");
+      res.redirect("/user/auth/login");
     });
   });
 };

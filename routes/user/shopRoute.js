@@ -12,6 +12,9 @@ const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
 const {
   quickView,
   getImage,
+  filterCategoryProduct,
+  filterAllProducts,
+  searchProducts,
 } = require("../../controllers/user/shopController");
 
 const test = (req, res, next) => {
@@ -26,5 +29,13 @@ router.get("/quickview/:id", isAuthenticatedUser, authorizeUser, quickView);
 //get the product image url
 //get - /user/shop/getImagePath
 router.get("/getImagePath", isAuthenticatedUser, authorizeUser, getImage);
+
+//search the whole products
+router.get("/filter/products", filterAllProducts);
+
+//search the products by the category
+router.get("/filter/category/:id", filterCategoryProduct);
+
+router.get(`/search`, test, searchProducts);
 
 module.exports = router;

@@ -46,7 +46,7 @@
       <!-- partial -->
       <div class="container-fluid page-body-wrapper">
         <!-- partial:partials/_navbar.ejs -->
-        <%- include('partials/_navbar') %>
+        <%- include('partials/_navbar', { pageType: 'products' }) %>
         <!-- partial -->
         <div class="main-panel">
           <div class="content-wrapper">
@@ -127,7 +127,7 @@
                                 Edit
                               </button>
                               <button
-                                class="btn <%= product.isListed ? 'btn-success' : 'btn-danger' %>"
+                                class="btn <%= product.isListed ? 'btn-danger' : 'btn-success' %>"
                                 onclick="confirmAndToggleListProduct('<%= product._id %>', '<%= product.isListed %>')"
                               >
                                 <%= product.isListed ? 'Unlist' : 'List' %>

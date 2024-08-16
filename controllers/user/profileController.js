@@ -68,10 +68,9 @@ const postAddress = async (req, res) => {
       flatNo,
     } = req.body;
 
-    console.log(req.body);
+    // console.log(req.body);
 
     let address = await AddressModel.findOne({ email });
-    console.log(address);
     if (!address) {
       address = new AddressModel({
         userId,
@@ -90,7 +89,6 @@ const postAddress = async (req, res) => {
       });
 
       const savedAddress = await address.save();
-      console.log(savedAddress);
       return res.status(201).json({
         status: "success",
         message: "user updated successfully",

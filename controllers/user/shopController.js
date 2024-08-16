@@ -1,4 +1,5 @@
 const ProductModel = require("../../models/ProductModel"); // Adjust the path as needed
+const CategoryModel = require("../../models/Category");
 
 const quickView = async (req, res) => {
   try {
@@ -37,4 +38,77 @@ const getImage = async (req, res) => {
   }
 };
 
-module.exports = { quickView, getImage };
+const filterCategoryProduct = async (req, res) => {
+  try {
+    const categoryId = req.params.id;
+    const category = await CategoryModel.findById(categoryId);
+    if (category) {
+      const products = await ProductModel.find({ categoryId, isListed: true });
+      console.log("testing");
+
+      res.status(200).json({
+        status: "Success",
+        message: "The products successfully fetched...",
+        data: products,
+      });
+    } else {
+      res.status(404).json({
+        status: "Failure",
+        message: " The category doesn't exists",
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error!!!",
+    });
+  }
+};
+
+const filterAllProducts = async (req, res) => {
+  try {
+    const products = await ProductModel.find({ isListed: true });
+    if (products.length > 0) {
+      res.status(200).json({
+        status: "Success",
+        message: "The products successfully fetched...",
+        data: products,
+      });
+    } else {
+      res.status(404).json({
+        status: "Failure",
+        message: " The products exists",
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error!!!",
+    });
+  }
+};
+
+const searchProducts = async (req, res) => {
+  try {
+    const query = req.query.query;
+
+    const products = await ProductModel.find({
+      name: { $regex: query, $options: "i" },
+    });
+
+    res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    console.error("Error searching products:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error searching products" });
+  }
+};
+
+module.exports = {
+  quickView,
+  getImage,
+  filterCategoryProduct,
+  filterAllProducts,
+  searchProducts,
+};

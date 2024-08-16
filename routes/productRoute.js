@@ -21,6 +21,7 @@ const {
   updateProduct,
   unlistProduct,
   getDetails,
+  searchProducts,
 } = require("../controllers/productController");
 
 //for uploading the images of the products
@@ -97,5 +98,8 @@ router.get(
   authorizeAdminForModule("productManagement"),
   getDetails
 );
+
+//get - /admin/products/search
+router.get("/search", test, searchProducts);
 
 module.exports = router;

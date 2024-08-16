@@ -73,6 +73,11 @@ app.use("/user/auth", authRouter); // for user authentication router url
 app.use("/user/shop", shopRouter); // for user shopping router url
 app.use("/user/profile", profileRouter); // for user shopping router url
 
+//get - / index page
+app.get("/", (req, res) => {
+  res.render("user/demoLogin");
+});
+
 //server listener
 app.listen(port, () => {
   console.log(`The server started at http://localhost:${port}`);
