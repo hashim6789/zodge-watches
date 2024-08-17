@@ -18,10 +18,11 @@ const {
 
 const router = express();
 
-const test = (req, res, next) => {
-  console.log(req.url);
-  next();
-};
+//for testing purpose
+// const test = (req, res, next) => {
+//   console.log(req.url);
+//   next();
+// };
 
 //get - /user/profile
 router.get("/:id", isAuthenticatedUser, authorizeUser, getProfile);

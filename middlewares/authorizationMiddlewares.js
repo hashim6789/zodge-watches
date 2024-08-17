@@ -1,24 +1,23 @@
 // middleware/authorizationMiddleware.js
 
-// Check if the user has access to user-specific routes
+// for user authorization
 function authorizeUser(req, res, next) {
   if (
     req.session.user?.role === "User" ||
     req.session.passport?.user?.role === "User"
   ) {
-    console.log("testing 2");
-    return next(); // User is authorized, proceed
+    return next();
   } else {
-    return res.status(403).send("Access denied"); // Forbidden
+    return res.status(403).send("Access denied");
   }
 }
 
-// Check if the admin has access to admin-specific modules
+// for admin authorization
 function authorizeAdmin(req, res, next) {
   if (req.session.admin?.role === "Admin") {
-    return next(); // Admin is authorized, proceed
+    return next();
   } else {
-    return res.status(403).send("Access denied"); // Forbidden
+    return res.status(403).send("Access denied");
   }
 }
 
@@ -29,9 +28,9 @@ function authorizeAdminForModule(module) {
       req.session.admin?.role === "Admin" &&
       req.session.admin?.permissions.includes(module)
     ) {
-      return next(); // Admin has permission for this module, proceed
+      return next();
     } else {
-      return res.status(403).send("Access denied"); // Forbidden
+      return res.status(403).send("Access denied");
     }
   };
 }

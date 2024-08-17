@@ -17,8 +17,8 @@ document
         location.reload();
       })
       .catch((error) => {
-        console.error(error);
-        alert("An error occurred while creating the category.");
+        // console.error(error);
+        alert(error.response.data.message);
       });
   });
 

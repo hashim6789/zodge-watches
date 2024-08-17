@@ -78,6 +78,11 @@ app.get("/", (req, res) => {
   res.render("user/demoLogin");
 });
 
+// Catch 404 and forward to error handler
+app.use((req, res, next) => {
+  res.status(404).send("404: Page Not Found");
+});
+
 //server listener
 app.listen(port, () => {
   console.log(`The server started at http://localhost:${port}`);

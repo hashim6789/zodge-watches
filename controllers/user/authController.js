@@ -8,6 +8,9 @@ const ProductModel = require("../../models/ProductModel");
 const CategoryModel = require("../../models/Category");
 require("dotenv").config();
 
+/**--------------------for mail activities------------------ */
+
+//for creating a nodemail transporter
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
@@ -19,6 +22,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+//for sending the verification mail or otp
 const sendVerificationMail = async ({ _id, email }, res) => {
   try {
     console.log(_id, email);
@@ -61,10 +65,19 @@ const sendVerificationMail = async ({ _id, email }, res) => {
   }
 };
 
+/**-------------for traditional signup and login-------------------- */
+
 //for get signup
 const getSignup = (req, res) => {
-  const error = req.query.error;
-  res.render("user/signup", { msg: error });
+  try {
+    const error = req.query.error;
+    res.render("user/signup", { msg: error });
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error",
+    });
+  }
 };
 
 // For post signup
@@ -105,16 +118,23 @@ const postSignup = async (req, res) => {
 
 //get the otp page
 const getOtpPage = (req, res) => {
-  const { email, userId, message } = req.query;
-  res.render("user/otpGeneratePage", { email, userId, msg: message });
+  try {
+    const { email, userId, message } = req.query;
+    res.render("user/otpGeneratePage", { email, userId, msg: message });
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error",
+    });
+  }
 };
 
 //post the otp (verifying)
 const postOtp = async (req, res) => {
-  const { otp1, otp2, otp3, otp4, userId, email } = req.body;
-  const otp = `${otp1}${otp2}${otp3}${otp4}`;
-
   try {
+    const { otp1, otp2, otp3, otp4, userId, email } = req.body;
+    const otp = `${otp1}${otp2}${otp3}${otp4}`;
+
     const otpRecord = await OtpModel.findOne({ userId });
     console.log(req.body);
 
@@ -168,10 +188,17 @@ const resendOtp = async (req, res) => {
   }
 };
 
-//for get signup
+//for get login
 const getLogin = (req, res) => {
-  const error = req.query.error;
-  res.render("user/login", { msg: error });
+  try {
+    const error = req.query.error;
+    res.render("user/login", { msg: error });
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error",
+    });
+  }
 };
 
 //for post Login
@@ -184,7 +211,6 @@ const postLogin = async (req, res) => {
       (await bcrypt.compare(password, user.password)) &&
       user.isBlocked === false
     ) {
-      console.log(user);
       req.session.user = user;
       res.redirect("/user/auth/home");
       // res.status(200).json({ message: "user login successfully" });
@@ -201,7 +227,7 @@ const postLogin = async (req, res) => {
   }
 };
 
-/**-----------------google--------------- */
+/**-----------------google signup and login--------------- */
 
 const googleSignup = passport.authenticate("google-signup", {
   scope: ["profile", "email"],
@@ -227,30 +253,45 @@ const googleLoginCallback = (req, res, next) => {
 
 //for redirect the home page after the otp validation
 const redirectToProfile = (req, res) => {
-  res.redirect("/user/auth/home");
+  try {
+    res.redirect("/user/auth/home");
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error",
+    });
+  }
 };
 
 //for get the home page
 const getHome = async (req, res) => {
-  console.log(req.session);
-  const id = req.session?.user?._id || req.session?.passport.user.id;
-  const user = await UserModel.findById(id);
-  const page = req.query.page || 1;
-  const perPage = 8;
-  const products = await ProductModel.find({ isListed: true })
-    .skip((page - 1) * perPage)
-    .limit(perPage);
-  const categories = await CategoryModel.find({ isListed: true });
-  const count = await ProductModel.countDocuments({ isListed: true });
-  console.log(count);
-  res.render("user/home", {
-    products,
-    categories,
-    current: page,
-    user,
-    pages: Math.ceil(count / perPage),
-  });
+  try {
+    const id = req.session?.user?._id || req.session?.passport.user.id;
+    const user = await UserModel.findById(id);
+    const page = req.query.page || 1;
+    const perPage = 8;
+    const products = await ProductModel.find({ isListed: true })
+      .skip((page - 1) * perPage)
+      .limit(perPage);
+    const categories = await CategoryModel.find({ isListed: true });
+    const count = await ProductModel.countDocuments({ isListed: true });
+
+    res.render("user/home", {
+      products,
+      categories,
+      current: page,
+      user,
+      pages: Math.ceil(count / perPage),
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error",
+    });
+  }
 };
+
+/**The user can reset the password */
 
 //reset password
 const resetPassword = async (req, res) => {
@@ -340,21 +381,30 @@ const changePassword = async (req, res) => {
   }
 };
 
-const logout = (req, res) => {
-  req.logout((err) => {
-    if (err) {
-      return next(err);
-    }
+/**------------------logout the user----------------- */
 
-    req.session.destroy((err) => {
+const logout = (req, res) => {
+  try {
+    req.logout((err) => {
       if (err) {
         return next(err);
       }
 
-      res.clearCookie("connect.sid");
-      res.redirect("/user/auth/login");
+      req.session.destroy((err) => {
+        if (err) {
+          return next(err);
+        }
+
+        res.clearCookie("connect.sid");
+        res.redirect("/user/auth/login");
+      });
     });
-  });
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error",
+    });
+  }
 };
 
 module.exports = {

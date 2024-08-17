@@ -14,7 +14,7 @@ const {
   authorizeAdminForModule,
 } = require("../middlewares/authorizationMiddlewares");
 
-//for product functions
+// functions for product module
 const {
   getAllProducts,
   createProduct,
@@ -35,11 +35,12 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+
 // for testing purposes
-const test = (req, res, next) => {
-  console.log(req.url);
-  next();
-};
+// const test = (req, res, next) => {
+//   console.log(req.url);
+//   next();
+// };
 
 //validate the image count at least 3
 const validateImageCount = (req, res, next) => {
@@ -100,6 +101,6 @@ router.get(
 );
 
 //get - /admin/products/search
-router.get("/search", test, searchProducts);
+router.get("/search", searchProducts);
 
 module.exports = router;

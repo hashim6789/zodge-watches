@@ -6,7 +6,7 @@ require("dotenv").config();
 
 /**----------------------USER SERIALIZERS------------------ */
 passport.serializeUser((user, done) => {
-  done(null, { id: user._id, role: user.role });
+  done(null, { id: user._id, email: user.email, role: user.role });
 });
 
 passport.deserializeUser((obj, done) => {
@@ -17,6 +17,7 @@ passport.deserializeUser((obj, done) => {
 
 /**----------------------GOOGLE STRATEGIES------------------ */
 
+//for google signup
 passport.use(
   "google-signup",
   new GoogleStrategy(
@@ -48,13 +49,11 @@ passport.use(
 
             return done(null, existingUser);
           } else {
-            // If the user already exists and has a googleId, handle it as an error
             return done(null, false, {
               message: "User already exists. Please log in.",
             });
           }
         } else {
-          // If not, create a new user
           const newUser = new User({
             googleId: profile.id,
             username: profile.displayName,
@@ -74,6 +73,7 @@ passport.use(
   )
 );
 
+//for google login
 passport.use(
   "google-login",
   new GoogleStrategy(
@@ -84,7 +84,6 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        // Check if a user exists by googleId
         let existingUser = await User.findOne({
           googleId: profile.id,
           isBlocked: false,
@@ -98,10 +97,8 @@ passport.use(
           email: profile.emails[0].value,
           isBlocked: false,
         });
-        console.log(existingUser);
 
         if (existingUser) {
-          // Update the user with the googleId
           existingUser.googleId = profile.id;
           existingUser.thumbnail = profile.photos[0].value;
           await existingUser.save();

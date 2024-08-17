@@ -1,6 +1,6 @@
 const UserModel = require("../models/User");
 
-//get all users
+//for get all users with pagination
 const getUsers = async (req, res) => {
   try {
     const query = req.query.query || "";

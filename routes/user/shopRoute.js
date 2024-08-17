@@ -17,10 +17,11 @@ const {
   searchProducts,
 } = require("../../controllers/user/shopController");
 
-const test = (req, res, next) => {
-  console.log(req.url);
-  next();
-};
+//for testing purpose
+// const test = (req, res, next) => {
+//   console.log(req.url);
+//   next();
+// };
 
 //get the product details
 //get - /user/shop/quickview/:id
@@ -36,6 +37,6 @@ router.get("/filter/products", filterAllProducts);
 //search the products by the category
 router.get("/filter/category/:id", filterCategoryProduct);
 
-router.get(`/search`, test, searchProducts);
+router.get(`/search`, searchProducts);
 
 module.exports = router;

@@ -12,6 +12,7 @@ const {
   authorizeAdminForModule,
 } = require("../middlewares/authorizationMiddlewares");
 
+//function for category module
 const {
   getCategory,
   createCategory,
@@ -21,10 +22,10 @@ const {
 } = require("../controllers/categoryController");
 
 //for testing purpose
-const test = (req, res, next) => {
-  console.log(req.url);
-  next();
-};
+// const test = (req, res, next) => {
+//   console.log(req.url);
+//   next();
+// };
 
 //get - admin/categories/
 router.get(
@@ -35,7 +36,7 @@ router.get(
   getCategory
 );
 
-//post - admin/categories/
+//post - admin/categories/create
 router.post(
   "/create",
   isAuthenticatedAdmin,
@@ -44,7 +45,7 @@ router.post(
   createCategory
 );
 
-//put - admin/categories/
+//put - admin/categories/edit/:id
 router.put(
   "/edit/:id",
   isAuthenticatedAdmin,
@@ -53,7 +54,7 @@ router.put(
   editCategory
 );
 
-//patch - admin/categories/
+//patch - admin/categories/unlist/:id
 router.patch(
   "/unlist/:id",
   isAuthenticatedAdmin,
@@ -63,6 +64,6 @@ router.patch(
 );
 
 //get - /admin/categories/search
-router.get("/search", test, searchCategories);
+router.get("/search", searchCategories);
 
 module.exports = router;

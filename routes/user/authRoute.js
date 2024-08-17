@@ -4,12 +4,14 @@ const router = express.Router();
 //for Authentication
 const {
   isAuthenticatedUser,
+  checkBlocked,
   redirectIfAuthenticated,
 } = require("../../middlewares/authenticationMiddlewares");
 
 //for Authorization
 const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
 
+//functions for user module
 const {
   getSignup,
   postSignup,
@@ -79,7 +81,7 @@ router.get(
 );
 
 //get home page
-router.get("/home", isAuthenticatedUser, authorizeUser, getHome);
+router.get("/home", isAuthenticatedUser, checkBlocked, authorizeUser, getHome);
 
 //post - /user/auth/reset-password
 router.post("/reset-password", resetPassword);

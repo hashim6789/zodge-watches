@@ -1,6 +1,7 @@
 const ProductModel = require("../../models/ProductModel"); // Adjust the path as needed
 const CategoryModel = require("../../models/Category");
 
+//for rendering the quick view (Product details page);
 const quickView = async (req, res) => {
   try {
     const product = await ProductModel.findById(req.params.id);
@@ -11,6 +12,7 @@ const quickView = async (req, res) => {
   }
 };
 
+//for get the images of the corresponding products
 const getImage = async (req, res) => {
   try {
     const index = parseInt(req.query.index, 10);
@@ -38,6 +40,7 @@ const getImage = async (req, res) => {
   }
 };
 
+//for filtering the products by categories
 const filterCategoryProduct = async (req, res) => {
   try {
     const categoryId = req.params.id;
@@ -65,6 +68,7 @@ const filterCategoryProduct = async (req, res) => {
   }
 };
 
+//for get the products of all without filtering the categories
 const filterAllProducts = async (req, res) => {
   try {
     const products = await ProductModel.find({ isListed: true });
@@ -88,6 +92,7 @@ const filterAllProducts = async (req, res) => {
   }
 };
 
+//search products
 const searchProducts = async (req, res) => {
   try {
     const query = req.query.query;

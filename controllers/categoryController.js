@@ -1,7 +1,7 @@
 const CategoryModel = require("../models/Category");
 const ProductModel = require("../models/ProductModel");
 
-//category
+//get all categories with pagination
 const getCategory = async (req, res) => {
   try {
     const query = req.query.query || "";
@@ -37,10 +37,14 @@ const getCategory = async (req, res) => {
   }
 };
 
+//for create a new category
 const createCategory = async (req, res) => {
   try {
-    const { categoryName } = req.body;
+    let { categoryName } = req.body;
+    categoryName = categoryName.toUpperCase();
+    console.log(categoryName);
     let category = await CategoryModel.findOne({ name: categoryName });
+    console.log(category);
     if (!category) {
       category = new CategoryModel({
         name: categoryName,
@@ -54,7 +58,7 @@ const createCategory = async (req, res) => {
       });
     } else {
       return res.status(404).json({
-        status: "error",
+        status: "Failed",
         message: "The category is already exists",
       });
     }
@@ -66,7 +70,7 @@ const createCategory = async (req, res) => {
   }
 };
 
-//for edit the existging category
+//for edit the existing category
 const editCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
@@ -75,7 +79,7 @@ const editCategory = async (req, res) => {
     const category = await CategoryModel.findByIdAndUpdate(
       categoryId,
       { name: categoryName },
-      { new: true } // Return the updated document
+      { new: true }
     );
 
     if (!category) {
@@ -107,7 +111,7 @@ const unlistCategory = async (req, res) => {
     const category = await CategoryModel.findByIdAndUpdate(
       categoryId,
       { isListed },
-      { new: true } // Return the updated document
+      { new: true }
     );
 
     if (!category) {

@@ -12,7 +12,7 @@ const {
   authorizeAdminForModule,
 } = require("../middlewares/authorizationMiddlewares");
 
-//user functions
+//functions for users module
 const {
   getUsers,
   blockUser,

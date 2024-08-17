@@ -1,4 +1,3 @@
-// User model file
 const mongoose = require("mongoose");
 
 const { Schema } = mongoose;

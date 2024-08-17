@@ -7,34 +7,43 @@ const admin = {
   permissions: process.env.ADMIN_PERMISSIONS.split(","),
 };
 
-//login
+/**---------------------------admin login------------------------ */
+
 const getLogin = (req, res) => {
   res.render("admin/login", { err: req.query.error });
 };
 
 const postLogin = (req, res, next) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  if (
-    email === process.env.ADMIN_EMAIL &&
-    password === process.env.ADMIN_PASSWORD
-  ) {
-    // Set session
-    req.session.admin = {
-      email,
-      role: "Admin",
-      permissions: process.env.ADMIN_PERMISSIONS.split(","),
-    };
-    // console.log(req.session);
-    // res
-    //   .status(200)
-    //   .json({ status: "success", message: "the user is login successfully" });
-    res.redirect("/admin/dashboard");
-  } else {
-    // res
-    //   .status(404)
-    //   .json({ status: "failure", message: "the username or email incorrect" });
-    res.redirect("/admin/login?error=Invalid email or password");
+    if (
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      // Set session
+      req.session.admin = {
+        email,
+        role: "Admin",
+
+        permissions: process.env.ADMIN_PERMISSIONS.split(","),
+      };
+      // console.log(req.session);
+      // res
+      //   .status(200)
+      //   .json({ status: "success", message: "the user is login successfully" });
+      res.redirect("/admin/dashboard");
+    } else {
+      // res
+      //   .status(404)
+      //   .json({ status: "failure", message: "the username or email incorrect" });
+      res.redirect("/admin/login?error=Invalid email or password");
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error",
+    });
   }
 };
 
@@ -46,15 +55,22 @@ const getDashboard = (req, res) => {
 
 //for logout
 const getLogout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.log("logout error:", err);
-      return res.redirect("/admin/dashboard");
-    }
-    console.log(req.session);
-    res.clearCookie("connect-cookie");
-    res.redirect("/admin/login");
-  });
+  try {
+    req.session.destroy((err) => {
+      if (err) {
+        console.log("logout error:", err);
+        return res.redirect("/admin/dashboard");
+      }
+      console.log(req.session);
+      res.clearCookie("connect-cookie");
+      res.redirect("/admin/login");
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error",
+    });
+  }
 };
 
 module.exports = {

@@ -52,6 +52,7 @@ const updatePersonal = async (req, res) => {
   }
 };
 
+//create the new address
 const postAddress = async (req, res) => {
   try {
     const {
@@ -108,6 +109,7 @@ const postAddress = async (req, res) => {
   }
 };
 
+//for edit the existing address
 const editAddress = async (req, res) => {
   try {
     const addressId = req.params.id;

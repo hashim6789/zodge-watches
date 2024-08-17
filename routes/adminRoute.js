@@ -1,14 +1,18 @@
 const express = require("express");
 
+//for authentication
 const {
   isAuthenticatedAdmin,
   redirectIfAuthenticated,
 } = require("../middlewares/authenticationMiddlewares");
+
+//for authorization
 const {
   authorizeAdmin,
   authorizeAdminForModule,
 } = require("../middlewares/authorizationMiddlewares");
 
+//functions for admin module
 const {
   getLogin,
   postLogin,
@@ -18,10 +22,11 @@ const {
 
 const router = express.Router();
 
-const test = (req, res, next) => {
-  console.log(req.url);
-  next();
-};
+//for testing purpose
+// const test = (req, res, next) => {
+//   console.log(req.url);
+//   next();
+// };
 
 // get - /admin/login
 router.get("/login", redirectIfAuthenticated, getLogin);

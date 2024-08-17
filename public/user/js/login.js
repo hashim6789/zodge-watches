@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("loginForm");
   const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");
+  const forgotEmailInput = document.getElementById("forgotEmail");
 
   // Validate email
   function validateEmail() {
@@ -32,6 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Attach event listeners
   emailInput.addEventListener("input", validateEmail);
   passwordInput.addEventListener("input", validatePassword);
+  forgotEmailInput.addEventListener("input", validateForgotEmail);
 
   // Form submit validation
   form.addEventListener("submit", function (event) {
@@ -48,4 +50,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
     form.classList.add("was-validated");
   });
+
+  //forgot password email validation
+  function validateForgotEmail() {
+    const email = forgotEmailInput.value;
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+
+    if (emailPattern.test(email)) {
+      forgotEmailInput.classList.remove("is-invalid");
+      forgotEmailInput.classList.add("is-valid");
+    } else {
+      forgotEmailInput.classList.remove("is-valid");
+      forgotEmailInput.classList.add("is-invalid");
+    }
+  }
 });
+
+document
+  .getElementById("forgotPasswordForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const email = document.getElementById("forgotEmail").value;
+
+    axios
+      .post("/user/auth/reset-password", {
+        email: email,
+      })
+      .then((response) => {
+        alert(response.data.message);
+      })
+      .catch((error) => {
+        console.error("There was an error resetting the password!", error);
+        alert(
+          error.response.data.message ||
+            "An error occurred while trying to reset your password."
+        );
+      });
+  });

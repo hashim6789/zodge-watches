@@ -1,7 +1,7 @@
 const ProductModel = require("../models/ProductModel");
 const CategoryModel = require("../models/Category");
 
-// Handle product creation
+// for create new product creation
 const createProduct = async (req, res) => {
   try {
     const { name, description, categoryId, price, stock } = req.body;
@@ -41,6 +41,7 @@ const createProduct = async (req, res) => {
   }
 };
 
+//get all products in the products where listed
 const getAllProducts = async (req, res) => {
   try {
     const query = req.query.query || "";
@@ -72,7 +73,7 @@ const getAllProducts = async (req, res) => {
     //   message: "The page rendered successfully",
     // });
   } catch (err) {
-    res.status(404).json({ status: "Success", message: "Server error!!!" });
+    res.status(500).json({ status: "Success", message: "Server error!!!" });
   }
 };
 
@@ -85,7 +86,7 @@ const unlistProduct = async (req, res) => {
     const product = await ProductModel.findByIdAndUpdate(
       productId,
       { isListed },
-      { new: true } // Return the updated document
+      { new: true }
     );
 
     if (!product) {
@@ -108,7 +109,7 @@ const unlistProduct = async (req, res) => {
   }
 };
 
-// Handle product update
+// for update of edit the existing product
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -147,6 +148,7 @@ const updateProduct = async (req, res) => {
   }
 };
 
+//for get the details about the corresponding product by id
 const getDetails = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -165,9 +167,16 @@ const getDetails = async (req, res) => {
 
 //for search products by name
 const searchProducts = (req, res) => {
-  const query = req.query.query;
-  console.log(query);
-  res.redirect(`/admin/products?query=${query}`);
+  try {
+    const query = req.query.query;
+    console.log(query);
+    res.redirect(`/admin/products?query=${query}`);
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error",
+    });
+  }
 };
 
 module.exports = {
