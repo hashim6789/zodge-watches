@@ -147,6 +147,7 @@ const postOtp = async (req, res) => {
           { isVerified: true },
           { new: true }
         );
+
         res.redirect("/user/auth/home");
       } else {
         res.redirect(
