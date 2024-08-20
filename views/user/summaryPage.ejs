@@ -172,18 +172,45 @@
           Home
           <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
         </a>
+        <a
+          href="/user/shop/cart/<%= user._id %>"
+          class="stext-109 cl8 hov-cl1 trans-04"
+        >
+          Shopping Cart
+          <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+        <a href="/user/shop/checkout" class="stext-109 cl8 hov-cl1 trans-04">
+          Checkout
+          <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+        <a
+          href="/user/shop/delivery-address"
+          class="stext-109 cl8 hov-cl1 trans-04"
+        >
+          Address
+          <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+        <a href="/user/shop/payment" class="stext-109 cl8 hov-cl1 trans-04">
+          Payment
+          <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
 
-        <span class="stext-109 cl4"> Shoping Cart </span>
+        <span class="stext-109 cl4"> Summary </span>
       </div>
     </div>
 
     <!-- Shoping Cart -->
-    <form class="bg0 p-t-75 p-b-85" action="/user/shop/cart" method="post">
+    <form
+      class="bg0 p-t-75 p-b-85"
+      action="/user/shop/place-order"
+      method="post"
+    >
       <div class="container">
         <div class="row">
           <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
             <div class="m-l-25 m-r--38 m-lr-0-xl">
-              <div class="wrap-table-shopping-cart">
+              <!-- Cart Products Summary -->
+              <div class="wrap-table-shopping-cart m-b-30">
                 <table class="table-shopping-cart">
                   <tr class="table_head">
                     <th class="column-1">Product</th>
@@ -191,7 +218,6 @@
                     <th class="column-3">Price</th>
                     <th class="column-4">Quantity</th>
                     <th class="column-5">Total</th>
-                    <th class="column-6"></th>
                   </tr>
 
                   <% cartProducts.forEach(function(product) { %>
@@ -214,75 +240,97 @@
                       ₹ <%= product.productPrice.toFixed(2) %>
                     </td>
                     <td class="column-4">
-                      <div class="wrap-num-product flex-w m-l-auto m-r-0">
-                        <div
-                          class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m"
-                          onclick="updateQuantity('<%= product.productId %>', -1)"
-                        >
-                          <i class="fs-16 zmdi zmdi-minus"></i>
-                        </div>
-
-                        <input
-                          class="mtext-104 cl3 txt-center num-product"
-                          type="number"
-                          name="num-product<%= product.productId %>"
-                          value="<%= product.quantity %>"
-                          disabled
-                        />
-
-                        <div
-                          class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m"
-                          onclick="updateQuantity('<%= product.productId %>', 1)"
-                        >
-                          <i class="fs-16 zmdi zmdi-plus"></i>
-                        </div>
-                      </div>
+                      <div class="text-center"><%= product.quantity %></div>
                     </td>
                     <td class="column-5">
                       ₹ <%= (product.productPrice * product.quantity).toFixed(2)
                       %>
                     </td>
-                    <td class="column-6">
-                      <button
-                        class="btn-delete-product"
-                        onclick="removeFromCart('<%= product.productId %>')"
-                        title="Remove item"
-                      >
-                        <i class="zmdi zmdi-delete p-3 fs-20"></i>
-                      </button>
-                    </td>
+                    <!-- <td class="column-6">
+                        <button
+                          class="btn-delete-product"
+                          onclick="removeFromCart('<%= product.productId %>')"
+                          title="Remove item"
+                        >
+                          <i class="zmdi zmdi-delete p-3 fs-20"></i>
+                        </button>
+                      </td> -->
                   </tr>
                   <% }) %>
                 </table>
               </div>
 
-              <input
-                type="hidden"
-                name="cartProducts"
-                value="<%= cartProducts %>"
-              />
+              <!-- Selected Delivery Address Summary -->
+              <div class="wrap-table-shopping-cart m-b-30">
+                <h4 class="mtext-105 cl2 p-b-30">Delivery Address</h4>
+                <table class="table-shopping-cart">
+                  <tr class="table_head">
+                    <th class="column-2">Address</th>
+                  </tr>
+
+                  <% if (!address) { %>
+                  <tr>
+                    <td colspan="2" class="text-center">No address found.</td>
+                  </tr>
+                  <% } else { %>
+                  <tr class="table_row">
+                    <td class="column-2">
+                      <strong
+                        ><%= address.firstName %> <%= address.lastName
+                        %></strong
+                      ><br />
+                      <%= address.addressLine %>, <%= address.flatNo %><br />
+                      <%= address.city %>, <%= address.state %> - <%=
+                      address.pincode %><br />
+                      <%= address.country %><br />
+                      <small>
+                        Phone: <%= address.phoneNo %><br />
+                        Email: <%= address.email %>
+                      </small>
+                    </td>
+                  </tr>
+                  <% } %>
+                </table>
+              </div>
+
+              <!-- Selected Payment Method Summary -->
+              <div class="wrap-table-shopping-cart">
+                <h4 class="mtext-105 cl2 p-b-30">Payment Method</h4>
+                <table class="table-shopping-cart">
+                  <tr class="table_row">
+                    <td class="column-1">
+                      <% if (selectedPaymentMethod === 'onlinePayment') { %>
+                      <strong>Online Payment</strong><br />
+                      Pay using credit/debit card, net banking, or UPI. <% }
+                      else if (selectedPaymentMethod === 'wallet') { %>
+                      <strong>Wallet</strong><br />
+                      Pay using your digital wallet balance. <% } else if
+                      (selectedPaymentMethod === 'cod') { %>
+                      <strong>Cash on Delivery</strong><br />
+                      Pay with cash upon delivery of the product. <% } %>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Continue Button -->
               <div
                 class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm"
               >
                 <div class="flex-w flex-m m-r-20 m-tb-5">
-                  <input
-                    class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5"
-                    type="text"
-                    name="coupon"
-                    placeholder="Coupon Code"
-                  />
-
-                  <div
+                  <button
                     class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5"
+                    onclick="goBackToPreviousPage()"
                   >
-                    Apply coupon
-                  </div>
+                    Go Back
+                  </button>
                 </div>
 
                 <div
                   class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10"
+                  onclick="confirmOrder()"
                 >
-                  Update Cart
+                  Confirm Order
                 </div>
               </div>
             </div>
@@ -367,9 +415,10 @@
               </div>
 
               <button
+                type="submit"
                 class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer"
               >
-                Proceed to Checkout
+                place the order
               </button>
             </div>
           </div>
@@ -390,58 +439,32 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
-      function updateQuantity(productId, changeQuantity) {
-        console.log(changeQuantity);
-        axios
-          .patch("/user/shop/cart/update-quantity", {
-            productId,
-            changeQuantity,
-          })
-          .then((response) => {
-            console.log("Quantity updated:", response.data);
-            // Optionally, update the UI with the new cart data
-            location.reload(); // Refresh the page or update the cart section
-          })
-          .catch((error) => {
-            console.error("Error updating quantity:", error);
-          });
+      function createNewAddress() {
+        // Redirect to the create new address page
+        window.location.href = "/address/new";
       }
-    </script>
 
-    <script>
-      function removeFromCart(productId) {
-        console.log(productId);
-        if (confirm("Are you sure?")) {
-          axios
-            .delete(`/user/shop/cart/delete-product/${productId}`)
-            .then((response) => {
-              console.log("product deleted fron the cart", response.data);
-              location.reload();
-            })
-            .catch((err) => {
-              console.error("Error deleting product from the cart:", err);
-            });
+      function editAddress(addressId) {
+        // Redirect to the edit address page with the address ID
+        window.location.href = "/address/edit/" + addressId;
+      }
+
+      function submitSelectedAddress() {
+        // Submit the selected address form
+        const selectedAddress = document.querySelector(
+          'input[name="selectedAddress"]:checked'
+        );
+        if (selectedAddress) {
+          // Perform an action with the selected address ID
+          console.log("Selected Address ID: " + selectedAddress.value);
+          // Redirect to the next step in the checkout process
+          window.location.href = "/checkout?addressId=" + selectedAddress.value;
+        } else {
+          alert("Please select an address.");
         }
       }
     </script>
-    <!-- <script>
-      document.querySelectorAll("#cartProduct").forEach((button) => {
-        button.addEventListener("click", function () {
-          const productId = this.getAttribute("data-product-id");
-          console.log(productId)
-          axios
-            .delete("/user/shop/cart/delete-product", { productId })
-            .then((response) => {
-              console.log(response.data.message);
-              location.reload(); // Optionally, remove the product from the UI or reload the page
-            })
-            .catch((error) => {
-              console.error(error);
-              alert("Error removing product from cart.");
-            });
-        });
-      });
-    </script> -->
+
     <!--===============================================================================================-->
     <script src="/public/user/vendor/jquery/jquery-3.2.1.min.js"></script>
     <!--===============================================================================================-->

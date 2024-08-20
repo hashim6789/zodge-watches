@@ -14,7 +14,7 @@ const OrdersSchema = new Schema({
   status: {
     type: String,
     required: true,
-    enum: ["pending", " failed", " placed", "shipped", "returned"],
+    enum: ["pending", " failed", " placed", "shipped", "delivered", "returned"],
   },
   createdAt: { type: Date, required: true },
   userId: { type: Types.ObjectId, required: true },
@@ -22,9 +22,20 @@ const OrdersSchema = new Schema({
   paymentMethod: {
     type: String,
     required: true,
-    enum: ["wallet", " online_pay", " cash_on_delivery"],
+    enum: ["wallet", " online_pay", "cod"],
   },
-  addressId: { type: Types.ObjectId, required: true },
+  address: {
+    addressLine: { type: String, required: true },
+    city: { type: String, required: true },
+    country: { type: String, required: true },
+    email: { type: String, required: true },
+    firstName: { type: String, required: true },
+    flatNo: { type: String },
+    lastName: { type: String },
+    phoneNo: { type: String, required: true },
+    pincode: { type: Number, required: true },
+    state: { type: String, required: true },
+  },
 });
 
 const Orders = mongoose.model("Orders", OrdersSchema);

@@ -214,29 +214,40 @@
               <div class="p-t-33">
                 <div class="flex-w flex-r-m p-b-10">
                   <div class="size-204 flex-w flex-m respon6-next">
-                    <!-- <div class="wrap-num-product flex-w m-r-20 m-tb-10">
-                      <div
-                        class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m"
-                      >
-                        <i class="fs-16 zmdi zmdi-minus"></i>
+                    <form id="addToCartForm">
+                      <div class="wrap-num-product flex-w m-r-20 m-tb-10">
+                        <input
+                          type="hidden"
+                          name="productId"
+                          id="productId"
+                          value="<%= product._id %>"
+                        />
+                        <div
+                          class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m"
+                        >
+                          <i class="fs-16 zmdi zmdi-minus"></i>
+                        </div>
+                        <input
+                          class="mtext-104 cl3 txt-center num-product"
+                          type="number"
+                          name="num-product"
+                          id="quantity"
+                          value="1"
+                          disabled
+                        />
+                        <div
+                          class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m"
+                        >
+                          <i class="fs-16 zmdi zmdi-plus"></i>
+                        </div>
                       </div>
-                      <input
-                        class="mtext-104 cl3 txt-center num-product"
-                        type="number"
-                        name="num-product"
-                        value="1"
-                      />
-                      <div
-                        class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m"
+                      <button
+                        id="AddToCart"
+                        class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
                       >
-                        <i class="fs-16 zmdi zmdi-plus"></i>
-                      </div>
-                    </div> -->
-                    <button
-                      class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
-                    >
-                      Add to cart
-                    </button>
+                        Add to cart
+                      </button>
+                    </form>
                   </div>
                 </div>
               </div>
@@ -310,5 +321,73 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/public/user/js/quickview.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Select all the decrement buttons
+        const decrementButtons = document.querySelectorAll(
+          ".btn-num-product-down"
+        );
+
+        // Select all the increment buttons
+        const incrementButtons = document.querySelectorAll(
+          ".btn-num-product-up"
+        );
+
+        // Loop through decrement buttons and add click event listeners
+        decrementButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const input = this.nextElementSibling; // Select the input field next to the button
+            let value = parseInt(input.value);
+
+            if (value > 1) {
+              // Prevent the value from going below 1
+              value -= 1;
+              input.value = value;
+            }
+          });
+        });
+
+        // Loop through increment buttons and add click event listeners
+        incrementButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const input = this.previousElementSibling; // Select the input field before the button
+            let value = parseInt(input.value);
+
+            if (value < 5) {
+              value += 1;
+              input.value = value;
+            }
+          });
+        });
+      });
+    </script>
+    <script>
+      document
+        .getElementById("addToCartForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const productId = document.getElementById("productId").value;
+          const quantity = document.getElementById("quantity").value;
+
+          axios
+            .post(`/user/shop/cart/add-to-cart/`, {
+              quantity,
+              productId,
+            })
+            .then((response) => {
+              console.log(response);
+              alert("Product added to cart successfully!");
+              location.reload();
+            })
+            .catch((error) => {
+              console.error(error);
+              alert(
+                error.response.data.message ||
+                  "An error occurred while adding the product to the cart."
+              );
+            });
+        });
+    </script>
   </body>
 </html>

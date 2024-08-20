@@ -9,7 +9,7 @@ const CartsSchema = new Schema({
       quantity: { type: Number, required: true },
     },
   ],
-  totalPrice: { type: Double, required: true },
+  totalPrice: { type: Number, required: true },
   updatedAt: { type: Date, required: true },
   createdAt: { type: Date, required: true },
   userId: { type: Types.ObjectId, required: true },

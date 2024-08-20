@@ -6,6 +6,7 @@ const UserModel = require("../../models/User");
 const OtpModel = require("../../models/Otp");
 const ProductModel = require("../../models/ProductModel");
 const CategoryModel = require("../../models/Category");
+const CartModel = require("../../models/Cart");
 require("dotenv").config();
 
 /**--------------------for mail activities------------------ */
@@ -276,6 +277,17 @@ const getHome = async (req, res) => {
       .limit(perPage);
     const categories = await CategoryModel.find({ isListed: true });
     const count = await ProductModel.countDocuments({ isListed: true });
+    let cart = await CartModel.findOne({ userId: id });
+    if (!cart) {
+      cart = new CartModel({
+        userId: id,
+        products: [],
+        totalPrice: 0,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      cart.save();
+    }
 
     res.render("user/home", {
       products,
@@ -283,6 +295,7 @@ const getHome = async (req, res) => {
       current: page,
       user,
       pages: Math.ceil(count / perPage),
+      cart,
     });
   } catch (err) {
     res.status(500).json({

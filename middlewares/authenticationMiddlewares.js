@@ -11,7 +11,6 @@ const isAuthenticatedAdmin = (req, res, next) => {
 
 // for user authentication
 const isAuthenticatedUser = (req, res, next) => {
-  console.log(req.session);
   if (req.session?.user || req.session.passport?.user?.role === "User") {
     return next();
   } else {

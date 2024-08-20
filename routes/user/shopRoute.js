@@ -15,13 +15,26 @@ const {
   filterCategoryProduct,
   filterAllProducts,
   searchProducts,
+  getCart,
+  postCart,
+  addToCart,
+  updateQuantity,
+  deleteCartProduct,
+  getCheckout,
+  postCheckout,
+  getDeliveryAddress,
+  postDeliveryAddress,
+  getPayment,
+  postPayment,
+  getSummary,
+  postPlaceOrder,
 } = require("../../controllers/user/shopController");
 
-//for testing purpose
-// const test = (req, res, next) => {
-//   console.log(req.url);
-//   next();
-// };
+// for testing purpose
+const test = (req, res, next) => {
+  console.log(req.url, "dsfsd");
+  next();
+};
 
 //get the product details
 //get - /user/shop/quickview/:id
@@ -38,5 +51,32 @@ router.get("/filter/products", filterAllProducts);
 router.get("/filter/category/:id", filterCategoryProduct);
 
 router.get(`/search`, searchProducts);
+
+//get - /user/shop/cart
+router.get("/cart/:id", getCart);
+
+router.post("/cart", test, postCart);
+
+router.post("/cart/add-to-cart", addToCart);
+
+router.patch("/cart/update-quantity", updateQuantity);
+
+router.delete("/cart/delete-product/:id", deleteCartProduct);
+
+router.post("/checkout", postCheckout);
+
+router.get("/checkout", getCheckout);
+
+router.post("/delivery-address", postDeliveryAddress);
+
+router.get("/delivery-address", getDeliveryAddress);
+
+router.get("/payment", getPayment);
+
+router.post("/payment", postPayment);
+
+router.get("/summary", getSummary);
+
+router.post("/place-order", postPlaceOrder);
 
 module.exports = router;
