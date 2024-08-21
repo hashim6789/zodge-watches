@@ -191,7 +191,7 @@
                     <th class="column-3">Price</th>
                     <th class="column-4">Quantity</th>
                     <th class="column-5">Total</th>
-                    <th class="column-6"></th>
+                    <th class="column-6">Remove</th>
                   </tr>
 
                   <% cartProducts.forEach(function(product) { %>
@@ -217,7 +217,7 @@
                       <div class="wrap-num-product flex-w m-l-auto m-r-0">
                         <div
                           class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m"
-                          onclick="updateQuantity('<%= product.productId %>', -1)"
+                          onclick="updateQuantity('<%= product.productId %>', -1, '<%= product.productStock %>')"
                         >
                           <i class="fs-16 zmdi zmdi-minus"></i>
                         </div>
@@ -227,17 +227,26 @@
                           type="number"
                           name="num-product<%= product.productId %>"
                           value="<%= product.quantity %>"
+                          data-stock="<%= product.stock %>"
                           disabled
                         />
 
                         <div
                           class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m"
-                          onclick="updateQuantity('<%= product.productId %>', 1)"
+                          onclick="updateQuantity('<%= product.productId %>', 1, '<%= product.productStock %>')"
                         >
                           <i class="fs-16 zmdi zmdi-plus"></i>
                         </div>
                       </div>
+                      <div
+                        id="feedback-<%= product.productId %>"
+                        class="invalid-feedback"
+                        style="display: none; color: red"
+                      >
+                        Quantity exceeds available stock.
+                      </div>
                     </td>
+
                     <td class="column-5">
                       ₹ <%= (product.productPrice * product.quantity).toFixed(2)
                       %>
@@ -390,6 +399,51 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
+      function updateQuantity(productId, changeQuantity, stock) {
+        const inputField = document.querySelector(
+          `input[name="num-product${productId}"]`
+        );
+        const currentQuantity = parseInt(inputField.value);
+        const newQuantity = currentQuantity + changeQuantity;
+        const feedback = document.getElementById(`feedback-${productId}`);
+        const maxQuantityPerPerson = 3;
+
+        if (newQuantity > stock) {
+          // Display feedback and prevent quantity change
+          feedback.style.display = "block";
+          inputField.value = stock;
+        } else if (newQuantity > maxQuantityPerPerson) {
+          feedback.textContent =
+            "You can purchase a maximum of 3 units per product.";
+          feedback.style.display = "block";
+          inputField.value = maxPerPerson;
+        } else if (newQuantity <= 0) {
+          // Ensure quantity doesn't go below 1
+          inputField.value = 1;
+          feedback.style.display = "none";
+        } else {
+          // Update quantity and hide feedback
+          inputField.value = newQuantity;
+          feedback.style.display = "none";
+
+          axios
+            .patch("/user/shop/cart/update-quantity", {
+              productId,
+              changeQuantity,
+            })
+            .then((response) => {
+              console.log("Quantity updated:", response.data);
+              // Optionally, update the UI with the new cart data
+              // location.reload(); // Refresh the page or update the cart section
+            })
+            .catch((error) => {
+              console.error("Error updating quantity:", error);
+            });
+        }
+      }
+    </script>
+
+    <!-- <script>
       function updateQuantity(productId, changeQuantity) {
         console.log(changeQuantity);
         axios
@@ -406,7 +460,7 @@
             console.error("Error updating quantity:", error);
           });
       }
-    </script>
+    </script> -->
 
     <script>
       function removeFromCart(productId) {

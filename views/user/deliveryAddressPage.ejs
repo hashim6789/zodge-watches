@@ -68,6 +68,12 @@
     <link rel="stylesheet" type="text/css" href="/public/user/css/util.css" />
     <link rel="stylesheet" type="text/css" href="/public/user/css/main.css" />
     <!--===============================================================================================-->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
   </head>
   <body class="animsition">
     <!-- Header -->
@@ -264,7 +270,8 @@
                 <div class="flex-w flex-m m-r-20 m-tb-5">
                   <button
                     class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5"
-                    onclick="createNewAddress()"
+                    data-bs-toggle="modal"
+                    data-bs-target="#createAddressModal"
                   >
                     Create New Address
                   </button>
@@ -370,6 +377,285 @@
       </div>
     </form>
 
+    <!-- Create New Address Modal -->
+    <div
+      class="modal fade"
+      id="createAddressModal"
+      tabindex="-1"
+      aria-labelledby="createAddressModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createAddressModalLabel">
+              Create New Address
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="createAddress">
+              <input
+                type="hidden"
+                name="userId"
+                id="userId"
+                value="<%= user._id %>"
+              />
+
+              <div class="mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="firstName"
+                  name="firstName"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="secondName" class="form-label">Second Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="secondName"
+                  name="secondName"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="phoneNo" class="form-label">Phone Number</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="phoneNo"
+                  name="phoneNo"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="addressEmail" class="form-label">Email</label>
+                <input
+                  type="AddressEmail"
+                  class="form-control"
+                  id="AddressEmail"
+                  name="AddressEmail"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="addressLine" class="form-label">Address Line</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="addressLine"
+                  name="addressLine"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="pincode" class="form-label">Pincode</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="pincode"
+                  name="pincode"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="state" class="form-label">State</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="state"
+                  name="state"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="country" class="form-label">Country</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="country"
+                  name="country"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="city" class="form-label">City</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="city"
+                  name="city"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="flatNo" class="form-label">Flat No</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="flatNo"
+                  name="flatNo"
+                />
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                Save Address
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Address Modal -->
+    <div
+      class="modal fade"
+      id="editAddressModal"
+      tabindex="-1"
+      aria-labelledby="editAddressModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editAddressModalLabel">Edit Address</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="editAddress">
+              <input type="hidden" id="addressId" name="addressId" />
+              <input type="hidden" name="userId" id="userId" />
+
+              <div class="mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editFirstName"
+                  name="firstName"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editLastName"
+                  name="lastName"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="addressLine1" class="form-label"
+                  >Address Line</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editAddressLine"
+                  name="addressLine1"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="city" class="form-label">City</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editCity"
+                  name="city"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="state" class="form-label">State</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editState"
+                  name="state"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="zipCode" class="form-label">Pincode</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="editZipCode"
+                  name="zipCode"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="country" class="form-label">Country</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editCountry"
+                  name="country"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="phone" class="form-label">Phone</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editPhone"
+                  name="phone"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="flatNo" class="form-label">Flat No</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editFlatNo"
+                  name="flatNo"
+                />
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                Save changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Footer -->
     <%- include('partials/_footer') %>
 
@@ -383,16 +669,109 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
-      function createNewAddress() {
-        // Redirect to the create new address page
-        window.location.href = "/address/new";
-      }
+      document
+        .getElementById("createAddress")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          // Get userId from the hidden input field
+          const userId = document.getElementById("userId").value;
 
-      function editAddress(addressId) {
-        // Redirect to the edit address page with the address ID
-        window.location.href = "/address/edit/" + addressId;
-      }
+          // Get values from the form input fields
+          const firstName = document.getElementById("firstName").value;
+          const secondName = document.getElementById("secondName").value;
+          const phoneNo = document.getElementById("phoneNo").value;
+          const email = document.getElementById("AddressEmail").value;
+          const addressLine = document.getElementById("addressLine").value;
+          const pincode = document.getElementById("pincode").value;
+          const state = document.getElementById("state").value;
+          const country = document.getElementById("country").value;
+          const city = document.getElementById("city").value;
+          const flatNo = document.getElementById("flatNo").value;
+          const data = {
+            userId,
+            firstName,
+            secondName,
+            phoneNo,
+            email,
+            addressLine,
+            pincode,
+            state,
+            country,
+            city,
+            flatNo,
+          };
 
+          // const addressData = {};
+          // formData.forEach((value, key) => {
+          //   addressData[key] = value;
+          // });
+
+          axios
+            .post("/user/profile/address", data)
+            .then((response) => {
+              if (response.status === 201) {
+                location.reload();
+              } else {
+                alert("Failed to create address");
+              }
+            })
+            .catch((error) => {
+              console.error("Error creating address:", error);
+              alert("Address creation failed");
+            });
+        });
+    </script>
+
+    <script>
+      document
+        .getElementById("editAddress")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Get the value from the hidden input field
+          const addressId = document.getElementById("addressId").value;
+
+          // Get values from the form input fields
+          const userId = document.getElementById("userId").value;
+          const firstName = document.getElementById("editFirstName").value;
+          const lastName = document.getElementById("editLastName").value;
+          const addressLine = document.getElementById("editAddressLine").value;
+          const city = document.getElementById("editCity").value;
+          const state = document.getElementById("editState").value;
+          const pincode = document.getElementById("editZipCode").value;
+          const country = document.getElementById("editCountry").value;
+          const phoneNo = document.getElementById("editPhone").value;
+          const flatNo = document.getElementById("editFlatNo").value;
+
+          try {
+            const response = await axios.put(
+              `/user/profile/address/${addressId}`,
+              {
+                addressId,
+                firstName,
+                lastName,
+                addressLine,
+                city,
+                state,
+                pincode,
+                country,
+                phoneNo,
+                flatNo,
+              }
+            );
+
+            // Handle success (e.g., show a success message, close modal, reload data, etc.)
+            alert("Address updated successfully");
+            location.reload(); // Reload the page to reflect changes, or update the DOM as needed
+          } catch (error) {
+            // Handle error (e.g., show an error message)
+            console.error("Error updating address:", error);
+            alert("Failed to update address. Please try again.");
+          }
+        });
+    </script>
+
+    <script>
       function submitSelectedAddress() {
         // Submit the selected address form
         const selectedAddress = document.querySelector(
@@ -420,6 +799,36 @@
             alert("Please select an address before submitting the form.");
           }
         });
+    </script>
+
+    <script>
+      // Populate modal fields with address data
+      var addressModal = document.getElementById("editAddressModal");
+      addressModal.addEventListener("show.bs.modal", function (event) {
+        var button = event.relatedTarget;
+        var addressId = button.getAttribute("data-address-id");
+        var firstName = button.getAttribute("data-address-first-name");
+        var lastName = button.getAttribute("data-address-last-name");
+        var addressLine = button.getAttribute("data-address-line1");
+        var city = button.getAttribute("data-address-city");
+        var state = button.getAttribute("data-address-state");
+        var zipCode = button.getAttribute("data-address-zip");
+        var country = button.getAttribute("data-address-country");
+        var phone = button.getAttribute("data-address-phone");
+        var flat = button.getAttribute("data-address-flat");
+
+        var modal = addressModal.querySelector("form");
+        modal.querySelector("#addressId").value = addressId;
+        modal.querySelector("#editFirstName").value = firstName;
+        modal.querySelector("#editLastName").value = lastName;
+        modal.querySelector("#editAddressLine").value = addressLine;
+        modal.querySelector("#editCity").value = city;
+        modal.querySelector("#editState").value = state;
+        modal.querySelector("#editZipCode").value = zipCode;
+        modal.querySelector("#editCountry").value = country;
+        modal.querySelector("#editPhone").value = phone;
+        modal.querySelector("#editFlatNo").value = flat;
+      });
     </script>
 
     <!--===============================================================================================-->

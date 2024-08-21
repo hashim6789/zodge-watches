@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Admin Demo</title>
+    <!-- plugins:css -->
+    <link
+      rel="stylesheet"
+      href="/public/assets/vendors/mdi/css/materialdesignicons.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="/public/assets/vendors/css/vendor.bundle.base.css"
+    />
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <!-- End Plugin css for this page -->
+    <!-- inject:css -->
+    <!-- endinject -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/public/assets/css/style.css" />
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="/public/assets/images/favicon.png" />
+  </head>
+  <body>
+    <div class="container-scroller">
+      <!-- partial:partials/_sidebar.ejs -->
+      <%- include('partials/_sidebar') %>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_navbar.ejs -->
+        <%- include('partials/_navbar',{pageType:"order"}) %>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <a href="/admin/dashboard">Admin</a> >
+            <a href="/admin/orders">Order Management</a>
+            <div class="row">
+              <div class="col-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <div
+                      class="d-flex justify-content-between align-items-center mb-4"
+                    >
+                      <h4 class="card-title">Order Management</h4>
+                      <!-- <button
+                        class="btn btn-success"
+                        data-toggle="modal"
+                        data-target="#createOrderModal"
+                      >
+                        Create New Order
+                      </button> -->
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Order ID</th>
+                            <th>Customer Name</th>
+                            <th>Total Price</th>
+                            <th>Status</th>
+                            <th>Payment Method</th>
+                            <th>Order Date</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% orders.forEach((order) => { %>
+                          <tr>
+                            <td><%= order._id %></td>
+                            <td>
+                              <%= order.address.firstName %> <%=
+                              order.address.lastName %>
+                            </td>
+                            <td>$<%= order.totalPrice.toFixed(2) %></td>
+                            <td><%= order.status %></td>
+                            <td><%= order.paymentMethod %></td>
+                            <td>
+                              <%= new Date(order.createdAt).toLocaleDateString()
+                              %>
+                            </td>
+                            <td>
+                              <select
+                                class="form-control"
+                                onchange="changeOrderStatus('<%= order._id %>', this.value)"
+                              >
+                                <option value="placed" <%= order.status === 'placed' ? 'selected' : '' %>>Placed</option>
+                                <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                                <option value="failed" <%= order.status === 'failed' ? 'selected' : '' %>>Failed</option>
+                                <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                                <option value="returned" <%= order.status === 'returned' ? 'selected' : '' %>>Returned</option>
+                              </select>
+                              <button
+                                class="btn btn-warning"
+                                onclick="confirmAndCancelOrder('<%= order._id %>')"
+                              >
+                                Cancel Order
+                              </button>
+                            </td>
+                            
+                          </tr>
+                          <% }) %>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+                <% if (current > 1) { %>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page=<%= current - 1 %>"
+                    aria-label="Previous"
+                  >
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+                <% } %> <% for (let i = 1; i <= pages; i++) { %>
+                <li class="page-item <%= current == i ? 'active' : '' %>">
+                  <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                </li>
+                <% } %> <% if (current < pages) { %>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page=<%= ++current %>"
+                    aria-label="Next"
+                  >
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+                <% } %>
+              </ul>
+            </nav>
+          </div>
+
+          <!-- content-wrapper ends -->
+          <!-- partial:partials/_footer.ejs -->
+          <%- include('partials/_footer') %>
+          <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+    <!-- partial:partials/_scripts.ejs -->
+    <%- include('partials/_scripts') %>
+    <!-- partial -->
+     <script>
+      function changeOrderStatus(orderId, newStatus) {
+  // Code to update the order status in the database
+  console.log(`Order ${orderId} status changed to ${newStatus}`);
+}
+
+function confirmAndCancelOrder(orderId) {
+  if (confirm('Are you sure you want to cancel this order?')) {
+    // Code to cancel the order in the database
+    console.log(`Order ${orderId} has been cancelled.`);
+  }
+}
+``
+
+     </script>
+  </body>
+</html>

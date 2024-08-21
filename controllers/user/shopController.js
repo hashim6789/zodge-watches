@@ -495,7 +495,13 @@ const postPlaceOrder = async (req, res) => {
       updatedAt: Date.now(),
     });
 
-    await order.save();
+    req.session.cartProducts = null;
+    req.session.selectedAddress = null;
+    req.session.selectedPaymentMethod = null;
+
+    console.log(req.session);
+
+    // await order.save();
 
     return res
       .status(200)
