@@ -11,7 +11,6 @@ const UsersSchema = new Schema({
   password: { type: String },
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: String },
-
   role: { type: String, default: "User" },
   isBlocked: { type: Boolean, default: false },
   isVerified: { type: Boolean, default: false },

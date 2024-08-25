@@ -14,15 +14,16 @@ const {
   updatePersonal,
   postAddress,
   editAddress,
+  getOrderDetail,
 } = require("../../controllers/user/profileController");
 
 const router = express();
 
 //for testing purpose
-// const test = (req, res, next) => {
-//   console.log(req.url);
-//   next();
-// };
+const test = (req, res, next) => {
+  console.log(req.url);
+  next();
+};
 
 //get - /user/profile
 router.get("/:id", isAuthenticatedUser, authorizeUser, getProfile);
@@ -40,5 +41,8 @@ router.post("/address", isAuthenticatedUser, authorizeUser, postAddress);
 
 //put - /user/profile/address
 router.put("/address/:id", isAuthenticatedUser, authorizeUser, editAddress);
+
+//get - /user/profile/orders/:id
+router.get("/orders/:orderId", test, getOrderDetail);
 
 module.exports = router;

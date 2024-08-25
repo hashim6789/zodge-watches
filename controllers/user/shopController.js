@@ -151,6 +151,9 @@ const getCart = async (req, res) => {
         },
       },
     ]);
+
+    req.session.steps = [];
+    console.log(req.session.steps);
     // const cartProducts = await ProductModel.find({ _id: { $in: productIds } });
     res.render("user/cartPage", { cart, user, cartProducts });
   } catch (err) {
@@ -351,6 +354,12 @@ const postCart = async (req, res) => {
       },
     ]);
     req.session.cartProducts = [...cartProducts];
+    if (!req.session.steps) {
+      req.session.steps = [];
+    }
+    if (!req.session.steps.includes("cart")) {
+      req.session.steps.push("cart");
+    }
 
     res.redirect("/user/shop/checkout");
   } catch (err) {
@@ -360,12 +369,12 @@ const postCart = async (req, res) => {
 
 const getCheckout = async (req, res) => {
   try {
-    console.log("object");
-
     const userId = req.session?.user?._id || req.session?.passport?.user?.id;
     const user = await UserModel.findById(userId);
     const cart = await CartModel.findOne({ userId });
     const cartProducts = [...req.session.cartProducts];
+    req.session.steps = ["cart"];
+    console.log(req.session.steps);
     return res.render("user/checkoutPage", { user, cart, cartProducts });
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
@@ -374,6 +383,9 @@ const getCheckout = async (req, res) => {
 
 const postCheckout = (req, res) => {
   try {
+    if (!req.session.steps.includes("checkout")) {
+      req.session.steps.push("checkout");
+    }
     res.redirect("/user/shop/delivery-address");
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
@@ -387,6 +399,8 @@ const getDeliveryAddress = async (req, res) => {
     const cart = await CartModel.findOne({ userId });
     const addresses = await AddressModel.find({ userId });
 
+    req.session.steps = ["cart", "checkout"];
+    console.log(req.session.steps);
     res.render("user/deliveryAddressPage", {
       cart,
       user,
@@ -404,6 +418,10 @@ const postDeliveryAddress = async (req, res) => {
     const Address = await AddressModel.findById(selectedAddress);
     req.session.selectedAddress = Address;
 
+    if (!req.session.steps.includes("address")) {
+      req.session.steps.push("address");
+    }
+
     res.redirect("/user/shop/payment");
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
@@ -415,6 +433,9 @@ const getPayment = async (req, res) => {
     const userId = req.session?.user?._id || req.session?.passport?.user?.id;
     const user = await UserModel.findById(userId);
     const cart = await CartModel.findOne({ userId });
+
+    req.session.steps = ["cart", "checkout", "address"];
+    console.log(req.session.steps);
 
     res.render("user/paymentMethodsPage", {
       cart,
@@ -431,6 +452,9 @@ const postPayment = async (req, res) => {
     const { selectedPaymentMethod } = req.body;
     req.session.selectedPaymentMethod = selectedPaymentMethod;
 
+    if (!req.session.steps.includes("payment")) {
+      req.session.steps.push("payment");
+    }
     res.redirect("/user/shop/summary");
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
@@ -448,9 +472,10 @@ const getSummary = async (req, res) => {
     const address = req.session.selectedAddress;
     const selectedPaymentMethod = req.session.selectedPaymentMethod;
     const cartProducts = [...req.session.cartProducts];
-    console.log("address = ", address);
-    console.log("payment = ", selectedPaymentMethod);
-    console.log("cart = ", cartProducts);
+
+    req.session.steps = ["cart", "checkout", "address", "payment"];
+    console.log(req.session.steps);
+
     res.render("user/summaryPage", {
       cart,
       user,
@@ -465,23 +490,20 @@ const getSummary = async (req, res) => {
 
 const postPlaceOrder = async (req, res) => {
   try {
-    // const userId = req.session?.user?._id || req.session?.passport?.user?.id;
     const { _id, userId, updatedAt, createdAt, __v, ...address } =
       req.session.selectedAddress;
 
     const paymentMethod = req.session.selectedPaymentMethod;
     const totalPrice = req.session.cartProducts[0].totalPrice;
+    console.log(req.session.cartProducts);
     const products = [...req.session.cartProducts].map((product) => {
+      console.log("product ids", product.productId);
       return {
-        productId: product._id,
+        productId: product.productId,
         quantity: product.quantity,
         price: product.productPrice,
       };
     });
-    console.log("object");
-    console.log(address);
-    console.log(paymentMethod);
-    console.log(totalPrice);
     console.log(products);
 
     const order = new OrderModel({
@@ -489,27 +511,75 @@ const postPlaceOrder = async (req, res) => {
       address,
       products,
       totalPrice,
-      status: "pending",
+      orderStatus: "placed",
       paymentMethod,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
 
-    req.session.cartProducts = null;
-    req.session.selectedAddress = null;
-    req.session.selectedPaymentMethod = null;
+    //for inventory management like manage the stock of the corresponding products
+    for (const item of products) {
+      const product = await ProductModel.findById(item.productId);
+      if (!product) {
+        return res
+          .status(404)
+          .json({ status: "Failed", message: "The product is not found" });
+      }
+      product.stock -= item.quantity;
+      product.save();
+    }
 
-    console.log(req.session);
+    //for the cart of the corresponding user in empty
+    const cart = await CartModel.findOne({ userId });
+    if (!cart) {
+      return res
+        .status(404)
+        .json({ status: "Failed", message: "The cart is not found" });
+    }
+    cart.products = [];
+    await cart.save();
 
-    // await order.save();
+    await order.save();
 
-    return res
-      .status(200)
-      .render("user/orderSuccessPage", { orderId: "123123131333" });
+    if (!req.session.steps.includes("summary")) {
+      req.session.steps.push("summary");
+    }
+    return res.status(200).redirect("/user/shop/place-order");
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
   }
 };
+
+const getSuccessPage = (req, res) => {
+  try {
+    const userId = req.session?.user?._id || req.session?.passport?.user?.id;
+
+    console.log(req.session);
+    req.session.cartProducts = null;
+    req.session.selectedAddress = null;
+    req.session.selectedPaymentMethod = null;
+    req.session.steps = null;
+
+    req.session.steps = [];
+    console.log(req.session.steps);
+    return res
+      .status(200)
+      .render("user/orderSuccessPage", { orderId: generateOrderId(userId) });
+  } catch (err) {
+    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+  }
+};
+
+function generateOrderId(userId) {
+  const timestamp = Date.now();
+  const orderId = `ORD-${userId}${timestamp}`;
+  return orderId;
+}
+
+// Example usage
+const userId = "USER123"; // Example user ID
+const newOrderId = generateOrderId(userId);
+console.log(newOrderId); // Example output: ORD-USER123-1692699347352
 
 module.exports = {
   quickView,
@@ -530,4 +600,5 @@ module.exports = {
   postPayment,
   getSummary,
   postPlaceOrder,
+  getSuccessPage,
 };

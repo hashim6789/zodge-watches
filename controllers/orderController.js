@@ -1,4 +1,3 @@
-const Orders = require("../models/Order");
 const OrderModel = require("../models/Order");
 
 const getOrders = async (req, res) => {
@@ -37,4 +36,56 @@ const getOrders = async (req, res) => {
   }
 };
 
-module.exports = { getOrders };
+//for get the order details of the corresponding order by id
+const getOrderDetails = async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+
+    const order = await OrderModel.findById(orderId)
+      .populate("userId", "firstName lastName email") // populate user details
+      .populate("products.productId", "name price images"); // populate product details
+
+    if (!order) {
+      return res.status(404).json({
+        status: "Failed",
+        message: "The order is doesn't exist in the database",
+      });
+    }
+
+    res.status(200).json({
+      status: "Success",
+      message: "The order is fetched successfully",
+      data: {
+        order,
+      },
+    });
+
+    // This mock order can now be used in your view modal testing logic.
+  } catch (err) {
+    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+  }
+};
+
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const updatedOrder = await OrderModel.findByIdAndUpdate(
+      id,
+      { orderStatus: status },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json({ status: updatedOrder.orderStatus });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { getOrders, getOrderDetails, updateOrderStatus };

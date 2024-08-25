@@ -121,3 +121,16 @@ const products = [
   </div>
   <% }); %>
 </div> -->
+
+
+
+
+const orders = await OrderModel.find()
+.populate("userId", "firstName lastName email") // populate user details
+.populate("products.productId", "name price") // populate product details
+.skip((page - 1) * perPage)
+.limit(perPage);
+
+console.log(orders);
+
+const count = await OrderModel.countDocuments();

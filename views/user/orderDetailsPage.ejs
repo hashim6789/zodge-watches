@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Order Details</title>
+    <%- include('partials/_header') %>
+    <style>
+      .order-details,
+      .order-products {
+        margin: 20px 0;
+      }
+      .no-orders {
+        font-style: italic;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body class="animsition">
+    <!-- Header -->
+    <%- include('partials/_navbar', { user }) %>
+
+    <!-- Wishlist -->
+    <%- include('partials/_wishlist') %>
+
+    <!-- Main Content -->
+    <div
+      class="order-details-container bg-white pt-5 p-4 rounded shadow-sm mb-5"
+    >
+      <h4 class="mb-4 pt-5">Order Summary</h4>
+
+      <!-- Order Information Section -->
+      <div class="order-info-section mb-4">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <p><strong>Order ID:</strong> <%= order._id %></p>
+            <p>
+              <strong>Date:</strong> <%= new
+              Date(order.createdAt).toLocaleDateString() %>
+            </p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <p><strong>Status:</strong> <%= order.orderStatus %></p>
+            <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <p>
+              <strong>Total Amount:</strong> $<%= order.totalPrice.toFixed(2) %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Address Section -->
+      <h5 class="mb-3">Shipping Address</h5>
+      <div class="shipping-address-section border p-3 rounded mb-4">
+        <p class="mb-1">
+          <%= order.address.flatNo ? order.address.flatNo + ", " : "" %> <%=
+          order.address.addressLine %>
+        </p>
+        <p class="mb-1">
+          <%= order.address.city %>, <%= order.address.state %> - <%=
+          order.address.pincode %>
+        </p>
+        <p class="mb-1"><%= order.address.country %></p>
+        <p class="mb-1">Phone: <%= order.address.phoneNo %></p>
+        <p class="mb-1">Email: <%= order.address.email %></p>
+      </div>
+
+      <!-- Ordered Products Section -->
+      <h5 class="mb-3">Ordered Products</h5>
+      <table class="table table-bordered">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">Product Name</th>
+            <th scope="col">Image</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% order.products.forEach(item => { %>
+          <tr>
+            <td><%= item.productId.name %></td>
+            <td>
+              <img
+                src="/public/uploads/<%= item.productId.images[0] %>"
+                alt="<%= item.productId.name %>"
+                class="img-thumbnail"
+                style="width: 75px; height: auto"
+              />
+            </td>
+            <td><%= item.quantity %></td>
+            <td>$<%= item.price.toFixed(2) %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+      <!-- Return Option or Order Tracking Section -->
+      <% if (order.orderStatus === 'Delivered') { %>
+      <div class="return-option mt-4">
+        <h5>Return Option</h5>
+        <form action="/orders/<%= order._id %>/return" method="post">
+          <div class="form-group">
+            <label for="returnReason">Return Reason:</label>
+            <textarea
+              id="returnReason"
+              name="returnReason"
+              class="form-control"
+              rows="3"
+              required
+            ></textarea>
+          </div>
+          <button type="submit" class="btn btn-danger">Request Return</button>
+        </form>
+      </div>
+      <% } else { %>
+      <div class="order-tracking mt-4">
+        <h5>Track Your Order</h5>
+        <p>Tracking details will be provided once the order is shipped.</p>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- Footer -->
+    <%- include('partials/_footer') %>
+
+    <!-- Back to top -->
+    <div class="btn-back-to-top" id="myBtn">
+      <span class="symbol-btn-back-to-top">
+        <i class="zmdi zmdi-chevron-up"></i>
+      </span>
+    </div>
+
+    <%- include('partials/_scripts') %>
+  </body>
+</html>

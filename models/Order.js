@@ -6,23 +6,23 @@ const OrdersSchema = new Schema({
   products: [
     {
       price: { type: Number, required: true },
-      productId: { type: Types.ObjectId, required: true },
+      productId: { type: Types.ObjectId, required: true, ref: "Products" },
       quantity: { type: Number, required: true },
     },
   ],
   totalPrice: { type: Number, required: true },
-  status: {
+  orderStatus: {
     type: String,
     required: true,
-    enum: ["pending", " failed", " placed", "shipped", "delivered", "returned"],
+    enum: ["failed", "placed", "shipped", "cancelled", "delivered", "returned"],
   },
-  createdAt: { type: Date, required: true },
-  userId: { type: Types.ObjectId, required: true },
-  updatedAt: { type: Date, required: true },
+  createdAt: { type: Date, default: Date.now, required: true },
+  updatedAt: { type: Date, default: Date.now, required: true },
+  userId: { type: Types.ObjectId, required: true, ref: "Users" },
   paymentMethod: {
     type: String,
     required: true,
-    enum: ["wallet", " online_pay", "cod"],
+    enum: ["wallet", "online_pay", "cod"],
   },
   address: {
     addressLine: { type: String, required: true },
@@ -35,6 +35,22 @@ const OrdersSchema = new Schema({
     phoneNo: { type: String, required: true },
     pincode: { type: Number, required: true },
     state: { type: String, required: true },
+  },
+  returnDetails: {
+    isReturnable: { type: Boolean, default: false },
+    returnStatus: {
+      type: String,
+      enum: ["requested", "approved", "rejected", "completed"],
+      default: null,
+    },
+    returnReason: { type: String },
+    returnRequestedAt: { type: Date },
+    returnCompletedAt: { type: Date },
+    refundAmount: { type: Number },
+    refundMethod: {
+      type: String,
+      enum: ["wallet", "online_pay", "original_payment_method"],
+    },
   },
 });
 

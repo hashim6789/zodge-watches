@@ -1,5 +1,6 @@
 const AddressModel = require("../../models/Address");
 const UserModel = require("../../models/User");
+const OrderModel = require("../../models/Order");
 
 //get the account profile page
 const getProfile = async (req, res) => {
@@ -11,9 +12,13 @@ const getProfile = async (req, res) => {
     }
 
     const addresses = await AddressModel.find({ userId: user._id });
+
+    const orders = await OrderModel.find({ userId: user._id });
+    console.log(orders);
     res.render("user/profile", {
       user,
       addresses,
+      orders,
     });
   } catch (err) {
     console.error(err);
@@ -161,4 +166,36 @@ const editAddress = async (req, res) => {
   }
 };
 
-module.exports = { getProfile, updatePersonal, postAddress, editAddress };
+const getOrderDetail = async (req, res) => {
+  try {
+    const userId = req.session?.user?._id || req.session?.passport.user.id;
+    const orderId = req.params.orderId;
+    const user = await UserModel.findById(userId);
+    const order = await OrderModel.findById(orderId).populate(
+      "products.productId",
+      "_id name images"
+    );
+    console.log("order = ", order);
+    if (!order) {
+      return res.status(404).json({
+        status: "Failed",
+        message: "The order is not found",
+      });
+    }
+
+    res.status(200).render("user/orderDetailsPage", { order, user });
+  } catch (err) {
+    return res.status(500).json({
+      status: "error",
+      message: "Error updating address status",
+    });
+  }
+};
+
+module.exports = {
+  getProfile,
+  updatePersonal,
+  postAddress,
+  editAddress,
+  getOrderDetail,
+};

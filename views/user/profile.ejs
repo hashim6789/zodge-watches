@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Account Profile</title>
 
+
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -104,9 +105,17 @@
 
   <body>
     <div class="container rounded bg-white mt-5 mb-5">
-      <a href="/user/auth/home">home</a>
-            >
-            <a href="/user/profile/<%= user._id %>">profile</a>
+      <!-- breadcrumb -->
+      <div class="container pt-5">
+        <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+          <a href="/user/auth/home" class="stext-109 cl8 hov-cl1 trans-04">
+            Home
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+          </a>
+
+          <span class="stext-109 cl4"> profile </span>
+        </div>
+      </div>
       <div class="row">
         <!-- Sidebar Navigation -->
         <div class="col-md-3">
@@ -266,8 +275,33 @@
             <!-- Orders Section (Hidden Initially) -->
             <div id="orders" class="d-none">
               <h4>Orders</h4>
-              <p>This section will display user's orders.</p>
-            </div>
+              <% if (orders.length === 0) { %>
+                  <p class="no-orders">There are no orders to display.</p>
+              <% } else { %>
+                  <table class="table">
+                      <thead>
+                          <tr>
+                              <th>Order ID</th>
+                              <th>Date</th>
+                              <th>Status</th>
+                              <th>Total</th>
+                              <th>Details</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <% orders.forEach(order => { %>
+                              <tr>
+                                  <td><%= order._id %></td>
+                                  <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                                  <td><%= order.orderStatus %></td>
+                                  <td>$<%= order.totalPrice.toFixed(2) %></td>
+                                  <td><a href="/user/profile/orders/<%= order._id %>" class="btn btn-info">View Details</a></td>
+                              </tr>
+                          <% }) %>
+                      </tbody>
+                  </table>
+              <% } %>
+          </div>
 
             <!-- Forgot Password Section (Hidden Initially) -->
             <div id="forgot-password" class="d-none">
@@ -873,6 +907,7 @@ const flatNo = document.getElementById('editFlatNo').value;
         modal.querySelector("#profileLastName").value = lastName;
       });
     </script>
-    
+      
+    </body>
     
 </html>

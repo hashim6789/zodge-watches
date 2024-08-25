@@ -28,6 +28,7 @@ const {
   postPayment,
   getSummary,
   postPlaceOrder,
+  getSuccessPage,
 } = require("../../controllers/user/shopController");
 
 // for testing purpose
@@ -35,6 +36,30 @@ const test = (req, res, next) => {
   console.log(req.url, "dsfsd");
   next();
 };
+
+// Middleware to initialize session steps if they don't exist
+function initializeSteps(req, res, next) {
+  if (!req.session.steps) {
+    req.session.steps = [];
+  }
+  next();
+}
+
+//for the step is corrected
+// Middleware to check if a specific step is completed
+function checkStepCompletion(requiredStep) {
+  return (req, res, next) => {
+    if (
+      req.session.steps === null ||
+      !req.session?.steps.includes(requiredStep)
+    ) {
+      res.redirect("/user/shop/cart"); // Adjust the redirect URL based on your application flow
+    } else {
+      next();
+      // Redirect to the appropriate step if the required step is not completed
+    }
+  };
+}
 
 //get the product details
 //get - /user/shop/quickview/:id
@@ -53,9 +78,9 @@ router.get("/filter/category/:id", filterCategoryProduct);
 router.get(`/search`, searchProducts);
 
 //get - /user/shop/cart
-router.get("/cart/:id", getCart);
+router.get("/cart", getCart);
 
-router.post("/cart", test, postCart);
+router.post("/cart", postCart);
 
 router.post("/cart/add-to-cart", addToCart);
 
@@ -63,20 +88,67 @@ router.patch("/cart/update-quantity", updateQuantity);
 
 router.delete("/cart/delete-product/:id", deleteCartProduct);
 
-router.post("/checkout", postCheckout);
+router.get(
+  "/checkout",
+  initializeSteps,
+  checkStepCompletion("cart"),
+  getCheckout
+);
 
-router.get("/checkout", getCheckout);
+router.post(
+  "/checkout",
+  initializeSteps,
+  checkStepCompletion("cart"),
+  postCheckout
+);
 
-router.post("/delivery-address", postDeliveryAddress);
+router.get(
+  "/delivery-address",
+  initializeSteps,
+  checkStepCompletion("checkout"),
+  getDeliveryAddress
+);
 
-router.get("/delivery-address", getDeliveryAddress);
+router.post(
+  "/delivery-address",
+  initializeSteps,
+  checkStepCompletion("checkout"),
+  postDeliveryAddress
+);
 
-router.get("/payment", getPayment);
+router.get(
+  "/payment",
+  initializeSteps,
+  checkStepCompletion("address"),
+  getPayment
+);
 
-router.post("/payment", postPayment);
+router.post(
+  "/payment",
+  initializeSteps,
+  checkStepCompletion("address"),
+  postPayment
+);
 
-router.get("/summary", getSummary);
+router.get(
+  "/summary",
+  initializeSteps,
+  checkStepCompletion("payment"),
+  getSummary
+);
 
-router.post("/place-order", postPlaceOrder);
+router.post(
+  "/place-order",
+  initializeSteps,
+  checkStepCompletion("payment"),
+  postPlaceOrder
+);
+
+router.get(
+  "/place-order",
+  initializeSteps,
+  checkStepCompletion("payment"),
+  getSuccessPage
+);
 
 module.exports = router;

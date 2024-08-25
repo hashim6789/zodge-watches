@@ -69,8 +69,13 @@ const cart = {
   userId: "60d21b4667d0d8992e610c87", // Example ObjectId
 };
 
-const dummy = (req, res) => {
-  res.render("user/cartPage", { user, cart });
+// const dummy = (req, res) => {
+//   res.render("user/cartPage", { user, cart });
+// };
+const dummy = async (req, res) => {
+  const userId = req.session?.user?._id || req.session?.passport?.user?.id;
+  const user = await UserModel.findById(userId);
+  res.render("user/dummyProfile", { user, addresses: [], orders: [] });
 };
 
 module.exports = { dummy };

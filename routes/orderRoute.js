@@ -13,15 +13,43 @@ const {
 } = require("../middlewares/authorizationMiddlewares");
 
 //function for category module
-const { getOrders } = require("../controllers/orderController");
+const {
+  getOrders,
+  getOrderDetails,
+  updateOrderStatus,
+} = require("../controllers/orderController");
 
 //for testing purpose
-// const test = (req, res, next) => {
-//   console.log(req.url);
-//   next();
-// };
+const test = (req, res, next) => {
+  console.log(req.url);
+  next();
+};
 
 //get - /admin/orders/
-router.get("/", getOrders);
+router.get(
+  "/",
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("orderManagement"),
+  getOrders
+);
+
+//get - /admin/orders/:id
+router.get(
+  "/:orderId",
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("orderManagement"),
+  getOrderDetails
+);
+
+//patch - `/admin/orders/:orderId`
+router.patch(
+  "/change-status/:id",
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("orderManagement"),
+  updateOrderStatus
+);
 
 module.exports = router;
