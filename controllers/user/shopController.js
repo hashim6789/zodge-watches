@@ -4,13 +4,14 @@ const CartModel = require("../../models/Cart");
 const UserModel = require("../../models/User");
 const AddressModel = require("../../models/Address");
 const OrderModel = require("../../models/Order");
-const { default: mongoose } = require("mongoose");
 
 //for rendering the quick view (Product details page);
 const quickView = async (req, res) => {
   try {
+    const userId = req.session?.passport?.user?.id || req.session?.user?._id;
+    const user = await UserModel.findById(userId);
     const product = await ProductModel.findById(req.params.id);
-    res.render("user/quickview", { product, ratings: 4 });
+    res.render("user/quickview", { product, ratings: 4, user });
   } catch (error) {
     console.error("Error fetching product:", error);
     res.status(500).send("Server error");
@@ -153,7 +154,6 @@ const getCart = async (req, res) => {
     ]);
 
     req.session.steps = [];
-    console.log(req.session.steps);
     // const cartProducts = await ProductModel.find({ _id: { $in: productIds } });
     res.render("user/cartPage", { cart, user, cartProducts });
   } catch (err) {
@@ -164,14 +164,14 @@ const getCart = async (req, res) => {
 //for add to cart the product
 const addToCart = async (req, res) => {
   try {
-    console.log("Request received");
     const { quantity, productId } = req.body;
+
+    console.log(typeof quantity);
 
     const userId = req.session?.passport?.user?.id || req.session?.user?._id;
 
     const product = await ProductModel.findById(productId);
     if (!product) {
-      console.log("Product not found");
       return res
         .status(404)
         .json({ status: "Error", message: "Product not found!" });
@@ -179,7 +179,6 @@ const addToCart = async (req, res) => {
 
     let cart = await CartModel.findOne({ userId });
     if (!cart) {
-      console.log("Cart not found, creating a new one");
       cart = new CartModel({
         userId: userId,
         products: [],
@@ -194,7 +193,7 @@ const addToCart = async (req, res) => {
     );
 
     if (existingProductIndex > -1) {
-      cart.products[existingProductIndex].quantity += quantity;
+      cart.products[existingProductIndex].quantity = quantity;
     } else {
       cart.products.push({
         productId: productId,
@@ -277,7 +276,6 @@ const deleteCartProduct = async (req, res) => {
     const userId = req.session?.user?._id || req.session?.passport?.user?.id;
 
     const cart = await CartModel.findOne({ userId });
-    console.log(productId, userId, cart);
     if (!cart) {
       return res
         .status(404)
@@ -374,7 +372,6 @@ const getCheckout = async (req, res) => {
     const cart = await CartModel.findOne({ userId });
     const cartProducts = [...req.session.cartProducts];
     req.session.steps = ["cart"];
-    console.log(req.session.steps);
     return res.render("user/checkoutPage", { user, cart, cartProducts });
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
@@ -400,7 +397,6 @@ const getDeliveryAddress = async (req, res) => {
     const addresses = await AddressModel.find({ userId });
 
     req.session.steps = ["cart", "checkout"];
-    console.log(req.session.steps);
     res.render("user/deliveryAddressPage", {
       cart,
       user,
@@ -413,7 +409,6 @@ const getDeliveryAddress = async (req, res) => {
 
 const postDeliveryAddress = async (req, res) => {
   try {
-    console.log(req.body);
     const { selectedAddress } = req.body;
     const Address = await AddressModel.findById(selectedAddress);
     req.session.selectedAddress = Address;
@@ -435,7 +430,6 @@ const getPayment = async (req, res) => {
     const cart = await CartModel.findOne({ userId });
 
     req.session.steps = ["cart", "checkout", "address"];
-    console.log(req.session.steps);
 
     res.render("user/paymentMethodsPage", {
       cart,
@@ -448,7 +442,6 @@ const getPayment = async (req, res) => {
 
 const postPayment = async (req, res) => {
   try {
-    console.log(req.body);
     const { selectedPaymentMethod } = req.body;
     req.session.selectedPaymentMethod = selectedPaymentMethod;
 
@@ -467,14 +460,11 @@ const getSummary = async (req, res) => {
     const user = await UserModel.findById(userId);
     const cart = await CartModel.findOne({ userId });
 
-    console.log(req.session);
-    console.log(userId);
     const address = req.session.selectedAddress;
     const selectedPaymentMethod = req.session.selectedPaymentMethod;
     const cartProducts = [...req.session.cartProducts];
 
     req.session.steps = ["cart", "checkout", "address", "payment"];
-    console.log(req.session.steps);
 
     res.render("user/summaryPage", {
       cart,
@@ -495,16 +485,13 @@ const postPlaceOrder = async (req, res) => {
 
     const paymentMethod = req.session.selectedPaymentMethod;
     const totalPrice = req.session.cartProducts[0].totalPrice;
-    console.log(req.session.cartProducts);
     const products = [...req.session.cartProducts].map((product) => {
-      console.log("product ids", product.productId);
       return {
         productId: product.productId,
         quantity: product.quantity,
         price: product.productPrice,
       };
     });
-    console.log(products);
 
     const order = new OrderModel({
       userId,
@@ -554,14 +541,13 @@ const getSuccessPage = (req, res) => {
   try {
     const userId = req.session?.user?._id || req.session?.passport?.user?.id;
 
-    console.log(req.session);
+    // console.log(req.session);
     req.session.cartProducts = null;
     req.session.selectedAddress = null;
     req.session.selectedPaymentMethod = null;
     req.session.steps = null;
 
     req.session.steps = [];
-    console.log(req.session.steps);
     return res
       .status(200)
       .render("user/orderSuccessPage", { orderId: generateOrderId(userId) });
@@ -575,11 +561,6 @@ function generateOrderId(userId) {
   const orderId = `ORD-${userId}${timestamp}`;
   return orderId;
 }
-
-// Example usage
-const userId = "USER123"; // Example user ID
-const newOrderId = generateOrderId(userId);
-console.log(newOrderId); // Example output: ORD-USER123-1692699347352
 
 module.exports = {
   quickView,

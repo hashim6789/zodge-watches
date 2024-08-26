@@ -38,7 +38,8 @@
             <div class="gallery-container">
               <!-- Sidebar with thumbnail images -->
               <div class="image-sidebar">
-                <% product.images.forEach(function(image, index) { %>
+                <% product.images.forEach(function(image, index) {
+                console.log(image,index); %>
                 <img
                   src="/public/uploads/<%= image %>"
                   alt="Thumbnail"
@@ -139,74 +140,40 @@
               <div class="p-t-33">
                 <div class="flex-w flex-r-m p-b-10">
                   <div class="size-204 flex-w flex-m respon6-next">
-                    <div class="size-204 flex-w flex-m respon6-next">
-                      <!-- Form Wrapper -->
-                      <form
-                        id="addToCartForm"
-                        class="d-flex flex-column align-items-start justify-content-between"
-                      >
+                    <form id="addToCartForm">
+                      <div class="wrap-num-product flex-w m-r-20 m-tb-10">
                         <input
                           type="hidden"
                           name="productId"
-                          value="<%= product._id %>"
                           id="productId"
+                          value="<%= product._id %>"
                         />
-                        <!-- Quantity Counter Wrapper -->
-                        <div class="d-flex align-items-center mb-2">
-                          <!-- Minus Button -->
-                          <button
-                            type="button"
-                            class="btn btn-outline-secondary"
-                            onclick="updateQuantity('<%= product._id %>', -1, '<%= product.stock %>')"
-                          >
-                            <i class="fs-16 zmdi zmdi-minus"></i>
-                          </button>
-
-                          <!-- Quantity Input (Disabled for manual editing) -->
-                          <input
-                            type="number"
-                            name="num-product"
-                            id="productQuantity"
-                            class="form-control text-center mx-2 num-product"
-                            value="1"
-                            disabled
-                          />
-
-                          <!-- Plus Button -->
-                          <button
-                            type="button"
-                            class="btn btn-outline-secondary"
-                            onclick="updateQuantity('<%= product._id %>', 1, '<%= product.stock %>')"
-                          >
-                            <i class="fs-16 zmdi zmdi-plus"></i>
-                          </button>
-                        </div>
-
-                        <!-- Feedback Message -->
                         <div
-                          id="feedback"
-                          class="invalid-feedback mt-2"
-                          style="display: none"
+                          class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m"
                         >
-                          <!-- This element will display feedback messages -->
+                          <i class="fs-16 zmdi zmdi-minus"></i>
                         </div>
-                      </form>
-                    </div>
-                    <button
-                      id="AddToCartButton"
-                      onclick="addToCart('<%= product._id%>')"
-                      class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail mt-5"
-                    >
-                      Add to cart
-                    </button>
-                    <div class="row py-4">
-                      <!-- <button
+                        <input
+                          class="mtext-104 cl3 txt-center num-product"
+                          type="number"
+                          name="num-product"
+                          id="quantity"
+                          value="1"
+                          disabled
+                        />
+                        <div
+                          class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m"
+                        >
+                          <i class="fs-16 zmdi zmdi-plus"></i>
+                        </div>
+                      </div>
+                      <button
                         id="AddToCart"
                         class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
                       >
                         Add to cart
-                      </button> -->
-                    </div>
+                      </button>
+                    </form>
                   </div>
                 </div>
               </div>
@@ -291,33 +258,6 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/public/user/js/quickview.js"></script>
     <script>
-      function addToCart(productId) {
-        const quantity = parseInt(
-          document.getElementById("productQuantity").value
-        );
-
-        console.log(productId, quantity);
-
-        axios
-          .post(`/user/shop/cart/add-to-cart/`, {
-            quantity,
-            productId,
-          })
-          .then((response) => {
-            console.log(response);
-            alert("Product added to cart successfully!");
-            location.reload();
-          })
-          .catch((error) => {
-            console.error(error);
-            alert(
-              error.response.data.message ||
-                "An error occurred while adding the product to the cart."
-            );
-          });
-      }
-    </script>
-    <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Select all the decrement buttons
         const decrementButtons = document.querySelectorAll(
@@ -358,44 +298,32 @@
       });
     </script>
     <script>
-      function updateQuantity(productId, changeQuantity, stock) {
-        // Select the input field
-        const inputField = document.querySelector(`input[name="num-product"]`);
-        // Parse the current quantity
-        const currentQuantity = parseInt(inputField.value, 10);
-        // Calculate the new quantity
-        const newQuantity = currentQuantity + changeQuantity;
-        // Select the feedback element
-        const feedback = document.getElementById(`feedback`);
-        // Define the maximum allowed quantity per person
-        const maxQuantityPerPerson = 3;
+      document
+        .getElementById("addToCartForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
 
-        // Log the current state (for debugging)
-        console.log("Current Quantity:", currentQuantity);
-        console.log("New Quantity:", newQuantity);
+          const productId = document.getElementById("productId").value;
+          const quantity = document.getElementById("quantity").value;
 
-        if (newQuantity > stock) {
-          // Display feedback for stock limit and set input value to stock
-          feedback.textContent = `Only ${stock} units in stock.`;
-          feedback.style.display = "inline-block";
-          inputField.value = stock;
-        } else if (newQuantity > maxQuantityPerPerson) {
-          // Display feedback for max quantity per person and set input value to max allowed
-          feedback.textContent =
-            "You can purchase a maximum of 3 units per product.";
-          feedback.style.display = "inline-block";
-          inputField.value = maxQuantityPerPerson;
-        } else if (newQuantity <= 0) {
-          // Ensure the quantity does not go below 1
-          inputField.value = 1;
-          feedback.style.display = "none";
-        } else {
-          console.log("currect", newQuantity);
-          // Update the quantity and hide feedback
-          inputField.value = newQuantity;
-          feedback.style.display = "none";
-        }
-      }
+          axios
+            .post(`/user/shop/cart/add-to-cart/`, {
+              quantity,
+              productId,
+            })
+            .then((response) => {
+              console.log(response);
+              alert("Product added to cart successfully!");
+              location.reload();
+            })
+            .catch((error) => {
+              console.error(error);
+              alert(
+                error.response.data.message ||
+                  "An error occurred while adding the product to the cart."
+              );
+            });
+        });
     </script>
   </body>
 </html>

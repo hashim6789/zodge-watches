@@ -73,9 +73,14 @@ const cart = {
 //   res.render("user/cartPage", { user, cart });
 // };
 const dummy = async (req, res) => {
-  const userId = req.session?.user?._id || req.session?.passport?.user?.id;
+  const productId = req.params.productId || "66b20c63179e1372e3854593";
+  const userId =
+    req.session?.user?._id ||
+    req.session?.passport?.user?.id ||
+    "66ba12a0b60c8ee3d46812fd";
   const user = await UserModel.findById(userId);
-  res.render("user/dummyProfile", { user, addresses: [], orders: [] });
+  const product = await ProductModel.findById(productId);
+  res.render("user/product_details", { user, product, ratings: 4 });
 };
 
 module.exports = { dummy };
