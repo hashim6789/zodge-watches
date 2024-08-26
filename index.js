@@ -1,5 +1,6 @@
 const express = require("express"); //import the express
 const path = require("path");
+const morgan = require("morgan");
 require("dotenv").config();
 // const methodOverride = require("method-override");
 const adminRouter = require("./routes/adminRoute"); //import the local module router for admin
@@ -62,6 +63,11 @@ app.use((req, res, next) => {
 
 // Middleware to serve static files
 app.use("/public", express.static(path.join(__dirname, "public")));
+
+//for morgan middleware for auditing the requests
+app.use(
+  morgan(":method :url :status :res[content-length] - :response-time ms")
+);
 
 // app.use("/", userRouter); // for user router url
 app.use("/admin/users", userRouter); // for admin - user management router url

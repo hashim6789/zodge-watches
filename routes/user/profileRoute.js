@@ -15,6 +15,7 @@ const {
   postAddress,
   editAddress,
   getOrderDetail,
+  cancelOrder,
 } = require("../../controllers/user/profileController");
 
 const router = express();
@@ -44,5 +45,7 @@ router.put("/address/:id", isAuthenticatedUser, authorizeUser, editAddress);
 
 //get - /user/profile/orders/:id
 router.get("/orders/:orderId", test, getOrderDetail);
+
+router.patch("/orders/cancel/:orderId", cancelOrder);
 
 module.exports = router;

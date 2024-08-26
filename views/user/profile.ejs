@@ -273,35 +273,48 @@
             
 
             <!-- Orders Section (Hidden Initially) -->
-            <div id="orders" class="d-none">
-              <h4>Orders</h4>
-              <% if (orders.length === 0) { %>
-                  <p class="no-orders">There are no orders to display.</p>
-              <% } else { %>
-                  <table class="table">
-                      <thead>
-                          <tr>
-                              <th>Order ID</th>
-                              <th>Date</th>
-                              <th>Status</th>
-                              <th>Total</th>
-                              <th>Details</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-                          <% orders.forEach(order => { %>
-                              <tr>
-                                  <td><%= order._id %></td>
-                                  <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
-                                  <td><%= order.orderStatus %></td>
-                                  <td>$<%= order.totalPrice.toFixed(2) %></td>
-                                  <td><a href="/user/profile/orders/<%= order._id %>" class="btn btn-info">View Details</a></td>
-                              </tr>
-                          <% }) %>
-                      </tbody>
-                  </table>
+<div id="orders" class="d-none">
+  <h4>Orders</h4>
+  <% if (orders.length === 0) { %>
+    <p class="no-orders">There are no orders to display.</p>
+  <% } else { %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th>Actions</th> <!-- Changed column name from "Details" to "Actions" -->
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach(order => { %>
+          <tr>
+            <td><%= order._id %></td>
+            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+            <td><%= order.orderStatus %></td>
+            <td>$<%= order.totalPrice.toFixed(2) %></td>
+            <td>
+              <!-- View Details Button -->
+              <a href="/user/profile/orders/<%= order._id %>" class="btn btn-info">View Details</a>
+              
+              <!-- Cancel Order Button -->
+              <% if (order.orderStatus === 'placed' || order.orderStatus === 'shipped') { %> 
+                <!-- Show the Cancel button only for orders that are Pending or Processing -->
+                <form id="cancelOrder" style="display:inline;">
+                  <button id="cancelButton" onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">Cancel</button>
+                </form>
+          
               <% } %>
-          </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
 
             <!-- Forgot Password Section (Hidden Initially) -->
             <div id="forgot-password" class="d-none">
@@ -781,6 +794,21 @@ const flatNo = document.getElementById('editFlatNo').value;
             alert("Failed to update address. Please try again.");
           }
         });
+    </script>
+
+    <!-- for cancel the order -->
+    <script>
+      function cancelOrder(orderId){
+        axios.patch(`/user/profile/orders/cancel/${orderId}`).then((response) => {
+          const updatedStatus = response.data.order.orderStatus;
+          if(updatedStatus === "cancelled"){
+            document.getElementById("cancelButton").style.display = "none";
+          }
+        })
+          .catch((error) => {
+            console.error("Error cancelling the order:", error);
+          });
+      }
     </script>
 
     <!-- //for reset-password -->

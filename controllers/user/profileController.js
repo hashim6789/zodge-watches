@@ -192,10 +192,32 @@ const getOrderDetail = async (req, res) => {
   }
 };
 
+//for cancelling the corresponding user;
+const cancelOrder = async (req, res) => {
+  const orderId = req.params.orderId;
+  const order = await OrderModel.findByIdAndUpdate(
+    orderId,
+    { orderStatus: "cancelled" },
+    { new: true }
+  );
+  if (!order) {
+    return res
+      .status(404)
+      .json({ status: "Failed", message: "The order is not found!!!" });
+  }
+
+  res.status(200).json({
+    status: "Success",
+    message: "the order is cancelled successfully...",
+    order,
+  });
+};
+
 module.exports = {
   getProfile,
   updatePersonal,
   postAddress,
   editAddress,
   getOrderDetail,
+  cancelOrder,
 };
