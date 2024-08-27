@@ -73,7 +73,7 @@ router.get("/getImagePath", isAuthenticatedUser, authorizeUser, getImage);
 router.get("/filter/products", filterAllProducts);
 
 //search the products by the category
-router.get("/filter/category/:id", filterCategoryProduct);
+router.get("/filter/categories/:categoryId", test, filterCategoryProduct);
 
 router.get(`/search`, searchProducts);
 

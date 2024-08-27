@@ -49,22 +49,25 @@ const getImage = async (req, res) => {
 //for filtering the products by categories
 const filterCategoryProduct = async (req, res) => {
   try {
-    const categoryId = req.params.id;
+    const categoryId = req.params.categoryId;
+    let products = [];
     const category = await CategoryModel.findById(categoryId);
     if (category) {
-      const products = await ProductModel.find({ categoryId, isListed: true });
+      products = await ProductModel.find({ categoryId, isListed: true });
+      console.log("products");
 
-      res.status(200).json({
-        status: "Success",
-        message: "The products successfully fetched...",
-        data: products,
-      });
-    } else {
-      res.status(404).json({
-        status: "Failure",
-        message: " The category doesn't exists",
-      });
+      if (products) {
+        return res.status(200).json({
+          status: "Success",
+          message: "The products successfully fetched...",
+          data: products,
+        });
+      }
     }
+    res.status(404).json({
+      status: "Failure",
+      message: " The category doesn't exists",
+    });
   } catch (err) {
     res.status(500).json({
       status: "Error",
@@ -76,7 +79,40 @@ const filterCategoryProduct = async (req, res) => {
 //for get the products of all without filtering the categories
 const filterAllProducts = async (req, res) => {
   try {
-    const products = await ProductModel.find({ isListed: true });
+    const method = req.query.method;
+    let products = [];
+
+    if (method === "priceLowToHigh") {
+      products = await ProductModel.find({ isListed: true })
+        .sort({ price: 1 })
+        .limit(8);
+    } else if (method === "priceHighToLow") {
+      products = await ProductModel.find({ isListed: true })
+        .sort({ price: -1 })
+        .limit(8);
+    } else if (method === "lettersAscendingOrder") {
+      products = await ProductModel.find({ isListed: true })
+        .sort({ name: 1 })
+        .limit(8);
+    } else if (method === "lettersDescendingOrder") {
+      products = await ProductModel.find({ isListed: true })
+        .sort({ name: -1 })
+        .limit(8);
+    } else if (method === "popularity") {
+      products = await ProductModel.find({ isListed: true })
+        .sort({ soldCount: -1 })
+        .limit(8);
+    } else if (method === "newArrivals") {
+      products = await ProductModel.find({ isListed: true })
+        .sort({ createdAt: -1 })
+        .limit(8);
+    }
+
+    // } else
+    // if(method === 'PriceLowToHigh'){
+
+    // } else
+
     if (products.length > 0) {
       res.status(200).json({
         status: "Success",
@@ -92,7 +128,7 @@ const filterAllProducts = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       status: "Error",
-      message: "The server error!!!",
+      message: "The serverrrr error!!!",
     });
   }
 };
@@ -513,6 +549,7 @@ const postPlaceOrder = async (req, res) => {
           .json({ status: "Failed", message: "The product is not found" });
       }
       product.stock -= item.quantity;
+      product.soldCount += 1;
       product.save();
     }
 

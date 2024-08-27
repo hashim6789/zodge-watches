@@ -36,7 +36,6 @@
             <% categories.forEach(function(category) { %>
             <button
               class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5"
-              data-filter=". <%= category._id %>"
               id="categorySearch"
               onclick="fetchProducts('<%= category._id %>')"
             >
@@ -104,7 +103,7 @@
                   <li class="p-b-6">
                     <button
                       class="filter-link stext-106 trans-04"
-                      onclick="sortByPrice('lowToHigh')"
+                      onclick="sortBy('priceLowToHigh')"
                     >
                       Price: Low to High
                     </button>
@@ -113,15 +112,51 @@
                   <li class="p-b-6">
                     <button
                       class="filter-link stext-106 trans-04"
-                      onclick="sortByPrice('highToLow')"
+                      onclick="sortBy('priceHighToLow')"
                     >
                       Price: High to Low
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="sortBy('lettersAscendingOrder')"
+                    >
+                      Letters: Aa - Zz
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="sortBy('lettersDescendingOrder')"
+                    >
+                      Letters: Zz - Aa
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="sortBy('popularity')"
+                    >
+                      Popularity
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="sortBy('newArrivals')"
+                    >
+                      New Arrivals
                     </button>
                   </li>
                 </ul>
               </div>
 
-              <div class="filter-col2 p-r-15 p-b-27">
+              <!-- <div class="filter-col2 p-r-15 p-b-27">
                 <div class="mtext-102 cl2 p-b-15">Price</div>
 
                 <ul>
@@ -179,7 +214,7 @@
                     </button>
                   </li>
                 </ul>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>

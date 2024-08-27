@@ -9,6 +9,7 @@ const productSchema = new Schema({
   stock: { type: Number, required: true },
   images: [{ type: String, required: true }],
   isListed: { type: Boolean, default: true },
+  soldCount: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

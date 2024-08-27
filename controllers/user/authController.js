@@ -276,6 +276,7 @@ const getHome = async (req, res) => {
       .skip((page - 1) * perPage)
       .limit(perPage);
     const categories = await CategoryModel.find({ isListed: true });
+    console.log(categories);
     const count = await ProductModel.countDocuments();
     let cart = await CartModel.findOne({ userId: id });
     if (!cart) {
