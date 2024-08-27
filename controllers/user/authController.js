@@ -272,11 +272,11 @@ const getHome = async (req, res) => {
     const user = await UserModel.findById(id);
     const page = req.query.page || 1;
     const perPage = 8;
-    const products = await ProductModel.find({ isListed: true })
+    const products = await ProductModel.find()
       .skip((page - 1) * perPage)
       .limit(perPage);
     const categories = await CategoryModel.find({ isListed: true });
-    const count = await ProductModel.countDocuments({ isListed: true });
+    const count = await ProductModel.countDocuments();
     let cart = await CartModel.findOne({ userId: id });
     if (!cart) {
       cart = new CartModel({

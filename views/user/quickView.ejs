@@ -139,74 +139,69 @@
               <div class="p-t-33">
                 <div class="flex-w flex-r-m p-b-10">
                   <div class="size-204 flex-w flex-m respon6-next">
-                    <div class="size-204 flex-w flex-m respon6-next">
-                      <!-- Form Wrapper -->
-                      <form
-                        id="addToCartForm"
-                        class="d-flex flex-column align-items-start justify-content-between"
-                      >
-                        <input
-                          type="hidden"
-                          name="productId"
-                          value="<%= product._id %>"
-                          id="productId"
-                        />
-                        <!-- Quantity Counter Wrapper -->
-                        <div class="d-flex align-items-center mb-2">
-                          <!-- Minus Button -->
-                          <button
-                            type="button"
-                            class="btn btn-outline-secondary"
-                            onclick="updateQuantity('<%= product._id %>', -1, '<%= product.stock %>')"
-                          >
-                            <i class="fs-16 zmdi zmdi-minus"></i>
-                          </button>
+                    <!-- Form Wrapper -->
+                    <form
+                      id="addToCartForm"
+                      class="d-flex flex-column align-items-start justify-content-between"
+                    >
+                      <input
+                        type="hidden"
+                        name="productId"
+                        value="<%= product._id %>"
+                        id="productId"
+                      />
 
-                          <!-- Quantity Input (Disabled for manual editing) -->
-                          <input
-                            type="number"
-                            name="num-product"
-                            id="productQuantity"
-                            class="form-control text-center mx-2 num-product"
-                            value="1"
-                            disabled
-                          />
-
-                          <!-- Plus Button -->
-                          <button
-                            type="button"
-                            class="btn btn-outline-secondary"
-                            onclick="updateQuantity('<%= product._id %>', 1, '<%= product.stock %>')"
-                          >
-                            <i class="fs-16 zmdi zmdi-plus"></i>
-                          </button>
-                        </div>
-
-                        <!-- Feedback Message -->
-                        <div
-                          id="feedback"
-                          class="invalid-feedback mt-2"
-                          style="display: none"
+                      <!-- Quantity Counter Wrapper -->
+                      <div class="d-flex align-items-center mb-2">
+                        <!-- Minus Button -->
+                        <button
+                          type="button"
+                          class="btn btn-outline-secondary"
+                          id="minusButton"
+                          onclick="updateQuantity('<%= product._id %>', -1, '<%= product.stock %>')"
                         >
-                          <!-- This element will display feedback messages -->
-                        </div>
-                      </form>
-                    </div>
+                          <i class="fs-16 zmdi zmdi-minus"></i>
+                        </button>
+
+                        <!-- Quantity Input (Disabled for manual editing) -->
+                        <input
+                          type="number"
+                          name="num-product"
+                          id="productQuantity"
+                          class="form-control text-center mx-2 num-product"
+                          value="1"
+                          disabled
+                        />
+
+                        <!-- Plus Button -->
+                        <button
+                          type="button"
+                          class="btn btn-outline-secondary"
+                          id="plusButton"
+                          onclick="updateQuantity('<%= product._id %>', 1, '<%= product.stock %>')"
+                        >
+                          <i class="fs-16 zmdi zmdi-plus"></i>
+                        </button>
+                      </div>
+
+                      <!-- Feedback Message -->
+                      <div
+                        id="feedback"
+                        class="invalid-feedback mt-2"
+                        style="display: none"
+                      >
+                        <!-- This element will display feedback messages -->
+                      </div>
+                    </form>
+
+                    <!-- Add to Cart Button -->
                     <button
-                      id="AddToCartButton"
-                      onclick="addToCart('<%= product._id%>')"
+                      id="addToCartButton"
+                      onclick="addToCart('<%= product._id %>')"
                       class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail mt-5"
                     >
                       Add to cart
                     </button>
-                    <div class="row py-4">
-                      <!-- <button
-                        id="AddToCart"
-                        class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
-                      >
-                        Add to cart
-                      </button> -->
-                    </div>
                   </div>
                 </div>
               </div>
@@ -396,6 +391,33 @@
           feedback.style.display = "none";
         }
       }
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Assuming you have the product's stock value in a data attribute or hidden input
+        const stock = parseInt("<%= product.stock %>"); // replace with actual method to get stock if needed
+        const isListed = "<%= product.isListed %>";
+        console.log(typeof isListed);
+
+        const minusButton = document.getElementById("minusButton");
+        const plusButton = document.getElementById("plusButton");
+        const addToCartButton = document.getElementById("addToCartButton");
+        const inputField = document.querySelector(`input[name="num-product"]`);
+
+        // Check if the stock is greater than 0
+        if (stock > 0 && isListed === "true") {
+          // Enable buttons
+          minusButton.disabled = false;
+          plusButton.disabled = false;
+          addToCartButton.disabled = false;
+        } else {
+          // Disable buttons if stock is 0 or less
+          minusButton.disabled = true;
+          plusButton.disabled = true;
+          addToCartButton.disabled = true;
+          inputField.value = 0;
+        }
+      });
     </script>
   </body>
 </html>
