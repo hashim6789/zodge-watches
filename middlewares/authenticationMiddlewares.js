@@ -21,11 +21,15 @@ const isAuthenticatedUser = (req, res, next) => {
 //check if the user is blocked
 const checkBlocked = async (req, res, next) => {
   const email = req.session?.user?.email || req.session?.passport?.user?.email;
-  const { isBlocked } = await UserModel.findOne({ email });
-  if (isBlocked) {
-    return res.redirect("/user/auth/logout");
+  let user = { isBlocked: false };
+  console.log(email);
+  if (email) {
+    user = await UserModel.findOne({ email });
   }
-  next();
+  if (!user.isBlocked) {
+    return next();
+  }
+  res.redirect("/user/auth/logout");
 };
 
 // for login, signup
@@ -36,14 +40,22 @@ const redirectIfAuthenticated = (req, res, next) => {
     req.session?.user?.role === "User" ||
     req.session?.passport?.user?.role === "User"
   ) {
-    return res.redirect("/user/auth/home");
+    const returnTo = req.session.returnTo || "/user/auth/home"; // Use the stored return URL or default to home
+    delete req.session.returnTo; // Clear it after using
+    return res.redirect(returnTo);
   }
   next();
 };
 
+// track the previous page url
+function trackPreviousPage(req, res, next) {
+  req.session.returnTo = req.originalUrl;
+  next();
+}
 module.exports = {
   isAuthenticatedAdmin,
   isAuthenticatedUser,
   checkBlocked,
   redirectIfAuthenticated,
+  trackPreviousPage,
 };

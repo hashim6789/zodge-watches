@@ -5,15 +5,15 @@ const OrderModel = require("../../models/Order");
 //get the account profile page
 const getProfile = async (req, res) => {
   try {
-    const id = req.params.id;
-    const user = await UserModel.findById(id);
+    const userId = req.session?.user?._id || req.session?.passport.user.id;
+    const user = await UserModel.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const addresses = await AddressModel.find({ userId: user._id });
+    const addresses = await AddressModel.find({ userId });
 
-    const orders = await OrderModel.find({ userId: user._id });
+    const orders = await OrderModel.find({ userId });
     console.log(orders);
     res.render("user/profile", {
       user,
@@ -166,6 +166,26 @@ const editAddress = async (req, res) => {
   }
 };
 
+//for deleting the existing address of the corresponding user
+const deleteAddress = async (req, res) => {
+  const userId = req.session?.user?._id || req.session?.passport.user.id;
+  const addressId = req.params.addressId;
+  const address = await AddressModel.findByIdAndDelete(addressId);
+
+  if (!address) {
+    return res.status(404).json({
+      status: "Failed",
+      message: "The address is not found",
+    });
+  }
+
+  res.status(200).json({
+    status: "Success",
+    message: "The address is deleted successfully",
+    address,
+  });
+};
+
 const getOrderDetail = async (req, res) => {
   try {
     const userId = req.session?.user?._id || req.session?.passport.user.id;
@@ -183,7 +203,9 @@ const getOrderDetail = async (req, res) => {
       });
     }
 
-    res.status(200).render("user/orderDetailsPage", { order, user });
+    res
+      .status(200)
+      .render("user/orderDetailsPage", { order, user, wishlist: {} });
   } catch (err) {
     return res.status(500).json({
       status: "error",
@@ -213,11 +235,40 @@ const cancelOrder = async (req, res) => {
   });
 };
 
+//for sending the return request to admin
+const sendReturnRequest = async (req, res) => {
+  const { orderId, returnReason } = req.body;
+  const order = await OrderModel.findByIdAndUpdate(
+    orderId,
+    {
+      $set: {
+        "returnDetails.returnStatus": "requested",
+        "returnDetails.returnReason": returnReason,
+        "returnDetails.returnRequestedAt": Date.now(),
+      },
+    },
+    { new: true }
+  );
+  if (!order) {
+    return res
+      .status(404)
+      .json({ status: "Failed", message: "The order is not found!!!" });
+  }
+
+  res.status(200).json({
+    status: "Success",
+    message: "the user send the return request to the user successfully...",
+    order,
+  });
+};
+
 module.exports = {
   getProfile,
   updatePersonal,
   postAddress,
   editAddress,
+  deleteAddress,
   getOrderDetail,
   cancelOrder,
+  sendReturnRequest,
 };

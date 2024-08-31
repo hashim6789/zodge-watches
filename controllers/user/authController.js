@@ -7,6 +7,7 @@ const OtpModel = require("../../models/Otp");
 const ProductModel = require("../../models/ProductModel");
 const CategoryModel = require("../../models/Category");
 const CartModel = require("../../models/Cart");
+const WishlistModel = require("../../models/Wishlist");
 require("dotenv").config();
 
 /**--------------------for mail activities------------------ */
@@ -214,7 +215,9 @@ const postLogin = async (req, res) => {
       user.isBlocked === false
     ) {
       req.session.user = user;
-      res.redirect("/user/auth/home");
+      const returnTo = req.session.returnTo || "/user/auth/home";
+      delete req.session.returnTo;
+      res.redirect(returnTo);
       // res.status(200).json({ message: "user login successfully" });
     } else {
       res.redirect(
@@ -253,9 +256,10 @@ const googleLoginCallback = (req, res, next) => {
   })(req, res, next);
 };
 
-//for redirect the home page after the otp validation
+//for redirect the home page after google login and google signup
 const redirectToProfile = (req, res) => {
   try {
+    console.log("HI", req.session.returnTo);
     res.redirect("/user/auth/home");
   } catch (err) {
     res.status(500).json({
@@ -268,33 +272,57 @@ const redirectToProfile = (req, res) => {
 //for get the home page
 const getHome = async (req, res) => {
   try {
-    const id = req.session?.user?._id || req.session?.passport.user.id;
-    const user = await UserModel.findById(id);
+    const userId = req.session?.user?._id || req.session?.passport?.user?.id;
+    let user = null;
+    if (userId) {
+      user = await UserModel.findById(userId);
+    }
+    // console.log(req.user);
     const page = req.query.page || 1;
     const perPage = 8;
     const products = await ProductModel.find()
       .skip((page - 1) * perPage)
       .limit(perPage);
     const categories = await CategoryModel.find({ isListed: true });
-    console.log(categories);
     const count = await ProductModel.countDocuments();
-    let cart = await CartModel.findOne({ userId: id });
-    if (!cart) {
-      cart = new CartModel({
-        userId: id,
-        products: [],
-        totalPrice: 0,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      });
-      cart.save();
+
+    let cart = null;
+    let wishlist = null;
+    if (userId) {
+      cart = await CartModel.findOne({ userId });
+      if (!cart) {
+        cart = new CartModel({
+          userId,
+          products: [],
+          totalPrice: 0,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+        cart.save();
+      }
+      wishlist = await WishlistModel.findOne({ userId }).populate(
+        "productIds",
+        "name price images"
+      );
+      // console.log(wishlist);
+      if (!wishlist) {
+        wishlist = new WishlistModel({
+          userId,
+          productIds: [],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+        wishlist.save();
+      }
     }
+    console.log(userId);
 
     res.render("user/home", {
       products,
       categories,
       current: page,
       user,
+      wishlist,
       pages: Math.ceil(count / perPage),
       cart,
     });
@@ -411,7 +439,7 @@ const logout = (req, res) => {
         }
 
         res.clearCookie("connect.sid");
-        res.redirect("/user/auth/login");
+        res.redirect("/user/auth/home");
       });
     });
   } catch (err) {

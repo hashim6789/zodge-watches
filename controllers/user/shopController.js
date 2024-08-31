@@ -4,14 +4,20 @@ const CartModel = require("../../models/Cart");
 const UserModel = require("../../models/User");
 const AddressModel = require("../../models/Address");
 const OrderModel = require("../../models/Order");
+const WishlistModel = require("../../models/Wishlist");
 
 //for rendering the quick view (Product details page);
 const quickView = async (req, res) => {
   try {
     const userId = req.session?.passport?.user?.id || req.session?.user?._id;
     const user = await UserModel.findById(userId);
+    const cart = await CartModel.findOne({ userId });
+    const wishlist = await WishlistModel.findOne({ userId }).populate(
+      "productIds",
+      "name price images"
+    );
     const product = await ProductModel.findById(req.params.id);
-    res.render("user/quickview", { product, ratings: 4, user });
+    res.render("user/quickview", { product, ratings: 4, user, wishlist, cart });
   } catch (error) {
     console.error("Error fetching product:", error);
     res.status(500).send("Server error");
@@ -79,6 +85,11 @@ const filterCategoryProduct = async (req, res) => {
 //for get the products of all without filtering the categories
 const filterAllProducts = async (req, res) => {
   try {
+    const userId = req.session?.passport?.user?.id || req.session?.user?._id;
+    let wishlist = null;
+    if (userId) {
+      wishlist = await WishlistModel.findOne({ userId });
+    }
     const method = req.query.method;
     let products = [];
 
@@ -117,7 +128,7 @@ const filterAllProducts = async (req, res) => {
       res.status(200).json({
         status: "Success",
         message: "The products successfully fetched...",
-        data: products,
+        data: { products, wishlist },
       });
     } else {
       res.status(404).json({
@@ -151,12 +162,100 @@ const searchProducts = async (req, res) => {
   }
 };
 
+//for adding a product into a wishlist
+const addToWishlist = async (req, res) => {
+  try {
+    const userId = req.session?.user?._id || req.session?.passport?.user?.id;
+    const { productId } = req.body;
+
+    const product = await ProductModel.findById(productId);
+    if (!product) {
+      return res
+        .status(404)
+        .json({ status: "Error", message: "Product not found!" });
+    }
+
+    let wishlist = await WishlistModel.findOne({ userId });
+    if (!wishlist) {
+      wishlist = new WishlistModel({
+        userId,
+        productIds: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    }
+
+    if (!wishlist.productIds.includes(productId)) {
+      wishlist.productIds.push(productId);
+    } else {
+      return res.status(404).json({
+        status: "failed",
+        message: "Product already in wishlist",
+      });
+    }
+    wishlist.save();
+    return res.status(201).json({
+      status: "Success",
+      message: "The product is added to the wishlist successfully",
+      data: wishlist,
+    });
+  } catch (err) {
+    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+  }
+};
+
+//remove product from a wishlist
+const removeFromWishlist = async (req, res) => {
+  try {
+    const userId = req.session?.user?._id || req.session?.passport?.user?.id;
+    const productId = req.params.productId;
+
+    const product = await ProductModel.findById(productId);
+    console.log(product);
+    if (!product) {
+      return res
+        .status(404)
+        .json({ status: "Error", message: "Product not found!" });
+    }
+
+    const wishlist = await WishlistModel.findOne({ userId });
+    if (!wishlist) {
+      return res
+        .status(404)
+        .json({ status: "Failed", message: "The wishlist is not found" });
+    }
+
+    const index = wishlist.productIds.indexOf(productId);
+    if (index > -1) {
+      wishlist.productIds.splice(index, 1);
+    } else {
+      return res.json({
+        status: "Failed",
+        message: "Product not found in wishlist",
+      });
+    }
+
+    wishlist.save();
+    res.status(200).json({
+      status: "Success",
+      message: "The product is removed from the wishlist",
+      data: wishlist,
+    });
+  } catch (err) {
+    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+  }
+};
+
 //for user cart page
 const getCart = async (req, res) => {
   try {
     const userId = req.session?.user?._id || req.session?.passport?.user?.id;
     const user = await UserModel.findById(userId);
     const cart = await CartModel.findOne({ userId });
+    const wishlist = await WishlistModel.findOne({ userId }).populate(
+      "productIds",
+      "name price images"
+    );
     const cartProducts = await CartModel.aggregate([
       {
         $match: {
@@ -191,7 +290,7 @@ const getCart = async (req, res) => {
 
     req.session.steps = [];
     // const cartProducts = await ProductModel.find({ _id: { $in: productIds } });
-    res.render("user/cartPage", { cart, user, cartProducts });
+    res.render("user/cartPage", { cart, user, cartProducts, wishlist });
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
   }
@@ -200,11 +299,8 @@ const getCart = async (req, res) => {
 //for add to cart the product
 const addToCart = async (req, res) => {
   try {
-    const { quantity, productId } = req.body;
-
-    console.log(typeof quantity);
-
     const userId = req.session?.passport?.user?.id || req.session?.user?._id;
+    const { quantity, productId } = req.body;
 
     const product = await ProductModel.findById(productId);
     if (!product) {
@@ -407,8 +503,18 @@ const getCheckout = async (req, res) => {
     const user = await UserModel.findById(userId);
     const cart = await CartModel.findOne({ userId });
     const cartProducts = [...req.session.cartProducts];
+    const wishlist = await WishlistModel.findOne({ userId }).populate(
+      "productIds",
+      "name price images"
+    );
+
     req.session.steps = ["cart"];
-    return res.render("user/checkoutPage", { user, cart, cartProducts });
+    return res.render("user/checkoutPage", {
+      user,
+      cart,
+      cartProducts,
+      wishlist,
+    });
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
   }
@@ -431,12 +537,17 @@ const getDeliveryAddress = async (req, res) => {
     const user = await UserModel.findById(userId);
     const cart = await CartModel.findOne({ userId });
     const addresses = await AddressModel.find({ userId });
+    const wishlist = await WishlistModel.findOne({ userId }).populate(
+      "productIds",
+      "name price images"
+    );
 
     req.session.steps = ["cart", "checkout"];
     res.render("user/deliveryAddressPage", {
       cart,
       user,
       addresses,
+      wishlist,
     });
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
@@ -464,12 +575,16 @@ const getPayment = async (req, res) => {
     const userId = req.session?.user?._id || req.session?.passport?.user?.id;
     const user = await UserModel.findById(userId);
     const cart = await CartModel.findOne({ userId });
-
+    const wishlist = await WishlistModel.findOne({ userId }).populate(
+      "productIds",
+      "name price images"
+    );
     req.session.steps = ["cart", "checkout", "address"];
 
     res.render("user/paymentMethodsPage", {
       cart,
       user,
+      wishlist,
     });
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
@@ -495,7 +610,10 @@ const getSummary = async (req, res) => {
     const userId = req.session?.user?._id || req.session?.passport?.user?.id;
     const user = await UserModel.findById(userId);
     const cart = await CartModel.findOne({ userId });
-
+    const wishlist = await WishlistModel.findOne({ userId }).populate(
+      "productIds",
+      "name price images"
+    );
     const address = req.session.selectedAddress;
     const selectedPaymentMethod = req.session.selectedPaymentMethod;
     const cartProducts = [...req.session.cartProducts];
@@ -505,6 +623,7 @@ const getSummary = async (req, res) => {
     res.render("user/summaryPage", {
       cart,
       user,
+      wishlist,
       cartProducts,
       address,
       selectedPaymentMethod,
@@ -605,6 +724,8 @@ module.exports = {
   filterCategoryProduct,
   filterAllProducts,
   searchProducts,
+  addToWishlist,
+  removeFromWishlist,
   getCart,
   postCart,
   addToCart,

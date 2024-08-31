@@ -17,6 +17,7 @@ const {
   getOrders,
   getOrderDetails,
   updateOrderStatus,
+  handleReturnRequest,
 } = require("../controllers/orderController");
 
 //for testing purpose
@@ -50,6 +51,14 @@ router.patch(
   authorizeAdmin,
   authorizeAdminForModule("orderManagement"),
   updateOrderStatus
+);
+
+router.patch(
+  "/handle-return/:orderId",
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("orderManagement"),
+  handleReturnRequest
 );
 
 module.exports = router;

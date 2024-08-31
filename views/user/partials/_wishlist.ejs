@@ -12,52 +12,56 @@
 
     <div class="header-cart-content flex-w js-pscroll">
       <ul class="header-cart-wrapitem w-full">
+        <!-- Check if wishlist exists and is not empty -->
+        <% if (wishlist && wishlist.productIds.length > 0) { %> <%
+        wishlist.productIds.forEach(function(item) { %>
         <li class="header-cart-item flex-w flex-t m-b-12">
           <div class="header-cart-item-img">
-            <img src="/public/user/images/item-cart-01.jpg" alt="IMG" />
+            <img src="/public/uploads/<%= item.images[0] %>" alt="IMG" />
           </div>
 
           <div class="header-cart-item-txt p-t-8">
             <a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-              White Shirt Ple
+              <%= item.name %>
             </a>
 
-            <span class="header-cart-item-info"> 1 x $19.00 </span>
+            <!-- Uncomment and use the code below if quantity and price are needed -->
+            <span class="header-cart-item-info"> 1 x $<%= item.price %> </span>
+          </div>
+
+          <!-- Remove icon to remove the product from the wishlist -->
+          <div class="header-cart-item-remove p-t-8">
+            <a
+              href="#"
+              class="cl2 p-lr-5 pointer hov-cl1 trans-04"
+              onclick="removeFromWishlist('<%= item._id %>')"
+            >
+              <i class="zmdi zmdi-delete"></i>
+            </a>
           </div>
         </li>
-
+        <% }); %> <% } else { %>
+        <!-- Message to display if wishlist is empty or null -->
         <li class="header-cart-item flex-w flex-t m-b-12">
-          <div class="header-cart-item-img">
-            <img src="/public/user/images/item-cart-02.jpg" alt="IMG" />
-          </div>
-
           <div class="header-cart-item-txt p-t-8">
-            <a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-              Converse All Star
-            </a>
-
-            <span class="header-cart-item-info"> 1 x $39.00 </span>
+            <span class="header-cart-item-name m-b-18"
+              >Your wishlist is empty.</span
+            >
           </div>
         </li>
-
-        <li class="header-cart-item flex-w flex-t m-b-12">
-          <div class="header-cart-item-img">
-            <img src="/public/user/images/item-cart-03.jpg" alt="IMG" />
-          </div>
-
-          <div class="header-cart-item-txt p-t-8">
-            <a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-              Nixon Porter Leather
-            </a>
-
-            <span class="header-cart-item-info"> 1 x $17.00 </span>
-          </div>
-        </li>
+        <% } %>
       </ul>
 
       <div class="w-full">
-        <div class="header-cart-total w-full p-tb-40">Total: $75.00</div>
+        <!-- Check if wishlist exists and is not empty before calculating total -->
+        <% if (wishlist && wishlist.length > 0) { %>
+        <div class="header-cart-total w-full p-tb-40">
+          Total: $<%= wishlist.reduce((total, item) => total + (item.price *
+          (item.quantity || 1)), 0).toFixed(2) %>
+        </div>
+        <% } %>
 
+        <!-- Wishlist action buttons -->
         <div class="header-cart-buttons flex-w w-full">
           <a
             href="shoping-cart.html"

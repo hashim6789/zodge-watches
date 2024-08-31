@@ -41,33 +41,33 @@ const test = (req, res, next) => {
 router.get("/signup", redirectIfAuthenticated, getSignup);
 
 //post the signup page
-router.post("/signup", redirectIfAuthenticated, postSignup);
+router.post("/signup", postSignup);
 
 //get otp entering page
-router.get("/verify-otp", isAuthenticatedUser, authorizeUser, getOtpPage);
+router.get("/verify-otp", getOtpPage);
 
 //post otp generator
-router.post("/verify-otp", isAuthenticatedUser, authorizeUser, postOtp);
+router.post("/verify-otp", postOtp);
 
 //post otp resend
-router.post("/resend-otp", isAuthenticatedUser, authorizeUser, resendOtp);
+router.post("/resend-otp", resendOtp);
 
 //get the login page
 router.get("/login", redirectIfAuthenticated, getLogin);
 
 //post the login page
-router.post("/login", redirectIfAuthenticated, postLogin);
+router.post("/login", postLogin);
 
 // Auth with Google for signup
-router.get("/google/signup", redirectIfAuthenticated, googleSignup);
+router.get("/google/signup", googleSignup);
 
 // Auth with Google for login
-router.get("/google/login", redirectIfAuthenticated, googleLogin);
+router.get("/google/login", googleLogin);
 
 // Callback route for Google to redirect to for signup
 router.get(
   "/google/signup/callback",
-  redirectIfAuthenticated,
+
   googleSignupCallback,
   redirectToProfile
 );
@@ -75,13 +75,13 @@ router.get(
 // Callback route for Google to redirect to for login
 router.get(
   "/google/login/callback",
-  redirectIfAuthenticated,
+
   googleLoginCallback,
   redirectToProfile
 );
 
 //get home page
-router.get("/home", isAuthenticatedUser, checkBlocked, authorizeUser, getHome);
+router.get("/home", checkBlocked, getHome);
 
 //post - /user/auth/reset-password
 router.post("/reset-password", resetPassword);

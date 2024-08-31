@@ -64,6 +64,7 @@
                             <th>Customer Name</th>
                             <th>Total Price</th>
                             <th>Status</th>
+                            <th>Return Status</th> <!-- New column for Return Status -->
                             <th>Payment Method</th>
                             <th>Order Date</th>
                             <th>Action</th>
@@ -73,23 +74,36 @@
                           <% orders.forEach((order) => { %>
                           <tr>
                             <td><%= order._id %></td>
-                            <td>
-                              <%= order.address.firstName %> <%=
-                              order.address.lastName %>
-                            </td>
+                            <td><%= order.address.firstName %> <%= order.address.lastName %></td>
                             <td>$<%= order.totalPrice.toFixed(2) %></td>
                             <td><%= order.orderStatus %></td>
-                            <td><%= order.paymentMethod %></td>
                             <td>
-                              <%= new Date(order.createdAt).toLocaleDateString()
-                              %>
+                              <% if (order.returnDetails.returnStatus) { %>
+                                <% if (order.returnDetails.returnStatus === 'requested') { %>
+                                  <span class="badge badge-warning">Requested</span>
+                                <% } else if (order.returnDetails.returnStatus === 'approved') { %>
+                                  <span class="badge badge-success">Approved</span>
+                                <% } else if (order.returnDetails.returnStatus === 'rejected') { %>
+                                  <span class="badge badge-danger">Rejected</span>
+                                <% } else if (order.returnDetails.returnStatus === 'completed') { %>
+                                  <span class="badge badge-primary">Completed</span>
+                                <% } %>
+                              <% } else { %>
+                                <span class="badge badge-info">N/A</span>
+                              <% } %>
                             </td>
+                            <td><%= order.paymentMethod %></td>
+                            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
                             <td>
                               <button
                                 class="btn btn-info"
                                 data-toggle="modal"
                                 data-target="#viewOrderModal"
                                 onclick="viewOrderDetails('<%= order._id %>')"
+                                <% if (order.orderStatus === 'Requested') { %> 
+                                  data-notification="Order is in 'Requested' status" 
+                                  class="btn btn-info btn-warning"
+                                <% } %>
                               >
                                 View
                               </button>
@@ -99,6 +113,7 @@
                         </tbody>
                       </table>
                     </div>
+                    
                   </div>
                 </div>
               </div>
@@ -305,7 +320,6 @@
             const order = response.data.data.order;
             const address = order.address;
 
-            // Generate the address HTML dynamically
             const addressHTML = `
           <br>
           ${address.flatNo ? address.flatNo + ", " : ""}${
@@ -317,7 +331,6 @@
           Email: ${address.email}
         `;
 
-            // Populate the modal with order details
             document.getElementById("modalOrderId").textContent = order._id;
             document.getElementById("modalUserName").textContent = `${
               order.userId.firstName
@@ -338,12 +351,11 @@
               order.returnDetails.returnReason || "Not requested"
             }`;
 
-            // Clear and populate the order items table
             const itemsTableBody = document.getElementById(
               "modalOrderItemsTable"
             );
             if (itemsTableBody) {
-              itemsTableBody.innerHTML = ""; // Clear previous items
+              itemsTableBody.innerHTML = "";
 
               if (order && Array.isArray(order.products)) {
                 order.products.forEach((item, index) => {
@@ -370,11 +382,9 @@
               );
             }
 
-            // Initialize order status buttons
             const currentStatus = order.orderStatus;
             initializeOrderStatusButtons(order._id, currentStatus);
 
-            // Show the modal
             $("#viewOrderModal").modal("show");
           })
           .catch(function (error) {
@@ -389,19 +399,20 @@
         const orderStatusButtons =
           document.getElementById("orderStatusButtons");
 
-        // Set the current order status text
         orderStatusElement.textContent = currentStatus;
 
-        // Clear any existing buttons
         orderStatusButtons.innerHTML = "";
 
-        // Create buttons based on current status
+        const returnStatus =
+          document.getElementById("modalReturnStatus").textContent;
         if (currentStatus === "placed") {
           createStatusButton("shipped", orderId, orderStatusButtons);
           createStatusButton("cancelled", orderId, orderStatusButtons);
         } else if (currentStatus === "shipped") {
           createStatusButton("delivered", orderId, orderStatusButtons);
           createStatusButton("cancelled", orderId, orderStatusButtons);
+        } else if (currentStatus === "delivered") {
+          initializeReturnStatusButtons(orderId, returnStatus);
         }
       }
 
@@ -432,16 +443,99 @@
             console.error("Error updating order status:", error);
           });
       }
-    </script>
 
-    <!-- <script>
-      // Example usage: Initialize the modal with order details
-      // document.addEventListener("DOMContentLoaded", () => {
-      //   const orderId = order._id; // Replace with actual order ID
-      //   const currentStatus = order.orderStatus; // Replace with actual current status from the backend
-      //   console.log(orderId, currentStatus);
-      //   initializeOrderStatusButtons(orderId, currentStatus);
-      // });
-    </script> -->
+      //for returnStatus
+      function initializeReturnStatusButtons(orderId, returnStatus) {
+        console.log(orderId, returnStatus);
+        const returnStatusElement =
+          document.getElementById("modalReturnStatus");
+        const returnReasonElement =
+          document.getElementById("modalReturnReason");
+        const returnStatusButtons = document.createElement("div");
+        const completeButton = document.createElement("div");
+
+        returnStatusElement.textContent = returnStatus;
+
+        returnReasonElement.innerHTML =
+          returnReasonElement.innerHTML.split("<div")[0];
+
+        if (returnStatus === "requested") {
+          returnStatusButtons.id = "returnStatusButtons";
+          returnStatusButtons.className = "mt-3";
+
+          createReturnButton(
+            "Approve",
+            orderId,
+            "approved",
+            returnStatusButtons
+          );
+          createReturnButton(
+            "Reject",
+            orderId,
+            "rejected",
+            returnStatusButtons
+          );
+
+          returnReasonElement.appendChild(returnStatusButtons);
+        } else if (returnStatus === "approved") {
+          returnStatusButtons.id = "returnStatusButtons";
+          returnStatusButtons.className = "mt-3";
+
+          createReturnButton(
+            "Completed",
+            orderId,
+            "completed",
+            returnStatusButtons
+          );
+          returnReasonElement.appendChild(returnStatusButtons);
+        }
+      }
+
+      // Function to create a button with an event listener for handling return requests
+      function createReturnButton(action, orderId, status, container) {
+        console.log(action, orderId, status, container);
+        const button = document.createElement("button");
+        let className = "";
+
+        // Mapping actions to Bootstrap button classes
+        if (action === "Approve") {
+          className = "success"; // btn-success for green
+        } else if (action === "Reject") {
+          className = "danger"; // btn-danger for red
+        } else if (action === "Completed") {
+          className = "primary"; // Use a more visible color, e.g., btn-primary for blue
+        }
+
+        button.className = `btn btn-${className} mr-2`;
+        button.textContent = action;
+
+        button.addEventListener("click", () => {
+          handleReturnRequest(orderId, status);
+        });
+
+        container.appendChild(button);
+      }
+
+      // Function to handle return requests via Axios POST request
+      function handleReturnRequest(orderId, status) {
+        axios
+          .patch(`/admin/orders/handle-return/${orderId}`, {
+            returnStatus: status,
+          })
+          .then((response) => {
+            const updatedReturnStatus =
+              response.data.order.returnDetails.returnStatus;
+            //for changing the order status filed of the modal
+            document.getElementById("modalOrderStatus").textContent =
+              response.data.order.orderStatus;
+            alert(`Return has been ${updatedReturnStatus} successfully.`);
+            initializeReturnStatusButtons(orderId, updatedReturnStatus);
+          })
+          .catch((error) => {
+            console.error("Error handling return request:", error);
+            alert("Failed to process return request. Please try again.");
+          });
+      }
+    </script>
   </body>
 </html>

@@ -2092,7 +2092,7 @@ input.num-product::-webkit-inner-spin-button {
 }
 
 .btn-addwish-b2 .icon-heart2 {
-  opacity: 0;
+  opacity: 0.5;
 }
 
 .btn-addwish-b2:hover .icon-heart2 {

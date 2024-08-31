@@ -215,60 +215,71 @@
             </div>
             </div>
 
-            <!-- Addresses Section -->
-            <div id="addresses" class="d-none">
-              <h4>Addresses</h4>
+           <!-- Addresses Section -->
+<div id="addresses" class="d-none">
+  <h4>Addresses</h4>
 
-              <% if (addresses.length === 0) { %>
-              <p>No addresses found.</p>
-              <% } else { %>
-              <div class="list-group">
-                <% addresses.forEach(function(address) { %>
-                <div
-                  class="list-group-item d-flex justify-content-between align-items-center"
-                >
-                  <div>
-                    <h5><%= address.firstName %> <%= address.lastName %></h5>
-                    <p>
-                      <%= address.addressLine %><br />
-                      <%= address.city %>, <%= address.state %>, <%=
-                      address.pincode %>,<%= address.flatNo %><br />
-                      <%= address.country %><br />
-                      <small><%= address.phoneNo %> <br><%= address.email %> </small>
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#editAddressModal"
-                    data-address-id="<%= address._id %>"
-                    data-address-first-name="<%= address.firstName %>"
-                    data-address-last-name="<%= address.lastName %>"
-                    data-address-line1="<%= address.addressLine %>"
-                    data-address-city="<%= address.city %>"
-                    data-address-state="<%= address.state %>"
-                    data-address-zip="<%= address.pincode %>"
-                    data-address-country="<%= address.country %>"
-                    data-address-phone="<%= address.phoneNo %>"
-                    data-address-flat="<%= address.flatNo %>"
-                  >
-                    Edit Address
-                  </button>
-                </div>
-                <% }) %>
-              </div>
-              <% } %>
+  <% if (addresses.length === 0) { %>
+  <p>No addresses found.</p>
+  <% } else { %>
+  <div class="list-group">
+    <% addresses.forEach(function(address) { %>
+    <div
+      class="list-group-item d-flex justify-content-between align-items-center"
+    >
+      <div>
+        <h5><%= address.firstName %> <%= address.lastName %></h5>
+        <p>
+          <%= address.addressLine %><br />
+          <%= address.city %>, <%= address.state %>, <%= address.pincode %>, <%= address.flatNo %><br />
+          <%= address.country %><br />
+          <small><%= address.phoneNo %> <br><%= address.email %> </small>
+        </p>
+      </div>
+      <!-- Edit Address Button -->
+      <div class="d-flex">
+        <button
+          type="button"
+          class="btn btn-primary me-2"
+          data-bs-toggle="modal"
+          data-bs-target="#editAddressModal"
+          data-address-id="<%= address._id %>"
+          data-address-first-name="<%= address.firstName %>"
+          data-address-last-name="<%= address.lastName %>"
+          data-address-line1="<%= address.addressLine %>"
+          data-address-city="<%= address.city %>"
+          data-address-state="<%= address.state %>"
+          data-address-zip="<%= address.pincode %>"
+          data-address-country="<%= address.country %>"
+          data-address-phone="<%= address.phoneNo %>"
+          data-address-flat="<%= address.flatNo %>"
+        >
+          Edit Address
+        </button>
+        <!-- Delete Address Button -->
+        <button
+          type="button"
+          class="btn btn-danger"
+          onclick="deleteAddress('<%= address._id %>')"
+        >
+          Delete Address
+        </button>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
 
-              <button
-                id="createNewAddressBtn"
-                class="btn btn-success mt-3"
-                data-bs-toggle="modal"
-                data-bs-target="#createAddressModal"
-              >
-                Create New Address
-              </button>
-            </div>
+  <button
+    id="createNewAddressBtn"
+    class="btn btn-success mt-3"
+    data-bs-toggle="modal"
+    data-bs-target="#createAddressModal"
+  >
+    Create New Address
+  </button>
+</div>
+
 
             
 
@@ -300,13 +311,34 @@
               <a href="/user/profile/orders/<%= order._id %>" class="btn btn-info">View Details</a>
               
               <!-- Cancel Order Button -->
-              <% if (order.orderStatus === 'placed' || order.orderStatus === 'shipped') { %> 
-                <!-- Show the Cancel button only for orders that are Pending or Processing -->
-                <form id="cancelOrder" style="display:inline;">
-                  <button id="cancelButton" onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">Cancel</button>
-                </form>
-          
-              <% } %>
+<% if (order.orderStatus === 'placed' || order.orderStatus === 'shipped') { %> 
+  <!-- Show the Cancel button only for orders that are Pending or Processing -->
+  <form id="cancelOrder" style="display:inline;">
+    <button id="cancelButton" onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">Cancel</button>
+  </form>
+  
+  <% } else if (order.orderStatus === "delivered" && order.returnDetails.returnStatus === null) { %>
+    <!-- Modify the Return button to open the modal -->
+    <button 
+    type="button" 
+    class="btn btn-warning" 
+    id="returnButton"
+    onclick="openReturnModal('<%= order._id %>')"
+    data-bs-toggle="modal" 
+    data-bs-target="#returnReasonModal"
+    >
+    Return
+  </button>
+  <% } else if (order.orderStatus === "cancelled") { %>
+    <button id="cancelButton" class="btn btn-danger" disabled>cancelled</button>
+  <% } else if (order.returnDetails.returnStatus === "requested") { %>
+    <button id="cancelButton" class="btn btn-danger" disabled>Requested</button>
+  <% } else if (order.returnDetails.returnStatus === "approved") { %>
+    <button id="cancelButton" class="btn btn-success  " disabled>Approved</button>
+  <% } else if (order.returnDetails.returnStatus === "rejected") { %>
+    <button id="cancelButton" class="btn btn-danger" disabled>Rejected</button>
+<% } %>
+
             </td>
           </tr>
         <% }) %>
@@ -668,6 +700,29 @@
         </div>
       </div>
     </div>
+
+    <!-- Return Reason Modal -->
+<div class="modal fade" id="returnReasonModal" tabindex="-1" aria-labelledby="returnReasonModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="returnReasonModalLabel">Enter Return Reason</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="returnReasonForm">
+          <div class="mb-3">
+            <label for="returnReason" class="form-label">Reason for Return</label>
+            <textarea class="form-control" id="returnReason" rows="3" required></textarea>
+          </div>
+          <input type="hidden" id="orderIdForReturn" />
+          <button type="submit" class="btn btn-primary" onclick="submitReturn()">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
     
 
 
@@ -796,6 +851,22 @@ const flatNo = document.getElementById('editFlatNo').value;
         });
     </script>
 
+    <!-- for deleting the address -->
+     <script>function deleteAddress(addressId) {
+      if (confirm('Are you sure you want to delete this address?')) {
+        axios
+          .delete(`/user/profile/address/${addressId}`) 
+          .then(function (response) {
+            document.querySelector(`[data-address-id='${addressId}']`).closest('.list-group-item').remove();
+            alert('Address deleted successfully.');
+          })
+          .catch(function (error) {
+            alert('Failed to delete the address.');
+          });
+      }
+    }
+    </script>
+
     <!-- for cancel the order -->
     <script>
       function cancelOrder(orderId){
@@ -810,6 +881,65 @@ const flatNo = document.getElementById('editFlatNo').value;
           });
       }
     </script>
+
+    <script>// Function to open the return modal and set the order ID
+      function openReturnModal(orderId) {
+        document.getElementById('orderIdForReturn').value = orderId;
+      }
+      
+      // Function to handle the return submission
+      function submitReturn() {
+  const orderId = document.getElementById('orderIdForReturn').value;
+  const returnReason = document.getElementById('returnReason').value;
+
+  console.log('Order ID:', orderId);
+  console.log('Return Reason:', returnReason);
+
+  if (!returnReason) {
+    alert("Please enter a return reason.");
+    return;
+  }
+
+  // Use Axios to send the return request
+  axios.post('/user/profile/orders/return', {
+    orderId,
+    returnReason
+  })
+  .then(function(response) {
+    console.log('Response:', response); // Log the entire response to check the structure
+
+    const updatedStatus = response.data.order.returnDetails.returnStatus;
+    console.log('Updated Status:', updatedStatus);
+
+    if (updatedStatus === "requested") {
+      document.getElementById("returnButton").style.display = "none";
+    }
+    // Close the modal after the form is submitted successfully
+    // var returnReasonModal = new bootstrap.Modal(document.getElementById('returnReasonModal'));
+    //   returnReasonModal.hide();
+  })
+  .catch(function(error) {
+    console.error('Error:', error); // Log the error object for more information
+    alert('Failed to submit return request. Please try again.');
+  });
+}
+
+      </script>
+
+    <!-- for return the order
+    <script>
+      function returnOrder(orderId){
+        axios.patch(`/user/profile/orders/return/${orderId}`).then((response) => {
+          const updatedStatus = response.data.order.orderStatus;
+          if(updatedStatus === "requested"){
+            document.getElementById("returnButton").style.display = "none";
+          }
+        })
+          .catch((error) => {
+            console.error("Error send the request for returning the order:", error);
+          });
+      }
+    </script> -->
 
     <!-- //for reset-password -->
      <script>// public/js/resetPassword.js

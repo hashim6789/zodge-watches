@@ -88,4 +88,49 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-module.exports = { getOrders, getOrderDetails, updateOrderStatus };
+//for handle the return request of the user like approve or rejected
+const handleReturnRequest = async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const { returnStatus } = req.body;
+    console.log(returnStatus);
+
+    const isReturnable = returnStatus === "approved";
+    const orderStatus = returnStatus === "completed" ? "returned" : "delivered";
+
+    const order = await OrderModel.findByIdAndUpdate(
+      orderId,
+      {
+        $set: {
+          "returnDetails.returnStatus": returnStatus,
+          "returnDetails.isReturnable": isReturnable,
+          orderStatus,
+          updatedAt: Date.now(),
+        },
+      },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        status: "Failed",
+        message: "The order is not found",
+      });
+    }
+
+    res.status(200).json({
+      status: "Success",
+      message: "The return request is handled successfully",
+      order,
+    });
+  } catch (err) {
+    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+  }
+};
+
+module.exports = {
+  getOrders,
+  getOrderDetails,
+  updateOrderStatus,
+  handleReturnRequest,
+};

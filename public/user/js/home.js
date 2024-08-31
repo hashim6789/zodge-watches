@@ -1,3 +1,54 @@
+function toggleHeartIcon(productId, isAdded) {
+  const heart1 = document.getElementById(`heart1-${productId}`);
+  const heart2 = document.getElementById(`heart2-${productId}`);
+
+  if (isAdded) {
+    heart1.classList.add("d-none");
+    heart2.classList.remove("d-none");
+  } else {
+    heart1.classList.remove("d-none");
+    heart2.classList.add("d-none");
+  }
+}
+
+function addToWishlist(productId) {
+  axios
+    .post("/user/shop/wishlist", { productId })
+    .then((response) => {
+      if (response.data.data) {
+        toggleHeartIcon(productId, true);
+        console.log(response.data.data);
+      } else {
+        alert("Failed to add product to wishlist.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error adding product to wishlist:", error);
+      alert(
+        "An error occurred while adding the product to the wishlist. Please try again."
+      );
+    });
+}
+
+function removeFromWishlist(productId) {
+  axios
+    .delete(`/user/shop/wishlist/${productId}`)
+    .then((response) => {
+      if (response.data.data) {
+        toggleHeartIcon(productId, false);
+        console.log(response.data.data);
+      } else {
+        alert("Failed to remove product from wishlist.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error removing product from wishlist:", error);
+      alert(
+        "An error occurred while removing the product from the wishlist. Please try again."
+      );
+    });
+}
+
 function fetchProducts(categoryId) {
   axios
     .get(`/user/shop/filter/categories/${categoryId}`)
@@ -117,12 +168,59 @@ function sortBy(sortMethod) {
   axios
     .get(`${endpoint}?method=${sortMethod}`)
     .then((response) => {
-      let products = response.data.data;
+      const products = response.data.data.products;
+      const wishlist = response.data.data.wishlist;
+      console.log(products);
 
       // Clear the existing content in the product-list div
       document.getElementById("product-list").innerHTML = "";
 
       products.forEach(function (product) {
+        // Determine the display message for product availability
+        let availabilityMessage = "";
+        if (!product.isListed) {
+          availabilityMessage = `<div class="product-unavailable text-danger mt-2">Currently unavailable</div>`;
+        } else if (product.stock === 0) {
+          availabilityMessage = `<div class="out-of-stock text-danger mt-2">Out of Stock</div>`;
+        }
+
+        // Determine the wishlist icon status
+        let wishlistIcons = `
+          <img
+            id="heart1-${product._id}"
+            class="icon-heart1 dis-block trans-04"
+            src="/public/user/images/icons/icon-heart-01.png"
+            alt="ICON"
+            onclick="toggleWishlist('${product._id}', false)"
+          />
+          <img
+            id="heart2-${product._id}"
+            class="icon-heart2 dis-block trans-04 d-none"
+            src="/public/user/images/icons/icon-heart-02.png"
+            alt="ICON"
+            onclick="toggleWishlist('${product._id}', true)"
+          />
+        `;
+        if (wishlist?.productIds.includes(product._id)) {
+          wishlistIcons = `
+            <img
+              id="heart1-${product._id}"
+              class="icon-heart1 dis-block trans-04 d-none"
+              src="/public/user/images/icons/icon-heart-01.png"
+              alt="ICON"
+              onclick="toggleWishlist('${product._id}', false)"
+            />
+            <img
+              id="heart2-${product._id}"
+              class="icon-heart2 dis-block trans-04"
+              src="/public/user/images/icons/icon-heart-02.png"
+              alt="ICON"
+              onclick="toggleWishlist('${product._id}', true)"
+            />
+          `;
+        }
+
+        // Build the product HTML
         const productHtml = `
           <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item ${product.categoryId}">
             <div class="block2">
@@ -140,12 +238,12 @@ function sortBy(sortMethod) {
                     ${product.name}
                   </a>
                   <span class="stext-105 cl3">${product.price}</span>
+                  ${availabilityMessage}
                 </div>
                 <div class="block2-txt-child2 flex-r p-t-3">
-                  <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2" data-id="${product._id}">
-                    <img class="icon-heart1 dis-block trans-04" src="/public/user/images/icons/icon-heart-01.png" alt="ICON" />
-                    <img class="icon-heart2 dis-block trans-04 ab-t-l" src="/public/user/images/icons/icon-heart-02.png" alt="ICON" />
-                  </a>
+                  <div class="btn-addwish-b2 dis-block pos-relative js-addwish-b2" data-id="${product._id}">
+                    ${wishlistIcons}
+                  </div>
                 </div>
               </div>
             </div>
@@ -200,35 +298,42 @@ $(".gallery-lb").each(function () {
 });
 
 /*---------------------------------------------*/
-$(".js-addwish-b2").on("click", function (e) {
-  e.preventDefault();
-});
-
-$(".js-addwish-b2").each(function () {
-  var nameProduct = $(this).parent().parent().find(".js-name-b2").html();
-  $(this).on("click", function () {
-    swal(nameProduct, "is added to wishlist !", "success");
-
-    $(this).addClass("js-addedwish-b2");
-    $(this).off("click");
-  });
-});
-
-$(".js-addwish-detail").each(function () {
-  var nameProduct = $(this)
-    .parent()
-    .parent()
-    .parent()
-    .find(".js-name-detail")
+function toggleWishlist(productId, isRemoving) {
+  var nameProduct = $("#heart1-" + productId)
+    .closest(".block2-txt-child2")
+    .find(".js-name-b2, .js-name-detail")
     .html();
 
-  $(this).on("click", function () {
-    swal(nameProduct, "is added to wishlist !", "success");
+  if (isRemoving) {
+    // Show the remove from wishlist notification
+    Swal.fire({
+      title: nameProduct,
+      text: "is removed from wishlist!",
+      icon: "warning",
+    });
 
-    $(this).addClass("js-addedwish-detail");
-    $(this).off("click");
-  });
-});
+    // Toggle icons for removal
+    $("#heart1-" + productId).removeClass("d-none");
+    $("#heart2-" + productId).addClass("d-none");
+
+    // Make an AJAX request to remove from wishlist (if needed)
+    removeFromWishlist(productId);
+  } else {
+    // Show the add to wishlist notification
+    Swal.fire({
+      title: nameProduct,
+      text: "is added to wishlist!",
+      icon: "success",
+    });
+
+    // Toggle icons for addition
+    $("#heart1-" + productId).addClass("d-none");
+    $("#heart2-" + productId).removeClass("d-none");
+
+    // Make an AJAX request to add to wishlist (if needed)
+    addToWishlist(productId);
+  }
+}
 
 /*---------------------------------------------*/
 
@@ -241,9 +346,10 @@ $(".js-addcart-detail").each(function () {
     .find(".js-name-detail")
     .html();
   $(this).on("click", function () {
-    swal(nameProduct, "is added to cart !", "success");
+    swal(nameProduct, "is added to cart!", "success");
   });
 });
+
 /*---------------------------------------------*/
 
 $(".js-pscroll").each(function () {

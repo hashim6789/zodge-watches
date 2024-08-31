@@ -4,6 +4,8 @@ const router = express.Router();
 //for Authentication
 const {
   isAuthenticatedUser,
+  checkBlocked,
+  trackPreviousPage,
 } = require("../../middlewares/authenticationMiddlewares");
 
 //for Authorization
@@ -15,6 +17,8 @@ const {
   filterCategoryProduct,
   filterAllProducts,
   searchProducts,
+  addToWishlist,
+  removeFromWishlist,
   getCart,
   postCart,
   addToCart,
@@ -63,33 +67,76 @@ function checkStepCompletion(requiredStep) {
 
 //get the product details
 //get - /user/shop/quickview/:id
-router.get("/quickview/:id", isAuthenticatedUser, authorizeUser, quickView);
+router.get("/quickview/:id", checkBlocked, quickView);
 
 //get the product image url
 //get - /user/shop/getImagePath
-router.get("/getImagePath", isAuthenticatedUser, authorizeUser, getImage);
+router.get("/getImagePath", getImage);
 
 //search the whole products
 router.get("/filter/products", filterAllProducts);
 
 //search the products by the category
-router.get("/filter/categories/:categoryId", test, filterCategoryProduct);
+router.get("/filter/categories/:categoryId", filterCategoryProduct);
 
-router.get(`/search`, searchProducts);
+router.get("/search", searchProducts);
+
+//add a product into a wishlist of the corresponding user
+router.post("/wishlist", isAuthenticatedUser, authorizeUser, addToWishlist);
+
+//remove a product from a wishlist of the corresponding user
+router.delete(
+  "/wishlist/:productId",
+  isAuthenticatedUser,
+  authorizeUser,
+  removeFromWishlist
+);
 
 //get - /user/shop/cart
-router.get("/cart", getCart);
+router.get(
+  "/cart",
+  checkBlocked,
+  trackPreviousPage,
+  isAuthenticatedUser,
+  authorizeUser,
+  checkBlocked,
+  getCart
+);
 
-router.post("/cart", postCart);
+router.post(
+  "/cart",
+  checkBlocked,
+  isAuthenticatedUser,
+  authorizeUser,
+  postCart
+);
 
-router.post("/cart/add-to-cart", addToCart);
+router.post(
+  "/cart/add-to-cart",
+  checkBlocked,
+  isAuthenticatedUser,
+  authorizeUser,
+  addToCart
+);
 
-router.patch("/cart/update-quantity", updateQuantity);
+router.patch(
+  "/cart/update-quantity",
+  checkBlocked,
+  isAuthenticatedUser,
+  updateQuantity
+);
 
-router.delete("/cart/delete-product/:id", deleteCartProduct);
+router.delete(
+  "/cart/delete-product/:id",
+  checkBlocked,
+  isAuthenticatedUser,
+  authorizeUser,
+  deleteCartProduct
+);
 
 router.get(
   "/checkout",
+  checkBlocked,
   initializeSteps,
   checkStepCompletion("cart"),
   getCheckout
@@ -97,6 +144,7 @@ router.get(
 
 router.post(
   "/checkout",
+  checkBlocked,
   initializeSteps,
   checkStepCompletion("cart"),
   postCheckout
@@ -104,6 +152,7 @@ router.post(
 
 router.get(
   "/delivery-address",
+  checkBlocked,
   initializeSteps,
   checkStepCompletion("checkout"),
   getDeliveryAddress
@@ -111,6 +160,7 @@ router.get(
 
 router.post(
   "/delivery-address",
+  checkBlocked,
   initializeSteps,
   checkStepCompletion("checkout"),
   postDeliveryAddress
@@ -118,6 +168,7 @@ router.post(
 
 router.get(
   "/payment",
+  checkBlocked,
   initializeSteps,
   checkStepCompletion("address"),
   getPayment
@@ -125,6 +176,7 @@ router.get(
 
 router.post(
   "/payment",
+  checkBlocked,
   initializeSteps,
   checkStepCompletion("address"),
   postPayment
@@ -132,6 +184,7 @@ router.post(
 
 router.get(
   "/summary",
+  checkBlocked,
   initializeSteps,
   checkStepCompletion("payment"),
   getSummary
@@ -139,6 +192,7 @@ router.get(
 
 router.post(
   "/place-order",
+  checkBlocked,
   initializeSteps,
   checkStepCompletion("payment"),
   postPlaceOrder
@@ -146,6 +200,7 @@ router.post(
 
 router.get(
   "/place-order",
+  checkBlocked,
   initializeSteps,
   checkStepCompletion("payment"),
   getSuccessPage

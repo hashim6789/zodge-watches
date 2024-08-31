@@ -2,14 +2,16 @@
 <html lang="en">
   <head>
     <title>Home</title>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <%- include('partials/_header') %>
   </head>
   <body class="animsition">
     <!-- Header -->
-    <%- include('partials/_navbar', {user}) %>
+    <%- include('partials/_navbar', {user, wishlist, cart}) %>
 
     <!-- Wishlist -->
-    <%- include('partials/_wishlist') %>
+    <%- include('partials/_wishlist', {wishlist}) %>
 
     <!-- Slider -->
     <%- include('partials/_slide') %>
@@ -257,7 +259,7 @@
                   <% if (!product.isListed) { %>
                   <!-- Product is not listed -->
                   <div class="product-unavailable text-danger mt-2">
-                    currently unavailable
+                    Currently unavailable
                   </div>
                   <% } else if (product.stock === 0) { %>
                   <!-- Product is out of stock -->
@@ -266,23 +268,45 @@
                 </div>
 
                 <!-- Wishlist button -->
+                <!-- Wishlist button -->
                 <div class="block2-txt-child2 flex-r p-t-3">
-                  <a
-                    href="#"
+                  <div
                     class="btn-addwish-b2 dis-block pos-relative js-addwish-b2"
                     data-id="<%= product._id %>"
                   >
+                    <!-- Conditionally display heart icons based on wishlist status -->
+                    <% if (wishlist?.productIds.includes(product._id)) { %>
                     <img
+                      id="heart1-<%= product._id %>"
+                      class="icon-heart1 dis-block trans-04 d-none"
+                      src="/public/user/images/icons/icon-heart-01.png"
+                      alt="ICON"
+                      onclick="toggleWishlist('<%= product._id %>', false)"
+                    />
+                    <img
+                      id="heart2-<%= product._id %>"
+                      class="icon-heart2 dis-block trans-04"
+                      src="/public/user/images/icons/icon-heart-02.png"
+                      alt="ICON"
+                      onclick="toggleWishlist('<%= product._id %>', true)"
+                    />
+                    <% } else { %>
+                    <img
+                      id="heart1-<%= product._id %>"
                       class="icon-heart1 dis-block trans-04"
                       src="/public/user/images/icons/icon-heart-01.png"
                       alt="ICON"
+                      onclick="toggleWishlist('<%= product._id %>', false)"
                     />
                     <img
-                      class="icon-heart2 dis-block trans-04 ab-t-l"
+                      id="heart2-<%= product._id %>"
+                      class="icon-heart2 dis-block trans-04 d-none"
                       src="/public/user/images/icons/icon-heart-02.png"
                       alt="ICON"
+                      onclick="toggleWishlist('<%= product._id %>', true)"
                     />
-                  </a>
+                    <% } %>
+                  </div>
                 </div>
               </div>
             </div>

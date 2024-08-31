@@ -17,7 +17,7 @@ const session = require("express-session"); //import session
 const passport = require("passport");
 const { v4: uuidv4 } = require("uuid"); //import unique id
 // const MongoDbSession = require("connect-mongodb-session")(session);
-const connecDB = require("./db");
+const connectDB = require("./db");
 const mongoose = require("mongoose");
 const app = express();
 
@@ -25,7 +25,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // connect with mongoDB
-connecDB();
+connectDB();
 
 //for setting view engine (ejs)
 app.set("views", path.join(__dirname, "views"));
@@ -81,14 +81,9 @@ app.use("/user/auth", authRouter); // for user authentication router url
 app.use("/user/shop", shopRouter); // for user shopping router url
 app.use("/user/profile", profileRouter); // for user shopping router url
 
-//get - / index page
-app.get("/", (req, res) => {
-  res.render("user/demoLogin");
-});
-
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
-  res.status(404).send("404: Page Not Found");
+  res.status(404).render("_404");
 });
 
 //server listener
