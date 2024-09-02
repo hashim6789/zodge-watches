@@ -11,10 +11,22 @@ function confirmAndToggleBlock(userId, isBlocked) {
 function toggleBlock(userId, isBlocked) {
   const newStatus = isBlocked === "true" ? false : true;
   axios
-    .patch(`/admin/users/block/${userId}`, { isBlocked: newStatus })
+    .patch(`/admin/users/${userId}/block`, { isBlocked: newStatus })
     .then((response) => {
       if (response.status === 200) {
-        location.reload(); // Reload the page to reflect changes
+        const data = response.data.data;
+        const buttonElement = document.getElementById(
+          `blockButton-${data.userId}`
+        );
+        const result = data.isBlocked ? "Unblock" : "Block";
+        const buttonClass = data.isBlocked ? "btn-success" : "btn-danger";
+
+        buttonElement.className = `btn ${buttonClass}`;
+        buttonElement.innerHTML = result;
+        buttonElement.setAttribute(
+          "onclick",
+          `confirmAndToggleBlock("${data.userId}", "${data.isBlocked}")`
+        );
       } else {
         alert("Failed to update status");
       }

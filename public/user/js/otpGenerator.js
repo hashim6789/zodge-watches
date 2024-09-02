@@ -32,24 +32,36 @@ document.addEventListener("DOMContentLoaded", function () {
     const email = document.getElementById("current-email").value;
     const id = document.getElementById("current-id").value;
     console.log(email);
-    // Call your API to resend the OTP using Axios
     axios
-      .post("/user/auth/resend-otp", {
-        email: email, // Replace with actual email
+      .post("/auth/otp/resend", {
+        email: email,
         _id: id,
       })
       .then((response) => {
         if (response.data) {
-          alert("OTP resent successfully!");
-          timeLeft = 60; // Reset the timer
-          startTimer(); // Restart the timer
+          Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "OTP resend successfully!",
+          }).then(() => {
+            timeLeft = 60; // Reset the timer
+            startTimer(); // Restart the timer
+          });
         } else {
-          alert("Failed to resend OTP. Please try again.");
+          Swal.fire({
+            icon: "error",
+            title: "Failed",
+            text: "Failed to resend OTP. Please try again.",
+          });
         }
       })
       .catch((error) => {
         console.error("Error resending OTP:", error);
-        alert("An error occurred. Please try again.");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "An error occurred. Please try again.",
+        });
       });
   }
 

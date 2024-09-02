@@ -13,56 +13,55 @@ const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
 
 //functions for user module
 const {
+  postLocalLogin,
+  postLocalSignup,
+  verifyOtp,
   getSignup,
-  postSignup,
   getOtpPage,
-  postOtp,
   resendOtp,
   getLogin,
-  postLogin,
   googleSignup,
   googleLogin,
   googleSignupCallback,
   googleLoginCallback,
   redirectToProfile,
-  getHome,
   resetPassword,
   changePassword,
   getResetPasswordPage,
   logout,
 } = require("../../controllers/user/authController");
 
-const test = (req, res, next) => {
-  console.log(req.url);
-  next();
-};
+// const test = (req, res, next) => {
+//   console.log(req.url);
+//   next();
+// };
 
 //get the signup page
 router.get("/signup", redirectIfAuthenticated, getSignup);
 
 //post the signup page
-router.post("/signup", postSignup);
+router.post("/signup", redirectIfAuthenticated, postLocalSignup);
 
 //get otp entering page
-router.get("/verify-otp", getOtpPage);
+router.get("/otp", getOtpPage);
 
-//post otp generator
-router.post("/verify-otp", postOtp);
+//post otp generator and verify the otp
+router.post("/otp", verifyOtp);
 
 //post otp resend
-router.post("/resend-otp", resendOtp);
+router.post("/otp/resend", resendOtp);
 
 //get the login page
 router.get("/login", redirectIfAuthenticated, getLogin);
 
 //post the login page
-router.post("/login", postLogin);
+router.post("/login", redirectIfAuthenticated, postLocalLogin);
 
 // Auth with Google for signup
-router.get("/google/signup", googleSignup);
+router.get("/google/signup", redirectIfAuthenticated, googleSignup);
 
 // Auth with Google for login
-router.get("/google/login", googleLogin);
+router.get("/google/login", redirectIfAuthenticated, googleLogin);
 
 // Callback route for Google to redirect to for signup
 router.get(
@@ -80,16 +79,13 @@ router.get(
   redirectToProfile
 );
 
-//get home page
-router.get("/home", checkBlocked, getHome);
-
-//post - /user/auth/reset-password
+//post - /auth/reset-password
 router.post("/reset-password", resetPassword);
 
-//post - /user/auth/reset-password
+//post - /auth/reset-password
 router.get("/reset-password/:token", getResetPasswordPage);
 
-//post - /user/auth/verify-password
+//post - /auth/verify-password
 router.post("/change-password", changePassword);
 
 // Auth logout

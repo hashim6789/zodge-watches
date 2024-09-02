@@ -71,6 +71,11 @@ document
   .addEventListener("submit", function (event) {
     event.preventDefault();
 
+    const submitButton = document.querySelector(
+      '#createProductForm button[type="submit"]'
+    );
+    submitButton.disabled = true;
+
     const formData = new FormData();
     formData.append("name", document.getElementById("createProductName").value);
     formData.append(
@@ -95,21 +100,101 @@ document
     });
 
     axios
-      .post("/admin/products/create", formData, {
+      .post("/admin/products/", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       })
       .then((response) => {
         if (response.status === 200) {
-          location.reload();
+          const newProduct = response.data.data.newProduct; // Assuming the new product data is returned in this format
+          const category = response.data.data.category;
+          // Extract product details from the response
+          const productName = newProduct.name;
+          const productCategory = category ? category.name : "Unknown"; // Ensure category is handled correctly
+          const productPrice = newProduct.price;
+          const productStock = newProduct.stock;
+          const productId = newProduct._id;
+          const isListed = newProduct.isListed;
+          const productDescription = newProduct.description;
+
+          // Calculate the current SI number (always 1 for the new product at the top)
+          const currentRowNumber = 1;
+
+          // Create a new row element
+          const newRow = document.createElement("tr");
+          newRow.innerHTML = `
+        <td>${currentRowNumber}</td>
+        <td>${productName}</td>
+        <td>${productCategory}</td>
+        <td>${productPrice}</td>
+        <td>${productStock}</td>
+        <td>
+          <button
+            id="editClick"
+            class="btn btn-primary"
+            data-toggle="modal"
+            data-target="#editProductModal"
+            data-id="${productId}"
+            data-name="${productName}"
+            data-description="${productDescription}"
+            data-category="${newProduct.categoryId}"
+            data-price="${productPrice}"
+            data-stock="${productStock}"
+            onclick="populateEditProductModal('${productId}', '${productName}', '${productDescription}', '${
+            newProduct.categoryId
+          }', '${productPrice}', '${productStock}')"
+          >
+            Edit
+          </button>
+          <button
+            id="listButton-${productId}"
+            class="btn ${isListed ? "btn-danger" : "btn-success"}"
+            onclick="confirmAndToggleListProduct('${productId}', ${isListed})"
+          >
+            ${isListed ? "Unlist" : "List"}
+          </button>
+        </td>
+      `;
+
+          // Insert the new row at the top of the table body
+          const tableBody = document.querySelector(".table tbody");
+          tableBody.insertBefore(newRow, tableBody.firstChild);
+
+          // Optional: Recalculate the SI numbers for all rows if needed
+          updateSINumbers();
+
+          // Use SweetAlert to show a success message
+          Swal.fire({
+            title: "Success!",
+            text: "Product created successfully!",
+            icon: "success",
+            confirmButtonText: "OK",
+          });
+
+          // // Clear form input fields or close modal as necessary
+          // document.getElementById("createProductForm").reset();
+          $("#createProductModal").modal("hide");
+
+          submitButton.disabled = false;
         } else {
-          alert("Failed to create product");
+          Swal.fire({
+            title: "Error!",
+            text: "Failed to create product.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+          submitButton.disabled = false; // Re-enable the submit button even if there's an error
         }
       })
       .catch((error) => {
         console.error("Error creating product:", error);
-        alert("Product creation failed");
+        Swal.fire({
+          title: "Error!",
+          text: "Product creation failed.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       });
   });
 
@@ -301,17 +386,44 @@ function confirmAndToggleListProduct(productId, isListed) {
 function toggleListProduct(productId, isListed) {
   const newStatus = isListed === "true" ? false : true;
   axios
-    .patch(`/admin/products/unlist/${productId}`, { isListed: newStatus })
+    .patch(`/admin/products/${productId}/unlist`, { isListed: newStatus })
     .then((response) => {
       if (response.status === 200) {
-        location.reload(); // Reload the page to reflect changes
+        const data = response.data.data;
+        const buttonElement = document.getElementById(`listButton-${data._id}`);
+        const result = data.isListed ? "Unlist" : "List";
+        const buttonClass = !data.isListed ? "btn-success" : "btn-danger";
+
+        buttonElement.className = `btn ${buttonClass}`;
+        buttonElement.innerHTML = result;
+        buttonElement.setAttribute(
+          "onclick",
+          `confirmAndToggleListProduct("${data._id}", "${data.isListed}")`
+        );
+
+        Swal.fire({
+          title: "Success!",
+          text: "Product updated successfully!",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       } else {
-        alert("Failed to update status");
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to update product status.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
     })
     .catch((error) => {
       console.error("There was an error updating the status!", error);
-      alert("Error updating status");
+      Swal.fire({
+        title: "Error!",
+        text: "Error updating product status.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     });
 }
 
@@ -335,3 +447,11 @@ $("#editProductModal").on("show.bs.modal", function (event) {
   modal.find("#editProductStock").val(stock);
   modal.find("#editProductImages").val(images);
 });
+
+// Function to update the serial numbers of the categories
+function updateSINumbers() {
+  const rows = document.querySelectorAll(".table tbody tr");
+  rows.forEach((row, index) => {
+    row.cells[0].innerText = index + 1;
+  });
+}

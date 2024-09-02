@@ -1,25 +1,26 @@
 const express = require("express");
-const router = express.Router();
 
-//for Authentication
+// //for Authentication
 const {
   isAuthenticatedAdmin,
-} = require("../middlewares/authenticationMiddlewares");
+} = require("../../middlewares/authenticationMiddlewares");
 
-//for Authorization
+// //for Authorization
 const {
   authorizeAdmin,
   authorizeAdminForModule,
-} = require("../middlewares/authorizationMiddlewares");
+} = require("../../middlewares/authorizationMiddlewares");
 
-//functions for users module
+// //functions for users module
 const {
   getUsers,
   blockUser,
   searchUsers,
-} = require("../controllers/userController");
+} = require("../../controllers/userController");
 
-//get - /admin/users/
+const router = express.Router();
+
+// //get - /admin/users/
 router.get(
   "/",
   isAuthenticatedAdmin,
@@ -28,16 +29,16 @@ router.get(
   getUsers
 );
 
-//get - /admin/users/block/:id
+// //get - /admin/users/block/:id
 router.patch(
-  "/block/:id",
+  "/:userId/block",
   isAuthenticatedAdmin,
   authorizeAdmin,
   authorizeAdminForModule("userManagement"),
   blockUser
 );
 
-//get - /admin/users/search
+// //get - /admin/users/search
 router.get("/search", searchUsers);
 
 module.exports = router;

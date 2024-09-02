@@ -6,10 +6,10 @@
   </head>
   <body class="animsition">
     <!-- Header -->
-    <%- include('partials/_navbar', {user}) %>
+    <%- include('partials/_navbar', {user, wishlist, cart}) %>
 
     <!-- Wishlist -->
-    <%- include('partials/_wishlist') %>
+    <%- include('partials/_wishlist', {wishlist}) %>
 
     <!-- Slider -->
     <!-- <%- include('partials/_slide') %> -->

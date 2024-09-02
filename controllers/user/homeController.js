@@ -1,6 +1,8 @@
 const ProductModel = require("../../models/ProductModel");
 const CategoryModel = require("../../models/Category");
 const UserModel = require("../../models/User");
+const WishlistModel = require("../../models/Wishlist");
+const CartModel = require("../../models/Cart");
 
 // const dummy = async (req, res) => {
 //   // const products = await ProductModel.find({ isListed: true });
@@ -79,8 +81,75 @@ const dummy = async (req, res) => {
     req.session?.passport?.user?.id ||
     "66ba12a0b60c8ee3d46812fd";
   const user = await UserModel.findById(userId);
+  let wishlist = await Wishlists.findOne({ userId });
   const product = await ProductModel.findById(productId);
-  res.render("user/product_details", { user, product, ratings: 4 });
+  res.render("user/newProfile", { user, wishlist, cart });
 };
 
-module.exports = { dummy };
+const getHome = async (req, res) => {
+  try {
+    console.log(req.user);
+    const userId = req.session?.user?._id || req.user?._id;
+    console.log(userId);
+    let user = null;
+    if (userId) {
+      user = await UserModel.findById(userId);
+    }
+    // console.log(req.user);
+    const page = req.query.page || 1;
+    const perPage = 8;
+    const products = await ProductModel.find()
+      .skip((page - 1) * perPage)
+      .limit(perPage);
+    const categories = await CategoryModel.find({ isListed: true });
+    const count = await ProductModel.countDocuments();
+
+    let cart = null;
+    let wishlist = null;
+    if (userId) {
+      cart = await CartModel.findOne({ userId });
+      if (!cart) {
+        cart = new CartModel({
+          userId,
+          products: [],
+          totalPrice: 0,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+        cart.save();
+      }
+      wishlist = await WishlistModel.findOne({ userId }).populate(
+        "productIds",
+        "name price images"
+      );
+      // console.log(wishlist);
+      if (!wishlist) {
+        wishlist = new WishlistModel({
+          userId,
+          productIds: [],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+        wishlist.save();
+      }
+    }
+    // console.log(cart);
+
+    res.render("user/home", {
+      products,
+      categories,
+      current: page,
+      user,
+      wishlist,
+      pages: Math.ceil(count / perPage),
+      cart,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error",
+    });
+  }
+};
+
+module.exports = { getHome };

@@ -24,10 +24,12 @@ const createProduct = async (req, res) => {
 
       await newProduct.save();
 
+      const category = await CategoryModel.findById(newProduct._id);
+
       return res.status(200).json({
         status: "success",
         message: "Product created successfully",
-        data: newProduct,
+        data: { newProduct, category },
       });
     } else {
       return res.status(404).json({
@@ -42,17 +44,18 @@ const createProduct = async (req, res) => {
 };
 
 //get all products in the products where listed
-const getAllProducts = async (req, res) => {
+const getProducts = async (req, res) => {
   try {
     const query = req.query.query || "";
     const page = req.query.page || 1;
     const perPage = 6;
     let products = await ProductModel.find({ name: new RegExp(query, "i") })
+      .sort({ createdAt: -1 })
       .skip((page - 1) * perPage)
       .limit(perPage);
     let categories = await CategoryModel.find();
 
-    if (!products) {
+    if (products.length < 1) {
       return res.render("admin/productManagementPage", {
         products: null,
         categories,
@@ -80,12 +83,12 @@ const getAllProducts = async (req, res) => {
 //for unlist the existing product
 const unlistProduct = async (req, res) => {
   try {
-    const productId = req.params.id;
+    const productId = req.params.productId;
     const { isListed } = req.body;
 
     const product = await ProductModel.findByIdAndUpdate(
       productId,
-      { isListed },
+      { isListed, updatedAt: Date.now() },
       { new: true }
     );
 
@@ -149,7 +152,7 @@ const updateProduct = async (req, res) => {
 };
 
 //for get the details about the corresponding product by id
-const getDetails = async (req, res) => {
+const getProductDetails = async (req, res) => {
   try {
     const productId = req.params.id;
     const product = await ProductModel.findById(productId);
@@ -180,10 +183,10 @@ const searchProducts = (req, res) => {
 };
 
 module.exports = {
-  getAllProducts,
+  getProducts,
   createProduct,
   updateProduct,
   unlistProduct,
-  getDetails,
+  getProductDetails,
   searchProducts,
 };

@@ -39,7 +39,7 @@ const getUsers = async (req, res) => {
 //block or unblock the user
 const blockUser = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId = req.params.userId;
     const { isBlocked } = req.body;
     const user = await UserModel.findByIdAndUpdate(
       userId,
@@ -57,7 +57,10 @@ const blockUser = async (req, res) => {
     return res.status(200).json({
       status: "success",
       message: "User status updated successfully",
-      data: user,
+      data: {
+        userId: user._id,
+        isBlocked: user.isBlocked,
+      },
     });
   } catch (error) {
     return res.status(500).json({

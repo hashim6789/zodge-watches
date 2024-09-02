@@ -1,7 +1,9 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const LocalStrategy = require("passport-local").Strategy;
 const User = require("../models/User");
 const authRoute = require("../routes/user/authRoute");
+const bcrypt = require("bcrypt");
 require("dotenv").config();
 
 /**----------------------USER SERIALIZERS------------------ */
@@ -24,7 +26,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/user/auth/google/signup/callback",
+      callbackURL: "/auth/google/signup/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -80,7 +82,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/user/auth/google/login/callback",
+      callbackURL: "/auth/google/login/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -111,6 +113,78 @@ passport.use(
         }
       } catch (error) {
         done(error);
+      }
+    }
+  )
+);
+
+/**----------------------GOOGLE STRATEGIES------------------ */
+
+// Local strategy for signup
+passport.use(
+  "local-signup",
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+      passReqToCallback: true, // Allows passing the entire request to the callback
+    },
+    async (req, email, password, done) => {
+      try {
+        let user = await User.findOne({ email });
+        if (user) {
+          return done(null, false, { message: "User already exists." });
+        }
+
+        const hashPassword = await bcrypt.hash(password, 10);
+        user = new User({
+          email,
+          password: hashPassword,
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+          isVerified: false,
+        });
+
+        await user.save();
+        return done(null, user);
+      } catch (err) {
+        return done(err);
+      }
+    }
+  )
+);
+
+// Local strategy for login
+passport.use(
+  "local-login",
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+    },
+    async (email, password, done) => {
+      try {
+        let user = await User.findOne({ email });
+        if (!user) {
+          return done(null, false, {
+            message: "Incorrect username or password.",
+          });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+          return done(null, false, {
+            message: "Incorrect username or password.",
+          });
+        }
+
+        if (user.isBlocked) {
+          return done(null, false, { message: "User is blocked." });
+        }
+
+        return done(null, user);
+      } catch (err) {
+        return done(err);
       }
     }
   )

@@ -24,6 +24,7 @@
         <span class="stext-109 cl4"> Shoping Cart </span>
       </div>
     </div>
+    <% console.log(cart.products[0])%>
 
     <!-- Shopping Cart -->
     <form class="bg0 p-t-75 p-b-85" action="/user/shop/cart" method="post">
@@ -31,7 +32,7 @@
         <div class="row">
           <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
             <div class="m-l-25 m-r--38 m-lr-0-xl">
-              <% if (cartProducts.length > 0) { %>
+              <% if (cart.products.length > 0) { %>
               <!-- Cart is not empty, show cart items -->
               <div class="wrap-table-shopping-cart">
                 <table class="table-shopping-cart">
@@ -44,50 +45,48 @@
                     <th class="column-6">Remove</th>
                   </tr>
 
-                  <% cartProducts.forEach(function(product) { %>
+                  <% cart.products.forEach(function(product) { %>
                   <tr class="table_row">
                     <td class="column-1">
                       <div class="how-itemcart1">
                         <button
                           id="cartProduct"
-                          data-product-id="<%= product.productId %>"
+                          data-product-id="<%= product.productId._id %>"
                         >
                           <img
-                            src="/public/uploads/<%= product.productImages[0] %>"
+                            src="/public/uploads/<%= product.productId.images[0] %>"
                             alt="IMG"
                           />
                         </button>
                       </div>
                     </td>
-                    <td class="column-2"><%= product.productName %></td>
-                    <td class="column-3">
-                      ₹ <%= product.productPrice.toFixed(2) %>
-                    </td>
+                    <td class="column-2"><%= product.productId.name %></td>
+                    <td class="column-3">₹ <%= product.price.toFixed(2) %></td>
                     <td class="column-4">
                       <div class="wrap-num-product flex-w m-l-auto m-r-0">
                         <div
                           class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m"
-                          onclick="updateQuantity('<%= product.productId %>', -1, '<%= product.productStock %>')"
+                          onclick="updateQuantity('<%= product.productId._id %>', -1, '<%= product.productId.stock %>')"
                         >
                           <i class="fs-16 zmdi zmdi-minus"></i>
                         </div>
                         <input
                           class="mtext-104 cl3 txt-center num-product"
                           type="number"
-                          name="num-product<%= product.productId %>"
+                          name="num-product<%= product.productId._id %>"
                           value="<%= product.quantity %>"
-                          data-stock="<%= product.stock %>"
+                          data-stock="<%= product.productId.stock %>"
                           disabled
                         />
                         <div
                           class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m"
-                          onclick="updateQuantity('<%= product.productId %>', 1, '<%= product.productStock %>')"
+                          onclick="updateQuantity('<%= product.productId._id %>', 1, '<%= product.productId.stock %>')"
                         >
                           <i class="fs-16 zmdi zmdi-plus"></i>
                         </div>
                       </div>
                       <div
-                        id="feedback-<%= product.productId %>"
+                        id="feedback-<%= product.productId._id %>"
                         class="invalid-feedback"
                         style="display: none; color: red"
                       >
@@ -95,13 +94,15 @@
                       </div>
                     </td>
                     <td class="column-5">
-                      ₹ <%= (product.productPrice * product.quantity).toFixed(2)
-                      %>
+                      ₹
+                      <span id="totalPrice-<%= product.productId._id%>">
+                        <%= (product.price * product.quantity).toFixed(2) %>
+                      </span>
                     </td>
                     <td class="column-6">
                       <button
                         class="btn-delete-product"
-                        onclick="removeFromCart('<%= product.productId %>')"
+                        onclick="removeFromCart('<%= product.productId._id %>')"
                         title="Remove item"
                       >
                         <i class="zmdi zmdi-delete p-3 fs-20"></i>
@@ -126,7 +127,7 @@
           </div>
 
           <!-- Cart totals section -->
-          <% if (cartProducts.length > 0) { %>
+          <% if (cart.products.length > 0) { %>
           <div class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
             <div
               class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm"
@@ -137,7 +138,9 @@
                   <span class="stext-110 cl2"> Subtotal: </span>
                 </div>
                 <div class="size-209">
-                  <span class="mtext-110 cl2">₹ <%= cart.totalPrice %></span>
+                  <span id="subtotal" class="mtext-110 cl2"
+                    >₹ <%= (cart.totalPrice).toFixed(2) %></span
+                  >
                 </div>
               </div>
               <div class="flex-w flex-t p-t-27 p-b-33">
@@ -145,7 +148,9 @@
                   <span class="mtext-101 cl2"> Total: </span>
                 </div>
                 <div class="size-209 p-t-1">
-                  <span class="mtext-110 cl2">₹ <%= cart.totalPrice %></span>
+                  <span class="mtext-110 cl2"
+                    >₹ <%= (cart.totalPrice).toFixed(2) %></span
+                  >
                 </div>
               </div>
               <button
@@ -190,7 +195,7 @@
           feedback.textContent =
             "You can purchase a maximum of 3 units per product.";
           feedback.style.display = "block";
-          inputField.value = maxPerPerson;
+          inputField.value = maxQuantityPerPerson;
         } else if (newQuantity <= 0) {
           // Ensure quantity doesn't go below 1
           inputField.value = 1;
@@ -206,7 +211,13 @@
               changeQuantity,
             })
             .then((response) => {
-              console.log("Quantity updated:", response.data);
+              const product = response.data.product;
+              console.log("Quantity updated:", product);
+              document.getElementById(`totalPrice-${productId}`).innerText = (
+                product.price * product.quantity
+              ).toFixed(2);
+              document.getElementById("subtotal").innerHTML =
+                response.data.cartTotal.toFixed(2);
               // Optionally, update the UI with the new cart data
               // location.reload(); // Refresh the page or update the cart section
             })

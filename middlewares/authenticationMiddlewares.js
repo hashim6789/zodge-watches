@@ -14,7 +14,7 @@ const isAuthenticatedUser = (req, res, next) => {
   if (req.session?.user || req.session.passport?.user?.role === "User") {
     return next();
   } else {
-    return res.redirect("/user/auth/login");
+    return res.redirect("/auth/login");
   }
 };
 
@@ -29,7 +29,7 @@ const checkBlocked = async (req, res, next) => {
   if (!user.isBlocked) {
     return next();
   }
-  res.redirect("/user/auth/logout");
+  res.redirect("/auth/logout");
 };
 
 // for login, signup
@@ -40,7 +40,7 @@ const redirectIfAuthenticated = (req, res, next) => {
     req.session?.user?.role === "User" ||
     req.session?.passport?.user?.role === "User"
   ) {
-    const returnTo = req.session.returnTo || "/user/auth/home"; // Use the stored return URL or default to home
+    const returnTo = req.session.returnTo || "/auth/home"; // Use the stored return URL or default to home
     delete req.session.returnTo; // Clear it after using
     return res.redirect(returnTo);
   }

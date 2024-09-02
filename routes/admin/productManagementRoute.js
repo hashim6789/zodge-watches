@@ -3,31 +3,31 @@ const multer = require("multer");
 const path = require("path");
 const router = express.Router();
 
-//for Authentication
+// //for Authentication
 const {
   isAuthenticatedAdmin,
-} = require("../middlewares/authenticationMiddlewares");
+} = require("../../middlewares/authenticationMiddlewares");
 
-//for Authorization
+// //for Authorization
 const {
   authorizeAdmin,
   authorizeAdminForModule,
-} = require("../middlewares/authorizationMiddlewares");
+} = require("../../middlewares/authorizationMiddlewares");
 
-// functions for product module
+// // functions for product module
 const {
-  getAllProducts,
+  getProducts,
   createProduct,
   updateProduct,
   unlistProduct,
-  getDetails,
+  getProductDetails,
   searchProducts,
-} = require("../controllers/productController");
+} = require("../../controllers/productController");
 
-//for uploading the images of the products
+// //for uploading the images of the products
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../public/uploads"));
+    cb(null, path.join(__dirname, "../../public/uploads"));
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
@@ -36,13 +36,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// for testing purposes
-// const test = (req, res, next) => {
-//   console.log(req.url);
-//   next();
-// };
+// // for testing purposes
+// // const test = (req, res, next) => {
+// //   console.log(req.url);
+// //   next();
+// // };
 
-//validate the image count at least 3
+// //validate the image count at least 3
 const validateImageCount = (req, res, next) => {
   if (req.files.length < 3) {
     return res
@@ -52,18 +52,18 @@ const validateImageCount = (req, res, next) => {
   next();
 };
 
-// get - /admin/products
+// // get - /admin/products
 router.get(
   "/",
   isAuthenticatedAdmin,
   authorizeAdmin,
   authorizeAdminForModule("productManagement"),
-  getAllProducts
+  getProducts
 );
 
-// post - /admin/products/create
+// // post - /admin/products/create
 router.post(
-  "/create",
+  "/",
   isAuthenticatedAdmin,
   authorizeAdmin,
   authorizeAdminForModule("productManagement"),
@@ -72,7 +72,7 @@ router.post(
   createProduct
 );
 
-//put - /admin/products/edit/:id
+// //put - /admin/products/edit/:id
 router.put(
   "/edit/:id",
   isAuthenticatedAdmin,
@@ -82,25 +82,25 @@ router.put(
   updateProduct
 );
 
-//patch - /admin/products/unlist/:id
+// //patch - /admin/products/unlist/:id
 router.patch(
-  "/unlist/:id",
+  "/:productId/unlist",
   isAuthenticatedAdmin,
   authorizeAdmin,
   authorizeAdminForModule("productManagement"),
   unlistProduct
 );
 
-//get - /admin/products/details/:id
+// //get - /admin/products/details/:id
 router.get(
   "/details/:id",
   isAuthenticatedAdmin,
   authorizeAdmin,
   authorizeAdminForModule("productManagement"),
-  getDetails
+  getProductDetails
 );
 
-//get - /admin/products/search
+// //get - /admin/products/search
 router.get("/search", searchProducts);
 
 module.exports = router;

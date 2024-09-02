@@ -74,17 +74,25 @@ document
     const email = document.getElementById("forgotEmail").value;
 
     axios
-      .post("/user/auth/reset-password", {
+      .post("/auth/reset-password", {
         email: email,
       })
       .then((response) => {
-        alert(response.data.message);
+        // $("#forgotPasswordModal").modal("hide");
+        Swal.fire({
+          title: "Success!",
+          text: `${response.data.message}`,
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       })
       .catch((error) => {
         console.error("There was an error resetting the password!", error);
-        alert(
-          error.response.data.message ||
-            "An error occurred while trying to reset your password."
-        );
+        Swal.fire({
+          title: "Error!",
+          text: `${error.response.data.message}`,
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       });
   });

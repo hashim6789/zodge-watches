@@ -67,6 +67,7 @@
                             <td><%= user.email %></td>
                             <td>
                               <button
+                                id="blockButton-<%= user._id %>"
                                 class="btn <%= user.isBlocked ? 'btn-success' : 'btn-danger' %>"
                                 onclick="confirmAndToggleBlock('<%= user._id %>', '<%= user.isBlocked %>')"
                               >

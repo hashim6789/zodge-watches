@@ -1,33 +1,33 @@
 const express = require("express");
 const router = express.Router();
 
-//for Authentication
+// //for Authentication
 const {
   isAuthenticatedAdmin,
-} = require("../middlewares/authenticationMiddlewares");
+} = require("../../middlewares/authenticationMiddlewares");
 
-//for Authorization
+// //for Authorization
 const {
   authorizeAdmin,
   authorizeAdminForModule,
-} = require("../middlewares/authorizationMiddlewares");
+} = require("../../middlewares/authorizationMiddlewares");
 
-//function for category module
+// //function for category module
 const {
   getCategory,
   createCategory,
   editCategory,
   unlistCategory,
   searchCategories,
-} = require("../controllers/categoryController");
+} = require("../../controllers/categoryController");
 
-//for testing purpose
-// const test = (req, res, next) => {
-//   console.log(req.url);
-//   next();
-// };
+// //for testing purpose
+// // const test = (req, res, next) => {
+// //   console.log(req.url);
+// //   next();
+// // };
 
-//get - admin/categories/
+// //get - admin/categories/
 router.get(
   "/",
   isAuthenticatedAdmin,
@@ -36,34 +36,34 @@ router.get(
   getCategory
 );
 
-//post - admin/categories/create
+// //post - admin/categories/create
 router.post(
-  "/create",
+  "/",
   isAuthenticatedAdmin,
   authorizeAdmin,
   authorizeAdminForModule("categoryManagement"),
   createCategory
 );
 
-//put - admin/categories/edit/:id
+// //put - admin/categories/edit/:id
 router.put(
-  "/edit/:id",
+  "/:categoryId",
   isAuthenticatedAdmin,
   authorizeAdmin,
   authorizeAdminForModule("categoryManagement"),
   editCategory
 );
 
-//patch - admin/categories/unlist/:id
+// //patch - admin/categories/unlist/:id
 router.patch(
-  "/unlist/:id",
+  "/:categoryId/unlist",
   isAuthenticatedAdmin,
   authorizeAdmin,
   authorizeAdminForModule("categoryManagement"),
   unlistCategory
 );
 
-//get - /admin/categories/search
+// //get - /admin/categories/search
 router.get("/search", searchCategories);
 
 module.exports = router;

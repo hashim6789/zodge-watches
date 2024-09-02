@@ -759,7 +759,7 @@ const flatNo = document.getElementById('flatNo').value;
           // });
 
           axios
-            .post("/user/profile/address", data)
+            .post("/account/address", data)
             .then((response) => {
               if (response.status === 201) {
                 location.reload();
@@ -786,7 +786,7 @@ const flatNo = document.getElementById('flatNo').value;
 
           try {
             const response = await axios.patch(
-              "/user/profile/personal/<%= user._id %>",
+              "/account/personal/<%= user._id %>",
               data
             );
             if (response.status === 200) {
@@ -825,7 +825,7 @@ const flatNo = document.getElementById('editFlatNo').value;
 
           try {
             const response = await axios.put(
-              `/user/profile/address/${addressId}`,
+              `/account/address/${addressId}`,
               {
                 addressId,
                 firstName,
@@ -855,7 +855,7 @@ const flatNo = document.getElementById('editFlatNo').value;
      <script>function deleteAddress(addressId) {
       if (confirm('Are you sure you want to delete this address?')) {
         axios
-          .delete(`/user/profile/address/${addressId}`) 
+          .delete(`/account/address/${addressId}`) 
           .then(function (response) {
             document.querySelector(`[data-address-id='${addressId}']`).closest('.list-group-item').remove();
             alert('Address deleted successfully.');
@@ -870,7 +870,7 @@ const flatNo = document.getElementById('editFlatNo').value;
     <!-- for cancel the order -->
     <script>
       function cancelOrder(orderId){
-        axios.patch(`/user/profile/orders/cancel/${orderId}`).then((response) => {
+        axios.patch(`/account/orders/cancel/${orderId}`).then((response) => {
           const updatedStatus = response.data.order.orderStatus;
           if(updatedStatus === "cancelled"){
             document.getElementById("cancelButton").style.display = "none";
@@ -901,7 +901,7 @@ const flatNo = document.getElementById('editFlatNo').value;
   }
 
   // Use Axios to send the return request
-  axios.post('/user/profile/orders/return', {
+  axios.post('/account/orders/return', {
     orderId,
     returnReason
   })
@@ -948,7 +948,7 @@ const flatNo = document.getElementById('editFlatNo').value;
       
         const email = document.getElementById('email').value;
       
-        axios.post('/user/auth/reset-password', {
+        axios.post('/auth/reset-password', {
           email: email
         })
         .then(response => {

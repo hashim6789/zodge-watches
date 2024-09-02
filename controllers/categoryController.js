@@ -10,6 +10,7 @@ const getCategory = async (req, res) => {
 
     let categories = [];
     categories = await CategoryModel.find({ name: new RegExp(query, "i") })
+      .sort({ createdAt: -1 })
       .skip((page - 1) * perPage)
       .limit(perPage);
     if (!categories) {
@@ -42,19 +43,22 @@ const createCategory = async (req, res) => {
   try {
     let { categoryName } = req.body;
     categoryName = categoryName.toUpperCase();
-    console.log(categoryName);
     let category = await CategoryModel.findOne({ name: categoryName });
     console.log(category);
     if (!category) {
       category = new CategoryModel({
         name: categoryName,
         isListed: true,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       });
       await category.save();
       return res.status(200).json({
         status: "success",
         message: "category created successfully",
-        data: category,
+        data: {
+          category,
+        },
       });
     } else {
       return res.status(404).json({
@@ -73,12 +77,25 @@ const createCategory = async (req, res) => {
 //for edit the existing category
 const editCategory = async (req, res) => {
   try {
-    const categoryId = req.params.id;
+    const categoryId = req.params.categoryId;
     const { categoryName } = req.body;
+
+    console.log(categoryName);
+    // Check if the new category name already exists
+    const existingCategory = await CategoryModel.findOne({
+      name: categoryName,
+    });
+
+    if (existingCategory && existingCategory._id.toString() !== categoryId) {
+      return res.status(400).json({
+        status: "error",
+        message: "Category name already exists",
+      });
+    }
 
     const category = await CategoryModel.findByIdAndUpdate(
       categoryId,
-      { name: categoryName },
+      { name: categoryName, updatedAt: Date.now() },
       { new: true }
     );
 
@@ -105,12 +122,12 @@ const editCategory = async (req, res) => {
 //for unlist the existing category
 const unlistCategory = async (req, res) => {
   try {
-    const categoryId = req.params.id;
+    const categoryId = req.params.categoryId;
     const { isListed } = req.body;
 
     const category = await CategoryModel.findByIdAndUpdate(
       categoryId,
-      { isListed },
+      { isListed, updatedAt: Date.now() },
       { new: true }
     );
 

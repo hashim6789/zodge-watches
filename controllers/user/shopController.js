@@ -6,6 +6,8 @@ const AddressModel = require("../../models/Address");
 const OrderModel = require("../../models/Order");
 const WishlistModel = require("../../models/Wishlist");
 
+const { v4: uuidv4 } = require("uuid");
+
 //for rendering the quick view (Product details page);
 const quickView = async (req, res) => {
   try {
@@ -251,46 +253,19 @@ const getCart = async (req, res) => {
   try {
     const userId = req.session?.user?._id || req.session?.passport?.user?.id;
     const user = await UserModel.findById(userId);
-    const cart = await CartModel.findOne({ userId });
+    const cart = await CartModel.findOne({ userId }) // Find cart by user ID
+      .populate({
+        path: "products.productId", // Populate the productId field in products array
+        select: "_id name images stock", // Specify which fields to include from Products
+      });
     const wishlist = await WishlistModel.findOne({ userId }).populate(
       "productIds",
       "name price images"
     );
-    const cartProducts = await CartModel.aggregate([
-      {
-        $match: {
-          _id: cart._id,
-        },
-      },
-      {
-        $unwind: "$products",
-      },
-      {
-        $lookup: {
-          from: "products",
-          localField: "products.productId",
-          foreignField: "_id",
-          as: "cartProductDetails",
-        },
-      },
-      {
-        $unwind: "$cartProductDetails",
-      },
-      {
-        $project: {
-          productName: "$cartProductDetails.name",
-          productImages: "$cartProductDetails.images",
-          productId: "$cartProductDetails._id",
-          productPrice: "$cartProductDetails.price",
-          quantity: "$products.quantity",
-          productStock: "$cartProductDetails.stock",
-        },
-      },
-    ]);
 
     req.session.steps = [];
     // const cartProducts = await ProductModel.find({ _id: { $in: productIds } });
-    res.render("user/cartPage", { cart, user, cartProducts, wishlist });
+    res.render("user/cartPage", { cart, user, wishlist });
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
   }
@@ -330,6 +305,7 @@ const addToCart = async (req, res) => {
       cart.products.push({
         productId: productId,
         quantity: quantity,
+        price: product.price,
       });
     }
 
@@ -393,9 +369,12 @@ const updateQuantity = async (req, res) => {
     cart.updatedAt = Date.now();
     await cart.save();
 
-    return res
-      .status(200)
-      .json({ status: "Success", message: "The quantity is updated", cart });
+    return res.status(200).json({
+      status: "Success",
+      message: "The quantity is updated",
+      product: cart.products[productIdx],
+      cartTotal: cart.totalPrice,
+    });
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
   }
@@ -501,20 +480,21 @@ const getCheckout = async (req, res) => {
   try {
     const userId = req.session?.user?._id || req.session?.passport?.user?.id;
     const user = await UserModel.findById(userId);
-    const cart = await CartModel.findOne({ userId });
-    const cartProducts = [...req.session.cartProducts];
+    const cart = await CartModel.findOne({ userId }) // Find cart by user ID
+      .populate({
+        path: "products.productId", // Populate the productId field in products array
+        select: "_id name images stock", // Specify which fields to include from Products
+      });
     const wishlist = await WishlistModel.findOne({ userId }).populate(
       "productIds",
       "name price images"
     );
+    console.log("cart = ", cart.products[0]);
 
-    req.session.steps = ["cart"];
-    return res.render("user/checkoutPage", {
-      user,
-      cart,
-      cartProducts,
-      wishlist,
-    });
+    const addresses = await AddressModel.find({ userId });
+
+    // const cartProducts = await ProductModel.find({ _id: { $in: productIds } });
+    res.render("user/checkoutPage", { cart, user, wishlist, addresses });
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
   }
@@ -531,79 +511,79 @@ const postCheckout = (req, res) => {
   }
 };
 
-const getDeliveryAddress = async (req, res) => {
-  try {
-    const userId = req.session?.user?._id || req.session?.passport?.user?.id;
-    const user = await UserModel.findById(userId);
-    const cart = await CartModel.findOne({ userId });
-    const addresses = await AddressModel.find({ userId });
-    const wishlist = await WishlistModel.findOne({ userId }).populate(
-      "productIds",
-      "name price images"
-    );
+// const getDeliveryAddress = async (req, res) => {
+//   try {
+//     const userId = req.session?.user?._id || req.session?.passport?.user?.id;
+//     const user = await UserModel.findById(userId);
+//     const cart = await CartModel.findOne({ userId });
+//     const addresses = await AddressModel.find({ userId });
+//     const wishlist = await WishlistModel.findOne({ userId }).populate(
+//       "productIds",
+//       "name price images"
+//     );
 
-    req.session.steps = ["cart", "checkout"];
-    res.render("user/deliveryAddressPage", {
-      cart,
-      user,
-      addresses,
-      wishlist,
-    });
-  } catch (err) {
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
-  }
-};
+//     req.session.steps = ["cart", "checkout"];
+//     res.render("user/deliveryAddressPage", {
+//       cart,
+//       user,
+//       addresses,
+//       wishlist,
+//     });
+//   } catch (err) {
+//     res.status(500).json({ status: "Error", message: "Server Error!!!" });
+//   }
+// };
 
-const postDeliveryAddress = async (req, res) => {
-  try {
-    const { selectedAddress } = req.body;
-    const Address = await AddressModel.findById(selectedAddress);
-    req.session.selectedAddress = Address;
+// const postDeliveryAddress = async (req, res) => {
+//   try {
+//     const { selectedAddress } = req.body;
+//     const Address = await AddressModel.findById(selectedAddress);
+//     req.session.selectedAddress = Address;
 
-    if (!req.session.steps.includes("address")) {
-      req.session.steps.push("address");
-    }
+//     if (!req.session.steps.includes("address")) {
+//       req.session.steps.push("address");
+//     }
 
-    res.redirect("/user/shop/payment");
-  } catch (err) {
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
-  }
-};
+//     res.redirect("/user/shop/payment");
+//   } catch (err) {
+//     res.status(500).json({ status: "Error", message: "Server Error!!!" });
+//   }
+// };
 
-const getPayment = async (req, res) => {
-  try {
-    const userId = req.session?.user?._id || req.session?.passport?.user?.id;
-    const user = await UserModel.findById(userId);
-    const cart = await CartModel.findOne({ userId });
-    const wishlist = await WishlistModel.findOne({ userId }).populate(
-      "productIds",
-      "name price images"
-    );
-    req.session.steps = ["cart", "checkout", "address"];
+// const getPayment = async (req, res) => {
+//   try {
+//     const userId = req.session?.user?._id || req.session?.passport?.user?.id;
+//     const user = await UserModel.findById(userId);
+//     const cart = await CartModel.findOne({ userId });
+//     const wishlist = await WishlistModel.findOne({ userId }).populate(
+//       "productIds",
+//       "name price images"
+//     );
+//     req.session.steps = ["cart", "checkout", "address"];
 
-    res.render("user/paymentMethodsPage", {
-      cart,
-      user,
-      wishlist,
-    });
-  } catch (err) {
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
-  }
-};
+//     res.render("user/paymentMethodsPage", {
+//       cart,
+//       user,
+//       wishlist,
+//     });
+//   } catch (err) {
+//     res.status(500).json({ status: "Error", message: "Server Error!!!" });
+//   }
+// };
 
-const postPayment = async (req, res) => {
-  try {
-    const { selectedPaymentMethod } = req.body;
-    req.session.selectedPaymentMethod = selectedPaymentMethod;
+// const postPayment = async (req, res) => {
+//   try {
+//     const { selectedPaymentMethod } = req.body;
+//     req.session.selectedPaymentMethod = selectedPaymentMethod;
 
-    if (!req.session.steps.includes("payment")) {
-      req.session.steps.push("payment");
-    }
-    res.redirect("/user/shop/summary");
-  } catch (err) {
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
-  }
-};
+//     if (!req.session.steps.includes("payment")) {
+//       req.session.steps.push("payment");
+//     }
+//     res.redirect("/user/shop/summary");
+//   } catch (err) {
+//     res.status(500).json({ status: "Error", message: "Server Error!!!" });
+//   }
+// };
 
 const getSummary = async (req, res) => {
   try {
@@ -649,6 +629,7 @@ const postPlaceOrder = async (req, res) => {
     });
 
     const order = new OrderModel({
+      orderId: generateOrderId(),
       userId,
       address,
       products,
@@ -704,18 +685,34 @@ const getSuccessPage = (req, res) => {
     req.session.steps = null;
 
     req.session.steps = [];
-    return res
-      .status(200)
-      .render("user/orderSuccessPage", { orderId: generateOrderId(userId) });
+    return res.status(200).render("user/orderSuccessPage", { orderId });
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
   }
 };
 
-function generateOrderId(userId) {
-  const timestamp = Date.now();
-  const orderId = `ORD-${userId}${timestamp}`;
-  return orderId;
+function generateOrderId() {
+  // Fixed prefix for the order
+  const prefix = "ORD";
+
+  // Get the current timestamp in YYYYMMDDHHMMSS format
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+  const timestamp = `${year}${month}${day}${hours}${minutes}${seconds}`;
+
+  // Generate a UUID and extract the first 4 alphanumeric characters
+  const uuidSegment = uuidv4()
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .substring(0, 4)
+    .toUpperCase();
+
+  // Combine all parts to form the order ID
+  return `${prefix}${timestamp}${uuidSegment}`;
 }
 
 module.exports = {
@@ -733,10 +730,10 @@ module.exports = {
   deleteCartProduct,
   getCheckout,
   postCheckout,
-  getDeliveryAddress,
-  postDeliveryAddress,
-  getPayment,
-  postPayment,
+  // getDeliveryAddress,
+  // postDeliveryAddress,
+  // getPayment,
+  // postPayment,
   getSummary,
   postPlaceOrder,
   getSuccessPage,

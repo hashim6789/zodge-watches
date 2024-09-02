@@ -74,7 +74,9 @@
                             <td>
                               <%= ((current - 1) * perPage) + (idx + 1) %>
                             </td>
-                            <td><%= category.name %></td>
+                            <td id="categoryName-<%= category._id %>">
+                              <%= category.name %>
+                            </td>
                             <td>
                               <button
                                 class="btn btn-primary"
@@ -88,6 +90,7 @@
                               </button>
 
                               <button
+                                id="listButton-<%= category._id%>"
                                 class="btn <%= category.isListed ? 'btn-danger' : 'btn-success' %>"
                                 onclick="confirmAndToggleListCategory('<%= category._id %>', '<%= category.isListed %>')"
                               >
@@ -263,6 +266,15 @@
     <!-- for modals -->
     <!-- for axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- SweetAlert2 CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+
     <script src="/public/user/js/categoryManagement.js"></script>
 
     <!-- partial:partials/_footer.ejs -->

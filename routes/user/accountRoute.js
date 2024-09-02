@@ -11,34 +11,48 @@ const {
 const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
 
 const {
-  getProfile,
+  getAccount,
+  getPersonalInfo,
+  updatePersonalInfo,
   updatePersonal,
+  getAddresses,
+  getAddressDetails,
+  editAddressDetails,
+  deleteAddressDetails,
   postAddress,
   editAddress,
   deleteAddress,
   getOrderDetail,
   cancelOrder,
   sendReturnRequest,
-} = require("../../controllers/user/profileController");
+} = require("../../controllers/user/accountController");
 
 const router = express();
 
 // //for testing purpose
-// const test = (req, res, next) => {
-//   console.log(req.url);
-//   next();
-// };
+const test = (req, res, next) => {
+  console.log("yes, tested this route");
+  next();
+};
 
-//get - /user/profile
-router.get("/", checkBlocked, isAuthenticatedUser, authorizeUser, getProfile);
+//get - /account
+router.get("/", checkBlocked, isAuthenticatedUser, authorizeUser, getAccount);
 
-//patch - /user/profile/personal/:id
+router.get("/api/personal-info", getPersonalInfo);
+router.post("/api/personal-info/", updatePersonalInfo);
+
+//patch - /account/personal/:id
 router.patch(
   "/personal/:id",
   isAuthenticatedUser,
   authorizeUser,
   updatePersonal
 );
+
+router.get("/api/addresses", test, getAddresses);
+router.get("/api/address/:addressId", getAddressDetails);
+router.put("/api/address/:addressId", test, editAddressDetails);
+router.delete("/api/address/:addressId", test, deleteAddressDetails);
 
 //post - /user/profile/address
 router.post(

@@ -1,32 +1,32 @@
 const express = require("express");
 const router = express.Router();
 
-//for Authentication
+// //for Authentication
 const {
   isAuthenticatedAdmin,
-} = require("../middlewares/authenticationMiddlewares");
+} = require("../../middlewares/authenticationMiddlewares");
 
-//for Authorization
+// //for Authorization
 const {
   authorizeAdmin,
   authorizeAdminForModule,
-} = require("../middlewares/authorizationMiddlewares");
+} = require("../../middlewares/authorizationMiddlewares");
 
-//function for category module
+// //function for category module
 const {
   getOrders,
   getOrderDetails,
   updateOrderStatus,
   handleReturnRequest,
-} = require("../controllers/orderController");
+} = require("../../controllers/orderController");
 
-//for testing purpose
-const test = (req, res, next) => {
-  console.log(req.url);
-  next();
-};
+// //for testing purpose
+// const test = (req, res, next) => {
+//   console.log(req.url);
+//   next();
+// };
 
-//get - /admin/orders/
+// //get - /admin/orders/
 router.get(
   "/",
   isAuthenticatedAdmin,
@@ -35,7 +35,7 @@ router.get(
   getOrders
 );
 
-//get - /admin/orders/:id
+// //get - /admin/orders/:id
 router.get(
   "/:orderId",
   isAuthenticatedAdmin,
@@ -44,7 +44,7 @@ router.get(
   getOrderDetails
 );
 
-//patch - `/admin/orders/:orderId`
+// //patch - `/admin/orders/:orderId`
 router.patch(
   "/change-status/:id",
   isAuthenticatedAdmin,

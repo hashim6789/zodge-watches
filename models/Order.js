@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const { Schema, Types } = mongoose;
 
 const OrdersSchema = new Schema({
+  orderId: { type: String, required: true },
   products: [
     {
       price: { type: Number, required: true },

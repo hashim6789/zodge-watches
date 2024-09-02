@@ -50,7 +50,7 @@
                 <h2 class="fs-6 fw-normal text-center mb-4">
                   Log in to your account
                 </h2>
-                <form id="loginForm" action="/user/auth/login" method="post">
+                <form id="loginForm" action="/auth/login" method="post">
                   <div class="row gy-2 overflow-hidden">
                     <div class="col-12">
                       <div class="form-floating mb-3">
@@ -116,7 +116,7 @@
                 </form>
 
                 <div class="col-12 mb-3">
-                  <a href="/user/auth/google/login">
+                  <a href="/auth/google/login">
                     <button
                       class="btn btn-google d-flex align-items-center justify-content-center w-100"
                     >
@@ -133,7 +133,7 @@
                   <p class="m-0 text-center">
                     Don't have an account?
                     <a
-                      href="/user/auth/signup"
+                      href="/auth/signup"
                       class="link-primary text-decoration-none"
                       >Sign up</a
                     >
@@ -195,6 +195,14 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- SweetAlert2 CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
     <script src="/public/user/js/login.js"></script>
   </body>
 </html>

@@ -16,6 +16,11 @@
       integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
       crossorigin="anonymous"
     ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
   </head>
   <body>
     <!-- OTP Verification Form -->
@@ -41,7 +46,7 @@
                 <h2 class="fs-6 fw-normal text-center mb-4">
                   Enter the OTP sent to your email <%= email %>
                 </h2>
-                <form id="otpForm" action="/user/auth/verify-otp" method="post">
+                <form id="otpForm" action="/auth/otp" method="post">
                   <div class="row gy-2 justify-content-center">
                     <div class="col-auto">
                       <input
@@ -118,6 +123,7 @@
     </section>
     <!-- Include Axios library (if not already included) -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
     <script src="/public/user/js/otpGenerator.js"></script>
   </body>
 </html>
