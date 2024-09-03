@@ -16,7 +16,7 @@
     <!-- breadcrumb -->
     <div class="container pt-5">
       <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-        <a href="/user/auth/home" class="stext-109 cl8 hov-cl1 trans-04">
+        <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
           Home
           <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
         </a>
@@ -27,7 +27,7 @@
     <% console.log(cart.products[0])%>
 
     <!-- Shopping Cart -->
-    <form class="bg0 p-t-75 p-b-85" action="/user/shop/cart" method="post">
+    <form class="bg0 p-t-75 p-b-85" action="/cart" method="post">
       <div class="container">
         <div class="row">
           <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
@@ -46,7 +46,10 @@
                   </tr>
 
                   <% cart.products.forEach(function(product) { %>
-                  <tr class="table_row">
+                  <tr
+                    class="table_row"
+                    data-product-id="<%= product.productId._id %>"
+                  >
                     <td class="column-1">
                       <div class="how-itemcart1">
                         <button
@@ -116,7 +119,7 @@
               <div class="text-center">
                 <p class="mtext-103 cl2">Your cart is currently empty.</p>
                 <a
-                  href="/user/auth/home"
+                  href="/"
                   class="flex-c-m stext-101 cl2 size-116 bg8 bor14 hov-btn3 p-lr-15 trans-04 pointer m-tb-10"
                   >Continue Shopping</a
                 >
@@ -176,111 +179,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-      function updateQuantity(productId, changeQuantity, stock) {
-        const inputField = document.querySelector(
-          `input[name="num-product${productId}"]`
-        );
-        const currentQuantity = parseInt(inputField.value);
-        const newQuantity = currentQuantity + changeQuantity;
-        const feedback = document.getElementById(`feedback-${productId}`);
-        const maxQuantityPerPerson = 3;
-
-        if (newQuantity > stock) {
-          // Display feedback and prevent quantity change
-          feedback.style.display = "block";
-          inputField.value = stock;
-        } else if (newQuantity > maxQuantityPerPerson) {
-          feedback.textContent =
-            "You can purchase a maximum of 3 units per product.";
-          feedback.style.display = "block";
-          inputField.value = maxQuantityPerPerson;
-        } else if (newQuantity <= 0) {
-          // Ensure quantity doesn't go below 1
-          inputField.value = 1;
-          feedback.style.display = "none";
-        } else {
-          // Update quantity and hide feedback
-          inputField.value = newQuantity;
-          feedback.style.display = "none";
-
-          axios
-            .patch("/user/shop/cart/update-quantity", {
-              productId,
-              changeQuantity,
-            })
-            .then((response) => {
-              const product = response.data.product;
-              console.log("Quantity updated:", product);
-              document.getElementById(`totalPrice-${productId}`).innerText = (
-                product.price * product.quantity
-              ).toFixed(2);
-              document.getElementById("subtotal").innerHTML =
-                response.data.cartTotal.toFixed(2);
-              // Optionally, update the UI with the new cart data
-              // location.reload(); // Refresh the page or update the cart section
-            })
-            .catch((error) => {
-              console.error("Error updating quantity:", error);
-            });
-        }
-      }
-    </script>
-
-    <!-- <script>
-      function updateQuantity(productId, changeQuantity) {
-        console.log(changeQuantity);
-        axios
-          .patch("/user/shop/cart/update-quantity", {
-            productId,
-            changeQuantity,
-          })
-          .then((response) => {
-            console.log("Quantity updated:", response.data);
-            // Optionally, update the UI with the new cart data
-            location.reload(); // Refresh the page or update the cart section
-          })
-          .catch((error) => {
-            console.error("Error updating quantity:", error);
-          });
-      }
-    </script> -->
-
-    <script>
-      function removeFromCart(productId) {
-        console.log(productId);
-        if (confirm("Are you sure?")) {
-          axios
-            .delete(`/user/shop/cart/delete-product/${productId}`)
-            .then((response) => {
-              console.log("product deleted fron the cart", response.data);
-              location.reload();
-            })
-            .catch((err) => {
-              console.error("Error deleting product from the cart:", err);
-            });
-        }
-      }
-    </script>
-    <!-- <script>
-      document.querySelectorAll("#cartProduct").forEach((button) => {
-        button.addEventListener("click", function () {
-          const productId = this.getAttribute("data-product-id");
-          console.log(productId)
-          axios
-            .delete("/user/shop/cart/delete-product", { productId })
-            .then((response) => {
-              console.log(response.data.message);
-              location.reload(); // Optionally, remove the product from the UI or reload the page
-            })
-            .catch((error) => {
-              console.error(error);
-              alert("Error removing product from cart.");
-            });
-        });
-      });
-    </script> -->
     <!--===============================================================================================-->
     <script src="/public/user/vendor/jquery/jquery-3.2.1.min.js"></script>
     <!--===============================================================================================-->
@@ -318,6 +218,7 @@
       });
     </script>
     <!--===============================================================================================-->
+    <script src="/public/user/js/cartManagemnt.js"></script>
     <script src="/public/user/js/main.js"></script>
   </body>
 </html>

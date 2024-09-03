@@ -127,7 +127,7 @@ passport.use(
     {
       usernameField: "email",
       passwordField: "password",
-      passReqToCallback: true, // Allows passing the entire request to the callback
+      passReqToCallback: true,
     },
     async (req, email, password, done) => {
       try {

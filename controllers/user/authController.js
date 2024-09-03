@@ -4,7 +4,7 @@ const passport = require("passport");
 const crypto = require("crypto");
 const UserModel = require("../../models/User");
 const OtpModel = require("../../models/Otp");
-const ProductModel = require("../../models/ProductModel");
+const ProductModel = require("../../models/Product");
 const CategoryModel = require("../../models/Category");
 const CartModel = require("../../models/Cart");
 const WishlistModel = require("../../models/Wishlist");
@@ -297,7 +297,8 @@ const resendOtp = async (req, res) => {
 //for get login
 const getLogin = (req, res) => {
   try {
-    const error = req.query.error;
+    console.log("get login page");
+    const error = req.query.error || "";
     res.render("user/login", { msg: error });
   } catch (err) {
     res.status(500).json({

@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Make an Axios request to get the image path
       axios
-        .get(`/user/shop/getImagePath?index=${index}&id=${productId}`)
+        .get(`/shop/getImagePath?index=${index}&id=${productId}`)
         .then((response) => {
           const newSrc = response.data.src;
           mainImage.src = newSrc;

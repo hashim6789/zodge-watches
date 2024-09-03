@@ -1,39 +1,32 @@
-// const express = require("express");
-// const router = express.Router();
+const express = require("express");
+const router = express.Router();
 
-// //for Authentication
-// const {
-//   isAuthenticatedUser,
-//   checkBlocked,
-//   trackPreviousPage,
-// } = require("../../middlewares/authenticationMiddlewares");
+//for Authentication
+const {
+  isAuthenticatedUser,
+  checkBlocked,
+  trackPreviousPage,
+} = require("../../middlewares/authenticationMiddlewares");
 
-// //for Authorization
-// const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
+//for Authorization
+const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
 
-// const {
-//   quickView,
-//   getImage,
-//   filterCategoryProduct,
-//   filterAllProducts,
-//   searchProducts,
-//   addToWishlist,
-//   removeFromWishlist,
-//   getCart,
-//   postCart,
-//   addToCart,
-//   updateQuantity,
-//   deleteCartProduct,
-//   getCheckout,
-//   postCheckout,
-//   getDeliveryAddress,
-//   postDeliveryAddress,
-//   getPayment,
-//   postPayment,
-//   getSummary,
-//   postPlaceOrder,
-//   getSuccessPage,
-// } = require("../../controllers/user/shopController");
+const {
+  getProductDetails,
+  getImage,
+  filterCategoryProduct,
+  filterAllProducts,
+  searchProducts,
+  addToWishlist,
+  removeFromWishlist,
+
+  getCheckout,
+  postCheckout,
+
+  getSummary,
+  postPlaceOrder,
+  getSuccessPage,
+} = require("../../controllers/user/shopController");
 
 // // for testing purpose
 // const test = (req, res, next) => {
@@ -65,13 +58,13 @@
 //   };
 // }
 
-// //get the product details
-// //get - /user/shop/quickview/:id
-// router.get("/quickview/:id", checkBlocked, quickView);
+//get the product details
+//get - /shop/product/:id
+router.get("/products/:productId", checkBlocked, getProductDetails);
 
-// //get the product image url
-// //get - /user/shop/getImagePath
-// router.get("/getImagePath", getImage);
+//get the product image url
+//get - /shop/getImagePath
+router.get("/getImagePath", getImage);
 
 // //search the whole products
 // router.get("/filter/products", filterAllProducts);
@@ -206,4 +199,4 @@
 //   getSuccessPage
 // );
 
-// module.exports = router;
+module.exports = router;

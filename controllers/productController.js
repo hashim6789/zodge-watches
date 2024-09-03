@@ -1,4 +1,4 @@
-const ProductModel = require("../models/ProductModel");
+const ProductModel = require("../models/Product");
 const CategoryModel = require("../models/Category");
 
 // for create new product creation

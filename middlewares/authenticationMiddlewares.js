@@ -11,16 +11,18 @@ const isAuthenticatedAdmin = (req, res, next) => {
 
 // for user authentication
 const isAuthenticatedUser = (req, res, next) => {
-  if (req.session?.user || req.session.passport?.user?.role === "User") {
+  if (req.isAuthenticated()) {
     return next();
   } else {
-    return res.redirect("/auth/login");
+    res
+      .status(401)
+      .json({ message: "You need to log in to perform this action." });
   }
 };
 
 //check if the user is blocked
 const checkBlocked = async (req, res, next) => {
-  const email = req.session?.user?.email || req.session?.passport?.user?.email;
+  const email = req.user?.email;
   let user = { isBlocked: false };
   console.log(email);
   if (email) {
@@ -36,11 +38,8 @@ const checkBlocked = async (req, res, next) => {
 const redirectIfAuthenticated = (req, res, next) => {
   if (req.session?.admin && req.session?.admin?.role === "Admin") {
     return res.redirect("/admin/dashboard");
-  } else if (
-    req.session?.user?.role === "User" ||
-    req.session?.passport?.user?.role === "User"
-  ) {
-    const returnTo = req.session.returnTo || "/auth/home"; // Use the stored return URL or default to home
+  } else if (req.isAuthenticated()) {
+    const returnTo = req.session.returnTo || "/"; // Use the stored return URL or default to home
     delete req.session.returnTo; // Clear it after using
     return res.redirect(returnTo);
   }
