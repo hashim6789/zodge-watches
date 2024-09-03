@@ -304,6 +304,33 @@
           .then((response) => {
             console.log(response.data.product);
             const product = response.data.product;
+
+            // Update local storage
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+            console.log("localStorage = ", localStorage.getItem("cart"));
+
+            // Check if the product is already in the cart
+            const existingProductIndex = cart.findIndex(
+              (item) => item.productId === productId
+            );
+
+            if (existingProductIndex !== -1) {
+              // If the product exists, update the quantity
+              cart[existingProductIndex].quantity = quantity;
+            } else {
+              // If the product does not exist, add it to the cart
+              cart.push({
+                productId: productId,
+                name: product.name,
+                price: product.price, // Assuming price is available in the response
+                quantity: quantity,
+              });
+            }
+
+            // Save the updated cart back to local storage
+            localStorage.setItem("cart", JSON.stringify(cart));
+            console.log("localStorage = ", localStorage.getItem("cart"));
+
             // SweetAlert for success message
             Swal.fire({
               icon: "success",
@@ -340,6 +367,7 @@
           });
       }
     </script>
+
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Select all the decrement buttons

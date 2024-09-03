@@ -26,6 +26,16 @@ function updateQuantity(productId, changeQuantity, stock) {
     inputField.value = newQuantity;
     feedback.style.display = "none";
 
+    // Update local storage
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const productIndex = cart.findIndex((item) => item.productId === productId);
+
+    if (productIndex !== -1) {
+      cart[productIndex].quantity = newQuantity;
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+
+    // Send the updated quantity to the server
     axios
       .patch("/cart/update-quantity", {
         productId,
@@ -73,6 +83,7 @@ function updateQuantity(productId, changeQuantity, stock) {
 
 function removeFromCart(productId) {
   event.preventDefault(); // Prevent form submission
+
   // Use SweetAlert2 to create a confirmation dialog
   Swal.fire({
     title: "Are you sure?", // The title of the alert
@@ -99,11 +110,16 @@ function removeFromCart(productId) {
             productRow.remove();
           }
 
-          //   document.getElementById(`totalPrice-${productId}`).innerText = (
-          //   product.price * product.quantity
-          // ).toFixed(2);
+          // Update subtotal in the UI
           document.getElementById("subtotal").innerHTML =
             response.data.cart.totalPrice.toFixed(2);
+
+          // Remove the product from local storage
+          const cart = JSON.parse(localStorage.getItem("cart")) || [];
+          const updatedCart = cart.filter(
+            (item) => item.productId !== productId
+          );
+          localStorage.setItem("cart", JSON.stringify(updatedCart));
 
           // SweetAlert2 Toast notification for product removal
           Swal.fire({

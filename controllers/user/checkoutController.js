@@ -27,13 +27,100 @@ const getCheckout = async (req, res) => {
   }
 };
 
-// const ----------------------------------------------------------------------- = async (req, res) => {
+const getAddress = async (req, res) => {
+  try {
+    const index = req.params.index;
+    const user = req.user; // Get the user from request object, adjust according to your middleware
+    const userId = req.user._id;
+    const addresses = await AddressModel.find({ userId });
+
+    if (user && addresses && addresses[index]) {
+      res.json(addresses[index]);
+    } else {
+      res.status(404).json({ error: "Address not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const postCheckout = async (req, res) => {
+  try {
+    // Extract data from the request body
+    const { userId, products, address, paymentMethod } = req.body.checkoutData;
+
+    // Validate request data
+    if (
+      !userId ||
+      !address.addressLine ||
+      !address.city ||
+      !address.state ||
+      !address.country ||
+      !address.email ||
+      !address.firstName ||
+      !address.phoneNo ||
+      !paymentMethod
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Please fill in all required fields." });
+    }
+
+    // Process the order
+    let totalPrice = 0;
+    const orderProducts = [];
+
+    for (const product of products) {
+      // Find the product and validate stock
+      const foundProduct = await ProductModel.findById(product.productId);
+      if (!foundProduct || foundProduct.stock < product.quantity) {
+        return res
+          .status(400)
+          .json({
+            message: `Insufficient stock for product ${product.productId}`,
+          });
+      }
+
+      // Calculate total price
+      totalPrice += foundProduct.price * product.quantity;
+
+      // Prepare the product data for the order
+      orderProducts.push({
+        productId: product.productId,
+        quantity: product.quantity,
+        price: foundProduct.price,
+      });
+    }
+
+    // Create the order
+    const newOrder = new Order({
+      userId,
+      products: orderProducts,
+      totalPrice,
+      orderStatus: "placed",
+      address,
+      paymentMethod,
+    });
+
+    // Save the order to the database
+    await newOrder.save();
+
+    // Return success response
+    res
+      .status(200)
+      .json({ message: "Order placed successfully!", order: newOrder });
+  } catch (err) {
+    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+  }
+};
 
 // const ----------------------------------------------------------------------- = async (req, res) => {
 
 // const ----------------------------------------------------------------------- = async (req, res) => {
 
 // const ----------------------------------------------------------------------- = async (req, res) => {
+
+// const ----------------------------------------------------------------------- = async (req, res) => {
 // const getDeliveryAddress = async (req, res) => {
 // const getDeliveryAddress = async (req, res) => {
 // const getDeliveryAddress = async (req, res) => {
@@ -43,16 +130,6 @@ const getCheckout = async (req, res) => {
 // const getDeliveryAddress = async (req, res) => {
 // const getDeliveryAddress = async (req, res) => {
 // const getDeliveryAddress = async (req, res) => {
-// const postCheckout = (req, res) => {
-//   try {
-//     if (!req.session.steps.includes("checkout")) {
-//       req.session.steps.push("checkout");
-//     }
-//     res.redirect("/user/shop/delivery-address");
-//   } catch (err) {
-//     res.status(500).json({ status: "Error", message: "Server Error!!!" });
-//   }
-// };
 
 // const getDeliveryAddress = async (req, res) => {
 //   try {
@@ -258,4 +335,4 @@ const getCheckout = async (req, res) => {
 //   return `${prefix}${timestamp}${uuidSegment}`;
 // }
 
-module.exports = { getCheckout };
+module.exports = { getCheckout, getAddress, postCheckout };

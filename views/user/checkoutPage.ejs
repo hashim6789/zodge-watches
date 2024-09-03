@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Shoping Cart</title>
+    <title>Shopping Cart - Checkout</title>
     <%- include('partials/_header') %>
   </head>
   <body class="animsition">
     <!-- Header -->
-    <%- include('partials/_navbar', {user}) %>
+    <%- include('partials/_navbar', { user }) %>
 
-    <!-- Cart -->
-    <%- include('partials/_wishlist', {wishlist}) %>
-
-    <!-- breadcrumb -->
+    <!-- Breadcrumb -->
     <div class="container pt-5">
       <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
         <a href="/user/auth/home" class="stext-109 cl8 hov-cl1 trans-04">
@@ -22,284 +19,281 @@
           Shopping Cart
           <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
         </a>
-
-        <span class="stext-109 cl4"> Checkout </span>
+        <span class="stext-109 cl4">Checkout</span>
       </div>
     </div>
-    <% console.log(cart.products[0].productId)%>
 
-    <!-- Shoping Cart -->
-    <form class="bg0 p-t-75 p-b-85" action="/user/shop/checkout" method="post">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
-            <div class="m-l-25 m-r--38 m-lr-0-xl">
-              <div class="wrap-table-shopping-cart">
-                <table class="table-shopping-cart">
-                  <tr class="table_head">
-                    <th class="column-1">Product</th>
-                    <th class="column-2"></th>
-                    <th class="column-3">Price</th>
-                    <th class="column-4">Quantity</th>
-                    <th class="column-5">Total</th>
-                  </tr>
-
-                  <% cart.products.forEach(function(product) { %>
-                  <tr class="table_row">
-                    <td class="column-1">
-                      <div class="how-itemcart1">
-                        <button
-                          id="cartProduct"
-                          data-product-id="<%= product.productId  %>"
-                        >
-                          <img
-                            src="/public/uploads/<%= product.productId.images[0] %>"
-                            alt="IMG"
-                          />
-                        </button>
-                      </div>
-                    </td>
-                    <td class="column-2"><%= product.productId.name %></td>
-                    <td class="column-3">
-                      ₹ <%= (product.price).toFixed(2) %>
-                    </td>
-                    <td class="column-4">
-                      <div class="text-center"><%= product.quantity %></div>
-                    </td>
-                    <td class="column-5">
-                      ₹ <%= (product.price * product.quantity).toFixed(2) %>
-                    </td>
-                  </tr>
-                  <% }) %>
-                </table>
+    <!-- Checkout Section -->
+    <div class="container p-t-40 p-b-60">
+      <div class="row">
+        <!-- Shipping Details -->
+        <div class="col-md-7 col-lg-8">
+          <div class="p-r-30 p-lr-0-lg">
+            <h4 class="mtext-109 cl2 p-b-30">Shipping Details</h4>
+            <form id="checkoutForm" onsubmit="submitCheckout(event)">
+              <input
+                type="hidden"
+                name="userId"
+                id="userId"
+                value="<%= user._id %>"
+              />
+              <!-- Address Selection Dropdown -->
+              <div class="form-group p-b-23">
+                <label for="savedAddress">Choose a Saved Address</label>
+                <select
+                  class="form-control"
+                  id="savedAddress"
+                  name="savedAddress"
+                  onchange="populateAddress(this)"
+                >
+                  <option value="">Select an address</option>
+                  <% addresses.forEach(function(address, index) { %>
+                  <option value="<%= index %>">
+                    <%= address.firstName %>, <%= address.secondName %>, <%=
+                    address.city %>, <%= address.state %>, <%= address.pincode
+                    %>, <%= address.country %>, <%= address.street %>,
+                  </option>
+                  <% }); %>
+                </select>
               </div>
 
-              <div
-                class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm"
-              >
-                <div class="flex-w flex-m m-r-20 m-tb-5">
-                  <input
-                    class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5"
-                    type="text"
-                    name="coupon"
-                    placeholder="Coupon Code"
-                  />
-
-                  <div
-                    class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5"
-                  >
-                    Apply coupon
+              <!-- Existing Form Fields for Shipping Details -->
+              <div class="row">
+                <div class="col-sm-6 p-b-23">
+                  <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="firstName"
+                      name="firstName"
+                      required
+                      onchange="checkAddressFields()"
+                    />
                   </div>
                 </div>
-
-                <div
-                  class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10"
-                >
-                  Update Cart
+                <div class="col-sm-6 p-b-23">
+                  <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="lastName"
+                      name="lastName"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <!-- //cart total -->
-          <div class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
-            <div
-              class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm"
+              <div class="row">
+                <div class="col-sm-6 p-b-23">
+                  <div class="form-group p-b-23">
+                    <label for="email">Email Address</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="email"
+                      name="email"
+                      required
+                      onchange="checkAddressFields()"
+                    />
+                  </div>
+                </div>
+                <div class="col-sm-6 p-b-23">
+                  <div class="form-group p-b-23">
+                    <label for="phoneNo">Phone No</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="phoneNo"
+                      name="phoneNo"
+                      required
+                      onchange="checkAddressFields()"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group p-b-23">
+                <label for="addressLine">Address</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="addressLine"
+                  name="addressLine"
+                  required
+                  onchange="checkAddressFields()"
+                />
+              </div>
+
+              <div class="row">
+                <div class="col-sm-4 p-b-23">
+                  <div class="form-group">
+                    <label for="pincode">Pincode</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="pincode"
+                      name="pincode"
+                      onblur="fetchPincodeDetails(this.value)"
+                      required
+                      onchange="checkAddressFields()"
+                    />
+                  </div>
+                </div>
+                <div class="col-sm-4 p-b-23">
+                  <div class="form-group p-b-23">
+                    <label for="city">City</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="city"
+                      name="city"
+                      required
+                      onchange="checkAddressFields()"
+                    />
+                  </div>
+                </div>
+                <div class="col-sm-4 p-b-23">
+                  <div class="form-group">
+                    <label for="state">State</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="state"
+                      name="state"
+                      required
+                      onchange="checkAddressFields()"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group p-b-23">
+                <label for="country">Country</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="country"
+                  name="country"
+                  required
+                  onchange="checkAddressFields()"
+                />
+              </div>
+
+              <div class="form-group p-b-23">
+                <label for="flatNo">Flat No</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="flatNo"
+                  name="flatNo"
+                />
+              </div>
+
+              <!-- Confirm Address Checkbox -->
+              <!-- Confirm Address Checkbox -->
+              <div class="form-group p-b-23">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="confirmAddress"
+                    disabled
+                    required
+                    onchange="togglePaymentOptions(this)"
+                  />
+                  <label class="form-check-label" for="confirmAddress">
+                    I confirm that the above address is correct.
+                  </label>
+                </div>
+              </div>
+
+              <!-- Payment Options -->
+              <div class="form-group p-b-23">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="paymentMethod"
+                    id="cod"
+                    value="cod"
+                    disabled
+                    required
+                  />
+                  <label class="form-check-label" for="cod"
+                    >Cash on Delivery</label
+                  >
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="paymentMethod"
+                    id="onlinePayment"
+                    value="onlinePayment"
+                    disabled
+                    required
+                  />
+                  <label class="form-check-label" for="onlinePayment"
+                    >Online Payment</label
+                  >
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="paymentMethod"
+                    id="wallet"
+                    value="wallet"
+                    disabled
+                    required
+                  />
+                  <label class="form-check-label" for="wallet">Wallet</label>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="form-group p-b-23">
+                <button class="btn btn-primary">Place Order</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-md-5 col-lg-4">
+          <div class="p-lr-15-lg">
+            <h4 class="mtext-109 cl2 p-b-30">Order Summary</h4>
+            <div class="flex-w flex-t p-b-13">
+              <div class="size-208">
+                <span class="stext-110 cl2">Subtotal:</span>
+              </div>
+              <div class="size-209">
+                <span class="mtext-110 cl2">₹<%= cart.subtotal %></span>
+              </div>
+            </div>
+
+            <div class="flex-w flex-t p-t-15 p-b-30">
+              <div class="size-208 p-t-1">
+                <span class="stext-110 cl2">Total:</span>
+              </div>
+              <div class="size-209 p-t-1">
+                <span class="mtext-110 cl2">₹<%= cart.total %></span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer"
+              onclick="submitCheckoutForm()"
             >
-              <h4 class="mtext-109 cl2 p-b-30">Cart Totals</h4>
-
-              <div class="flex-w flex-t bor12 p-b-13">
-                <div class="size-208">
-                  <span class="stext-110 cl2"> Subtotal: </span>
-                </div>
-
-                <div class="size-209">
-                  <span class="mtext-110 cl2">
-                    ₹<%= (cart.totalPrice).toFixed(2) %>
-                  </span>
-                </div>
-              </div>
-
-              <div class="flex-w flex-t bor12 p-t-15 p-b-30">
-                <div class="size-208 w-full-ssm">
-                  <span class="stext-110 cl2"> Shipping: </span>
-                </div>
-              </div>
-
-              <div class="flex-w flex-t p-t-27 p-b-33">
-                <div class="size-208">
-                  <span class="mtext-101 cl2"> Total: </span>
-                </div>
-
-                <div class="size-209 p-t-1">
-                  <span class="mtext-110 cl2">
-                    ₹<%= (cart.totalPrice).toFixed(2) %>
-                  </span>
-                </div>
-              </div>
-
-              <button
-                class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer"
-              >
-                Continue
-              </button>
-            </div>
-          </div>
-          <!-- Delivery Address Selection -->
-          <div class="col-lg-6 col-xl-6 m-lr-auto m-b-50">
-            <div class="m-l-25 m-r--38 m-lr-0-xl">
-              <div class="wrap-table-shopping-cart">
-                <table class="table-shopping-cart">
-                  <tr class="table_head">
-                    <th class="column-1">Select</th>
-                    <th class="column-2">Address</th>
-                    <th class="column-3">Actions</th>
-                  </tr>
-
-                  <% if (addresses.length === 0) { %>
-                  <tr>
-                    <td colspan="3" class="text-center">No addresses found.</td>
-                  </tr>
-                  <% } else { %> <% addresses.forEach(function(address) { %>
-                  <tr class="table_row">
-                    <td class="column-1">
-                      <input type="radio" name="selectedAddress" value="<%=
-                      address._id %>" <%= address.isDefault ? 'checked' : '' %>
-                      />
-                    </td>
-                    <td class="column-2">
-                      <strong
-                        ><%= address.firstName %> <%= address.lastName
-                        %></strong
-                      ><br />
-                      <%= address.addressLine %>, <%= address.flatNo %><br />
-                      <%= address.city %>, <%= address.state %> - <%=
-                      address.pincode %><br />
-                      <%= address.country %><br />
-                      <small>
-                        Phone: <%= address.phoneNo %><br />
-                        Email: <%= address.email %>
-                      </small>
-                    </td>
-                    <td class="column-3">
-                      <button
-                        type="button"
-                        class="btn-edit-address"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editAddressModal"
-                        data-address-id="<%= address._id %>"
-                        data-address-first-name="<%= address.firstName %>"
-                        data-address-last-name="<%= address.lastName %>"
-                        data-address-line1="<%= address.addressLine %>"
-                        data-address-city="<%= address.city %>"
-                        data-address-state="<%= address.state %>"
-                        data-address-zip="<%= address.pincode %>"
-                        data-address-country="<%= address.country %>"
-                        data-address-phone="<%= address.phoneNo %>"
-                        data-address-flat="<%= address.flatNo %>"
-                        title="Edit Address"
-                      >
-                        <i class="zmdi zmdi-edit p-3 fs-20"></i>
-                      </button>
-                    </td>
-                  </tr>
-                  <% }) %> <% } %>
-                </table>
-              </div>
-
-              <div
-                class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm"
-              >
-                <div class="flex-w flex-m m-r-20 m-tb-5">
-                  <button
-                    class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5"
-                    data-bs-toggle="modal"
-                    data-bs-target="#createAddressModal"
-                  >
-                    Create New Address
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- Payment Method Selection -->
-          <div class="col-lg-6 col-xl-6 m-lr-auto m-b-50">
-            <div class="m-l-25 m-r--38 m-lr-0-xl">
-              <div class="wrap-table-shopping-cart">
-                <table class="table-shopping-cart">
-                  <tr class="table_head">
-                    <th class="column-1">Select</th>
-                    <th class="column-2">Payment Method</th>
-                  </tr>
-
-                  <tr class="table_row">
-                    <td class="column-1">
-                      <input
-                        type="radio"
-                        name="selectedPaymentMethod"
-                        value="onlinePayment"
-                      />
-                    </td>
-                    <td class="column-2">
-                      <strong>Online Payment</strong><br />
-                      Pay using credit/debit card, net banking, or UPI.
-                    </td>
-                  </tr>
-
-                  <tr class="table_row">
-                    <td class="column-1">
-                      <input
-                        type="radio"
-                        name="selectedPaymentMethod"
-                        value="wallet"
-                      />
-                    </td>
-                    <td class="column-2">
-                      <strong>Wallet</strong><br />
-                      Pay using your digital wallet balance.
-                    </td>
-                  </tr>
-
-                  <tr class="table_row">
-                    <td class="column-1">
-                      <input
-                        type="radio"
-                        name="selectedPaymentMethod"
-                        value="cod"
-                      />
-                    </td>
-                    <td class="column-2">
-                      <strong>Cash on Delivery</strong><br />
-                      Pay with cash upon delivery of the product.
-                    </td>
-                  </tr>
-                </table>
-              </div>
-
-              <div
-                class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm"
-              >
-                <div class="flex-w flex-m m-r-20 m-tb-5">
-                  <button
-                    class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5"
-                    onclick="goBackToPreviousPage()"
-                  >
-                    Go Back
-                  </button>
-                </div>
-
-                <div
-                  class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10"
-                  onclick="submitCheckoutForm()"
-                >
-                  Continue
-                </div>
-              </div>
-            </div>
+              Place Order
+            </button>
           </div>
         </div>
       </div>
-    </form>
+    </div>
 
     <!-- Footer -->
     <%- include('partials/_footer') %>
@@ -316,5 +310,635 @@
     <%- include('partials/_scripts') %>
 
     <script src="/public/user/js/main.js"></script>
+
+    <script>
+      function submitCheckoutForm() {
+        document.getElementById("checkoutForm").submit();
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+      async function submitCheckout(event) {
+        event.preventDefault(); // Prevent form from submitting the default way
+
+        // Gather data from the form
+        const userId = document.getElementById("userId").value;
+        const address = {
+          addressLine: document.getElementById("addressLine").value,
+          city: document.getElementById("city").value,
+          state: document.getElementById("state").value,
+          country: document.getElementById("country").value,
+          email: document.getElementById("email").value,
+          firstName: document.getElementById("firstName").value,
+          lastName: document.getElementById("lastName").value,
+          phoneNo: document.getElementById("phoneNo").value,
+          pincode: parseInt(document.getElementById("pincode").value),
+          flatNo: document.getElementById("flatNo").value,
+        };
+        const paymentMethod = document.querySelector(
+          'input[name="paymentMethod"]:checked'
+        ).value;
+        const products = JSON.parse(localStorage.getItem("cart")) || []; // Assuming cart data is stored in local storage
+
+        // Validate data
+        if (
+          !userId ||
+          !address.addressLine ||
+          !address.city ||
+          !address.state ||
+          !address.country ||
+          !address.email ||
+          !address.firstName ||
+          !address.phoneNo ||
+          !paymentMethod
+        ) {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Please fill in all required fields.",
+          });
+          return;
+        }
+
+        // Prepare data for the request
+        const checkoutData = {
+          userId,
+          products,
+          address,
+          paymentMethod,
+        };
+
+        try {
+          axios.post("/checkout", {
+            checkoutData,
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            Swal.fire({
+              icon: "success",
+              title: "Success!",
+              text: "Order placed successfully!",
+              confirmButtonText: "OK",
+            }).then(() => {
+              // Redirect to order confirmation page or clear cart
+              localStorage.removeItem("cart"); // Clear cart after successful order
+              window.location.href = "/order-confirmation"; // Redirect to order confirmation page
+            });
+          } else {
+            const errorData = await response.json();
+            Swal.fire({
+              icon: "error",
+              title: "Error!",
+              text: `Error placing order: ${errorData.message}`,
+            });
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Error!",
+            text: "Error placing order. Please try again.",
+          });
+        }
+      }
+    </script>
+
+    <script>
+      function populateAddress(select) {
+        const index = select.value;
+
+        if (index === "") {
+          // Clear form fields if no address is selected
+          document.getElementById("firstName").value = "";
+          document.getElementById("lastName").value = "";
+          document.getElementById("email").value = "";
+          document.getElementById("phoneNo").value = "";
+          document.getElementById("addressLine").value = "";
+          document.getElementById("flatNo").value = "";
+
+          document.getElementById("city").value = "";
+          document.getElementById("state").value = "";
+          document.getElementById("pincode").value = "";
+          document.getElementById("country").value = "";
+          return;
+        }
+
+        // Make an Axios request to get the selected address
+        axios
+          .get(`/checkout/address/${index}`)
+          .then((response) => {
+            const address = response.data;
+
+            // Update form fields with the selected address
+
+            document.getElementById("lastName").value = address.lastName || "";
+            document.getElementById("firstName").value =
+              address.firstName || "";
+            document.getElementById("email").value = address.email || "";
+            document.getElementById("phoneNo").value = address.phoneNo || "";
+            document.getElementById("addressLine").value =
+              address.addressLine || "";
+            document.getElementById("city").value = address.city || "";
+            document.getElementById("state").value = address.state || "";
+            document.getElementById("pincode").value = address.pincode || "";
+            document.getElementById("country").value = address.country || "";
+            document.getElementById("flatNo").value = address.flatNo || "";
+
+            checkAddressFields();
+          })
+          .catch((error) => {
+            console.error("Error fetching address:", error);
+          });
+      }
+    </script>
+    <script>
+      // Function to fetch pincode details
+      function fetchPincodeDetails(pincode) {
+        if (pincode.length !== 6) {
+          alert("Please enter a valid 6-digit pincode.");
+          return;
+        }
+
+        // Make a request to the Pincode API
+        axios
+          .get(`https://api.postalpincode.in/pincode/${pincode}`)
+          .then((response) => {
+            const data = response.data;
+            if (data[0].Status === "Success") {
+              const postOffice = data[0].PostOffice[0];
+
+              // Update the form fields with the API data
+              document.getElementById("country").value =
+                postOffice.Country || "";
+              document.getElementById("city").value = postOffice.District || "";
+              document.getElementById("state").value = postOffice.State || "";
+            } else {
+              alert("Invalid pincode or data not available.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching pincode details:", error);
+          });
+      }
+
+      // Event listener to call the function when the pincode input reaches 6 digits
+      document.addEventListener("DOMContentLoaded", function () {
+        const pincodeInput = document.getElementById("pincode");
+
+        // Add input event listener to the pincode field
+        pincodeInput.addEventListener("input", function () {
+          if (pincodeInput.value.length === 6) {
+            fetchPincodeDetails(pincodeInput.value);
+          }
+        });
+      });
+    </script>
+    <script>
+      function checkAddressFields() {
+        const firstName = document.getElementById("firstName").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const phoneNo = document.getElementById("phoneNo").value.trim();
+        const addressLine = document.getElementById("addressLine").value.trim();
+        const pincode = document.getElementById("pincode").value.trim();
+        const city = document.getElementById("city").value.trim();
+        const state = document.getElementById("state").value.trim();
+        const country = document.getElementById("country").value.trim();
+
+        if (
+          firstName &&
+          email &&
+          phoneNo &&
+          addressLine &&
+          pincode &&
+          city &&
+          state &&
+          country
+        ) {
+          document.getElementById("confirmAddress").disabled = false;
+        } else {
+          document.getElementById("confirmAddress").disabled = true;
+        }
+      }
+
+      function togglePaymentOptions(checkbox) {
+        // Get all payment method radio buttons
+        const paymentMethods = document.querySelectorAll(
+          'input[name="paymentMethod"]'
+        );
+
+        // Enable or disable payment options based on checkbox state
+        paymentMethods.forEach((paymentMethod) => {
+          paymentMethod.disabled = !checkbox.checked;
+        });
+      }
+
+      // Add event listener to the address dropdown to call checkAddressFields
+      document
+        .getElementById("savedAddress")
+        .addEventListener("change", function () {
+          populateAddress(this); // Assuming populateAddress fills in the address fields
+          checkAddressFields();
+        });
+    </script>
   </body>
 </html>
+
+<!-- Shoping Cart
+<form class="bg0 p-t-75 p-b-85">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
+        <div class="m-l-25 m-r--38 m-lr-0-xl">
+          <div class="wrap-table-shopping-cart">
+            <table class="table-shopping-cart">
+              <tr class="table_head">
+                <th class="column-1">Product</th>
+                <th class="column-2"></th>
+                <th class="column-3">Price</th>
+                <th class="column-4">Quantity</th>
+                <th class="column-5">Total</th>
+              </tr>
+
+              <% cart.products.forEach(function(product) { %>
+              <tr class="table_row">
+                <td class="column-1">
+                  <div class="how-itemcart1">
+                    <button
+                      id="cartProduct"
+                      data-product-id="<%= product.productId  %>"
+                    >
+                      <img
+                        src="/public/uploads/<%= product.productId.images[0] %>"
+                        alt="IMG"
+                      />
+                    </button>
+                  </div>
+                </td>
+                <td class="column-2"><%= product.productId.name %></td>
+                <td class="column-3">₹ <%= (product.price).toFixed(2) %></td>
+                <td class="column-4">
+                  <div class="text-center"><%= product.quantity %></div>
+                </td>
+                <td class="column-5">
+                  ₹ <%= (product.price * product.quantity).toFixed(2) %>
+                </td>
+              </tr>
+              <% }) %>
+            </table>
+          </div>
+
+          <div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
+            <div class="flex-w flex-m m-r-20 m-tb-5">
+              <input
+                class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5"
+                type="text"
+                name="coupon"
+                placeholder="Coupon Code"
+              />
+
+              <div
+                class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5"
+              >
+                Apply coupon
+              </div>
+            </div>
+
+            <div
+              class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10"
+            >
+              Update Cart
+            </div>
+          </div>
+        </div>
+      </div>
+
+       //cart total
+      <div class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
+        <div
+          class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm"
+        >
+          <h4 class="mtext-109 cl2 p-b-30">Cart Totals</h4>
+
+          <div class="flex-w flex-t bor12 p-b-13">
+            <div class="size-208">
+              <span class="stext-110 cl2"> Subtotal: </span>
+            </div>
+
+            <div class="size-209">
+              <span class="mtext-110 cl2">
+                ₹<%= (cart.totalPrice).toFixed(2) %>
+              </span>
+            </div>
+          </div>
+
+          <div class="flex-w flex-t bor12 p-t-15 p-b-30">
+            <div class="size-208 w-full-ssm">
+              <span class="stext-110 cl2"> Shipping: </span>
+            </div>
+          </div>
+
+          <div class="flex-w flex-t p-t-27 p-b-33">
+            <div class="size-208">
+              <span class="mtext-101 cl2"> Total: </span>
+            </div>
+
+            <div class="size-209 p-t-1">
+              <span class="mtext-110 cl2">
+                ₹<%= (cart.totalPrice).toFixed(2) %>
+              </span>
+            </div>
+          </div>
+
+          <button
+            class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+
+      Delivery Address Selection
+      <div class="col-lg-6 col-xl-6 m-lr-auto m-b-50">
+        <div class="m-l-25 m-r--38 m-lr-0-xl">
+          <div class="wrap-table-shopping-cart">
+            <table class="table-shopping-cart">
+              <tr class="table_head">
+                <th class="column-1">Select</th>
+                <th class="column-2">Address</th>
+                <th class="column-3">Actions</th>
+              </tr>
+
+              <% if (addresses.length === 0) { %>
+              <tr>
+                <td colspan="3" class="text-center">No addresses found.</td>
+              </tr>
+              <% } else { %> <% addresses.forEach(function(address) { %>
+              <tr class="table_row">
+                <td class="column-1">
+                  <input type="radio" name="selectedAddress" value="<%=
+                  address._id %>" <%= address.isDefault ? 'checked' : '' %> />
+                </td>
+                <td class="column-2">
+                  <strong
+                    ><%= address.firstName %> <%= address.lastName %></strong
+                  ><br />
+                  <%= address.addressLine %>, <%= address.flatNo %><br />
+                  <%= address.city %>, <%= address.state %> - <%=
+                  address.pincode %><br />
+                  <%= address.country %><br />
+                  <small>
+                    Phone: <%= address.phoneNo %><br />
+                    Email: <%= address.email %>
+                  </small>
+                </td>
+                <td class="column-3">
+                  <button
+                    type="button"
+                    class="btn-edit-address"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editAddressModal"
+                    data-address-id="<%= address._id %>"
+                    data-address-first-name="<%= address.firstName %>"
+                    data-address-last-name="<%= address.lastName %>"
+                    data-address-line1="<%= address.addressLine %>"
+                    data-address-city="<%= address.city %>"
+                    data-address-state="<%= address.state %>"
+                    data-address-zip="<%= address.pincode %>"
+                    data-address-country="<%= address.country %>"
+                    data-address-phone="<%= address.phoneNo %>"
+                    data-address-flat="<%= address.flatNo %>"
+                    title="Edit Address"
+                  >
+                    <i class="zmdi zmdi-edit p-3 fs-20"></i>
+                  </button>
+                </td>
+              </tr>
+              <% }) %> <% } %>
+            </table>
+          </div>
+        </div>
+      </div>
+      Payment Method Selection
+      <div class="col-lg-6 col-xl-6 m-lr-auto m-b-50">
+        <div class="m-l-25 m-r--38 m-lr-0-xl">
+          <div class="wrap-table-shopping-cart">
+            <table class="table-shopping-cart">
+              <tr class="table_head">
+                <th class="column-1">Select</th>
+                <th class="column-2">Payment Method</th>
+              </tr>
+
+              <tr class="table_row">
+                <td class="column-1">
+                  <input
+                    type="radio"
+                    name="selectedPaymentMethod"
+                    value="onlinePayment"
+                  />
+                </td>
+                <td class="column-2">
+                  <strong>Online Payment</strong><br />
+                  Pay using credit/debit card, net banking, or UPI.
+                </td>
+              </tr>
+
+              <tr class="table_row">
+                <td class="column-1">
+                  <input
+                    type="radio"
+                    name="selectedPaymentMethod"
+                    value="wallet"
+                  />
+                </td>
+                <td class="column-2">
+                  <strong>Wallet</strong><br />
+                  Pay using your digital wallet balance.
+                </td>
+              </tr>
+
+              <tr class="table_row">
+                <td class="column-1">
+                  <input
+                    type="radio"
+                    name="selectedPaymentMethod"
+                    value="cod"
+                  />
+                </td>
+                <td class="column-2">
+                  <strong>Cash on Delivery</strong><br />
+                  Pay with cash upon delivery of the product.
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
+            <div
+              class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5"
+              onclick="goBackToPreviousPage()"
+            >
+              Go Back
+            </div>
+
+            <div
+              class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10"
+              onclick="submitCheckoutForm()"
+            >
+              Continue
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+----------------------------------------------- modals------------------------------------------
+
+Create Address Modal
+<div
+  class="modal fade"
+  id="createAddressModal"
+  tabindex="-1"
+  aria-labelledby="createAddressModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createAddressModalLabel">
+          Create New Address
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="createAddressForm" novalidate>
+          <div class="mb-3">
+            <label for="firstName" class="form-label">First Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="firstName"
+              name="firstName"
+              required
+            />
+            <div class="invalid-feedback">First name is required.</div>
+          </div>
+          <div class="mb-3">
+            <label for="lastName" class="form-label">Last Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="lastName"
+              name="lastName"
+              required
+            />
+            <div class="invalid-feedback">Last name is required.</div>
+          </div>
+          <div class="mb-3">
+            <label for="addressLine" class="form-label">Address Line</label>
+            <input
+              type="text"
+              class="form-control"
+              id="addressLine"
+              name="addressLine"
+              required
+            />
+            <div class="invalid-feedback">Address line is required.</div>
+          </div>
+          <div class="mb-3">
+            <label for="flatNo" class="form-label">Flat No</label>
+            <input type="text" class="form-control" id="flatNo" name="flatNo" />
+          </div>
+          <div class="mb-3">
+            <label for="city" class="form-label">City</label>
+            <input
+              type="text"
+              class="form-control"
+              id="city"
+              name="city"
+              required
+            />
+            <div class="invalid-feedback">City is required.</div>
+          </div>
+          <div class="mb-3">
+            <label for="state" class="form-label">State</label>
+            <input
+              type="text"
+              class="form-control"
+              id="state"
+              name="state"
+              required
+            />
+            <div class="invalid-feedback">State is required.</div>
+          </div>
+          <div class="mb-3">
+            <label for="pincode" class="form-label">Pincode</label>
+            <input
+              type="text"
+              class="form-control"
+              id="pincode"
+              name="pincode"
+              required
+              pattern="^\d{5,6}$"
+            />
+            <div class="invalid-feedback">Please enter a valid pincode.</div>
+          </div>
+          <div class="mb-3">
+            <label for="country" class="form-label">Country</label>
+            <input
+              type="text"
+              class="form-control"
+              id="country"
+              name="country"
+              required
+            />
+            <div class="invalid-feedback">Country is required.</div>
+          </div>
+          <div class="mb-3">
+            <label for="phoneNo" class="form-label">Phone Number</label>
+            <input
+              type="tel"
+              class="form-control"
+              id="phoneNo"
+              name="phoneNo"
+              required
+              pattern="^\d{10}$"
+            />
+            <div class="invalid-feedback">
+              Please enter a valid 10-digit phone number.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              required
+            />
+            <div class="invalid-feedback">
+              Please enter a valid email address.
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="button" class="btn btn-primary" onclick="submitAddress()">
+          Save Address
+        </button>
+      </div>
+    </div>
+  </div>
+</div> -->
