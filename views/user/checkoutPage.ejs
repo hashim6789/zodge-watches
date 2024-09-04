@@ -306,6 +306,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <%- include('partials/_scripts') %>
 
@@ -340,7 +341,7 @@
           'input[name="paymentMethod"]:checked'
         ).value;
         const products = JSON.parse(localStorage.getItem("cart")) || []; // Assuming cart data is stored in local storage
-
+        console.log(products);
         // Validate data
         if (
           !userId ||
@@ -369,31 +370,39 @@
           paymentMethod,
         };
 
-        try {
-          axios.post("/checkout", {
-            checkoutData,
-          });
+        console.log("data = ", checkoutData);
 
-          if (response.ok) {
-            const data = await response.json();
-            Swal.fire({
-              icon: "success",
-              title: "Success!",
-              text: "Order placed successfully!",
-              confirmButtonText: "OK",
-            }).then(() => {
-              // Redirect to order confirmation page or clear cart
-              localStorage.removeItem("cart"); // Clear cart after successful order
-              window.location.href = "/order-confirmation"; // Redirect to order confirmation page
-            });
-          } else {
-            const errorData = await response.json();
-            Swal.fire({
-              icon: "error",
-              title: "Error!",
-              text: `Error placing order: ${errorData.message}`,
-            });
-          }
+        try {
+          const response = await axios.post("/checkout", checkoutData);
+
+          // Access the status code
+          const statusCode = response.status;
+          console.log("Status Code:", statusCode); // e.g., 200
+
+          // Access the response data
+          const responseData = response.data;
+
+          // You can destructure to get specific properties
+          const { message, order } = responseData;
+
+          console.log("Message:", message); // e.g., "Order placed successfully!"
+          console.log("Order:", order); // Full order object
+
+          // If you want to access specific details from the order object
+          console.log("Order ID:", order.orderId);
+          console.log("Total Price:", order.totalPrice);
+          console.log("Products:", order.products);
+
+          // Handling success scenario
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: message,
+            confirmButtonText: "OK",
+          }).then(() => {
+            localStorage.removeItem("cart"); // Clear cart after successful order
+            window.location.href = "/checkout/confirmation"; // Redirect to order confirmation page
+          });
         } catch (error) {
           console.error("Error:", error);
           Swal.fire({

@@ -4,11 +4,14 @@ const {
   getCheckout,
   getAddress,
   postCheckout,
+  getOrderConfirmation,
 } = require("../../controllers/user/checkoutController");
 
 router.get("/", getCheckout);
 
 router.post("/", postCheckout);
+
+router.get("/confirmation", getOrderConfirmation);
 
 router.get("/address/:index", getAddress);
 

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Order Confirmation</title>
+    <%- include('partials/_header') %>
+    <!-- Include Bootstrap CSS for styling -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+  </head>
+  <body class="animsition">
+    <!-- Header -->
+    <%- include('partials/_navbar', {user, wishlist, cart}) %>
+
+    <!-- Order Confirmation Content -->
+    <div class="container mt-5 mb-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+          <div class="card">
+            <div class="card-header text-center bg-success text-white">
+              <h2>Order Confirmation</h2>
+            </div>
+            <div class="card-body">
+              <h5 class="text-center text-success">
+                Thank you for your purchase!
+              </h5>
+              <p class="text-center">
+                Your order has been placed successfully.
+              </p>
+              <hr />
+
+              <!-- Order Details -->
+              <h5 class="mt-4">Order Details</h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <strong>Order ID:</strong> <%= order.orderId %>
+                </li>
+                <li class="list-group-item">
+                  <strong>Date:</strong> <%= new
+                  Date(order.createdAt).toLocaleDateString() %>
+                </li>
+                <li class="list-group-item">
+                  <strong>Payment Method:</strong> <%= order.paymentMethod %>
+                </li>
+                <li class="list-group-item">
+                  <strong>Total Amount:</strong> ₹<%= order.totalPrice %>
+                </li>
+              </ul>
+              <hr />
+
+              <!-- Shipping Address -->
+              <h5 class="mt-4">Shipping Address</h5>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <strong>Name:</strong> <%= order.address.firstName %> <%=
+                  order.address.lastName %>
+                </li>
+                <li class="list-group-item">
+                  <strong>Address:</strong> <%= order.address.addressLine %>,
+                  <%= order.address.flatNo %>
+                </li>
+                <li class="list-group-item">
+                  <strong>City:</strong> <%= order.address.city %>
+                </li>
+                <li class="list-group-item">
+                  <strong>State:</strong> <%= order.address.state %>
+                </li>
+                <li class="list-group-item">
+                  <strong>Country:</strong> <%= order.address.country %>
+                </li>
+                <li class="list-group-item">
+                  <strong>Pincode:</strong> <%= order.address.pincode %>
+                </li>
+                <li class="list-group-item">
+                  <strong>Phone:</strong> <%= order.address.phoneNo %>
+                </li>
+              </ul>
+              <hr />
+
+              <!-- Product Details -->
+              <h5 class="mt-4">Products</h5>
+              <ul class="list-group list-group-flush">
+                <% order.products.forEach(product => { %>
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center"
+                >
+                  <span><%= product.productId.name %></span>
+                  <span>₹<%= product.price %></span>
+                </li>
+                <% }) %>
+              </ul>
+              <hr />
+
+              <!-- Back to Home or View Order History -->
+              <div class="text-center mt-4">
+                <a href="/" class="btn btn-primary">Back to Home</a>
+                <a href="/order-history" class="btn btn-secondary"
+                  >View Order History</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <%- include('partials/_footer') %>
+
+    <!-- Back to top -->
+    <div class="btn-back-to-top" id="myBtn">
+      <span class="symbol-btn-back-to-top">
+        <i class="zmdi zmdi-chevron-up"></i>
+      </span>
+    </div>
+    <%- include('partials/_scripts') %>
+  </body>
+</html>

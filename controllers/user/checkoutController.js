@@ -2,6 +2,10 @@ const UserModel = require("../../models/User");
 const CartModel = require("../../models/Cart");
 const WishlistModel = require("../../models/Wishlist");
 const AddressModel = require("../../models/Address");
+const ProductModel = require("../../models/Product");
+const OrderModel = require("../../models/Order");
+
+const { v4: uuidv4 } = require("uuid");
 
 const getCheckout = async (req, res) => {
   try {
@@ -46,9 +50,11 @@ const getAddress = async (req, res) => {
 
 const postCheckout = async (req, res) => {
   try {
+    console.log(req.body);
     // Extract data from the request body
-    const { userId, products, address, paymentMethod } = req.body.checkoutData;
+    const { userId, products, address, paymentMethod } = req.body;
 
+    console.log(userId, products, address);
     // Validate request data
     if (
       !userId ||
@@ -71,29 +77,29 @@ const postCheckout = async (req, res) => {
     const orderProducts = [];
 
     for (const product of products) {
-      // Find the product and validate stock
       const foundProduct = await ProductModel.findById(product.productId);
       if (!foundProduct || foundProduct.stock < product.quantity) {
-        return res
-          .status(400)
-          .json({
-            message: `Insufficient stock for product ${product.productId}`,
-          });
+        return res.status(400).json({
+          message: `Insufficient stock for product ${product.productId}`,
+        });
       }
 
-      // Calculate total price
       totalPrice += foundProduct.price * product.quantity;
 
-      // Prepare the product data for the order
       orderProducts.push({
         productId: product.productId,
         quantity: product.quantity,
         price: foundProduct.price,
       });
-    }
 
-    // Create the order
-    const newOrder = new Order({
+      //for inventory management
+      foundProduct.stock -= product.quantity;
+      await foundProduct.save();
+    }
+    console.log("ordered products = ", orderProducts);
+
+    const newOrder = new OrderModel({
+      orderId: generateOrderId(),
       userId,
       products: orderProducts,
       totalPrice,
@@ -102,10 +108,16 @@ const postCheckout = async (req, res) => {
       paymentMethod,
     });
 
-    // Save the order to the database
     await newOrder.save();
+    req.session.orderId = newOrder._id;
 
-    // Return success response
+    //for clear the products of the cart
+    const cart = await CartModel.findOne({ userId });
+    cart.products = [];
+    await cart.save();
+
+    console.log("order = ", newOrder);
+
     res
       .status(200)
       .json({ message: "Order placed successfully!", order: newOrder });
@@ -114,6 +126,30 @@ const postCheckout = async (req, res) => {
   }
 };
 
+const getOrderConfirmation = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    const user = await UserModel.findById(userId);
+    const wishlist = await WishlistModel.findOne({ userId });
+    const cart = await CartModel.findOne({ userId });
+    const orderId = req.session?.orderId;
+    console.log(orderId);
+    const order = await OrderModel.findById(orderId)
+      .populate("userId")
+      .populate("products.productId");
+
+    console.log(order);
+    if (!order) {
+      return res.status(404).send("Order not found");
+    }
+
+    // Render the order confirmation page with the order data
+    res.render("user/orderConfirmation", { order, user, wishlist, cart });
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
 // const ----------------------------------------------------------------------- = async (req, res) => {
 
 // const ----------------------------------------------------------------------- = async (req, res) => {
@@ -311,28 +347,33 @@ const postCheckout = async (req, res) => {
 //   }
 // };
 
-// function generateOrderId() {
-//   // Fixed prefix for the order
-//   const prefix = "ORD";
+function generateOrderId() {
+  // Fixed prefix for the order
+  const prefix = "ORD";
 
-//   // Get the current timestamp in YYYYMMDDHHMMSS format
-//   const now = new Date();
-//   const year = now.getFullYear();
-//   const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are 0-based
-//   const day = String(now.getDate()).padStart(2, "0");
-//   const hours = String(now.getHours()).padStart(2, "0");
-//   const minutes = String(now.getMinutes()).padStart(2, "0");
-//   const seconds = String(now.getSeconds()).padStart(2, "0");
-//   const timestamp = `${year}${month}${day}${hours}${minutes}${seconds}`;
+  // Get the current timestamp in YYYYMMDDHHMMSS format
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+  const timestamp = `${year}${month}${day}${hours}${minutes}${seconds}`;
 
-//   // Generate a UUID and extract the first 4 alphanumeric characters
-//   const uuidSegment = uuidv4()
-//     .replace(/[^a-zA-Z0-9]/g, "")
-//     .substring(0, 4)
-//     .toUpperCase();
+  // Generate a UUID and extract the first 4 alphanumeric characters
+  const uuidSegment = uuidv4()
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .substring(0, 4)
+    .toUpperCase();
 
-//   // Combine all parts to form the order ID
-//   return `${prefix}${timestamp}${uuidSegment}`;
-// }
+  // Combine all parts to form the order ID
+  return `${prefix}${timestamp}${uuidSegment}`;
+}
 
-module.exports = { getCheckout, getAddress, postCheckout };
+module.exports = {
+  getCheckout,
+  getAddress,
+  postCheckout,
+  getOrderConfirmation,
+};
