@@ -7,9 +7,13 @@ const {
   getOrderConfirmation,
 } = require("../../controllers/user/checkoutController");
 
+const { verifyPayment } = require("../../config/razorpayService");
+
 router.get("/", getCheckout);
 
 router.post("/", postCheckout);
+
+router.post("/verify-payment", verifyPayment);
 
 router.get("/confirmation", getOrderConfirmation);
 

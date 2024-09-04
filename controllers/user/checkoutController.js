@@ -5,6 +5,7 @@ const AddressModel = require("../../models/Address");
 const ProductModel = require("../../models/Product");
 const OrderModel = require("../../models/Order");
 
+const { createOrder } = require("../../config/razorpayService");
 const { v4: uuidv4 } = require("uuid");
 
 const getCheckout = async (req, res) => {
@@ -54,7 +55,7 @@ const postCheckout = async (req, res) => {
     // Extract data from the request body
     const { userId, products, address, paymentMethod } = req.body;
 
-    console.log(userId, products, address);
+    console.log(userId, products, address, paymentMethod);
     // Validate request data
     if (
       !userId ||
@@ -115,12 +116,53 @@ const postCheckout = async (req, res) => {
     const cart = await CartModel.findOne({ userId });
     cart.products = [];
     await cart.save();
-
     console.log("order = ", newOrder);
 
-    res
-      .status(200)
-      .json({ message: "Order placed successfully!", order: newOrder });
+    if (paymentMethod === "cod") {
+      res.status(200).json({
+        message: "Order placed successfully with cash on delivery!",
+        order: newOrder,
+      });
+    } else if (paymentMethod === "wallet") {
+      // Deduct from wallet and confirm the order
+      const user = await UserModel.findById(userId);
+      if (user.walletBalance < totalPrice) {
+        return res
+          .status(400)
+          .json({ message: "Insufficient wallet balance." });
+      }
+      user.walletBalance -= totalPrice;
+      await user.save();
+      return res
+        .status(200)
+        .json({ message: "Order placed successfully using Wallet!" });
+    } else if (paymentMethod === "onlinePayment") {
+      // Create an order with Razorpay
+      const options = {
+        amount: totalPrice, // Amount in paisa
+        currency: "INR",
+        receipt: newOrder.orderId,
+      };
+
+      // Create Razorpay order
+      // Create Razorpay order
+      const razorpayOrder = await createOrder(options);
+      console.log(razorpayOrder, "ttttt");
+
+      // Save Razorpay order ID to the new order
+      newOrder.razorpayOrderId = razorpayOrder.id;
+      await newOrder.save();
+
+      // Send Razorpay order details to the frontend
+      return res.status(200).json({
+        message: "Proceed to payment",
+        orderId: newOrder._id,
+        razorpayOrderId: razorpayOrder.id,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+        key_id: process.env.RAZORPAY_KEY_ID, // Razorpay key ID for frontend use
+      });
+    }
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
   }

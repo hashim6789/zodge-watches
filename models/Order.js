@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const { Schema, Types } = mongoose;
 
-const OrdersSchema = new Schema(
+const OrderSchema = new Schema(
   {
     orderId: { type: String, required: true },
     products: [
@@ -29,8 +29,17 @@ const OrdersSchema = new Schema(
     paymentMethod: {
       type: String,
       required: true,
-      enum: ["wallet", "online_pay", "cod"],
+      enum: ["wallet", "onlinePayment", "cod"],
     },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "successful", "failed"],
+      default: "pending",
+    },
+    razorpayOrderId: { type: String },
+    razorpayPaymentId: { type: String },
+    razorpaySignature: { type: String },
+    walletUsed: { type: Boolean, default: false },
     address: {
       addressLine: { type: String, required: true },
       city: { type: String, required: true },
@@ -63,6 +72,6 @@ const OrdersSchema = new Schema(
   { timestamps: true }
 );
 
-const Orders = mongoose.model("Orders", OrdersSchema);
+const Orders = mongoose.model("Orders", OrderSchema);
 
 module.exports = Orders;
