@@ -11,7 +11,7 @@ const {
 const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
 
 const {
-  getAccount,
+  getAccountPage,
   getPersonalInfo,
   updatePersonalInfo,
   updatePersonal,
@@ -36,7 +36,8 @@ const test = (req, res, next) => {
 };
 
 //get - /account
-router.get("/", checkBlocked, isAuthenticatedUser, authorizeUser, getAccount);
+// router.get("/", checkBlocked, isAuthenticatedUser, authorizeUser, getAccount);
+router.get("/:userId", test, getAccountPage);
 
 router.get("/api/personal-info", getPersonalInfo);
 router.post("/api/personal-info/", updatePersonalInfo);

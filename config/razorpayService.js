@@ -15,6 +15,8 @@ const verifyPayment = async (req, res) => {
   try {
     const { orderId, razorpayOrderId, paymentId, signature } = req.body;
 
+    console.log(orderId, razorpayOrderId, paymentId, signature);
+
     // Fetch the order from the database
     const order = await OrderModel.findById(orderId);
     if (!order || order.razorpayOrderId !== razorpayOrderId) {
@@ -33,7 +35,7 @@ const verifyPayment = async (req, res) => {
     }
 
     // Update the order status to 'paid'
-    order.orderStatus = "paid";
+    order.paymentStatus = "successful";
     await order.save();
 
     // Finalize stock deduction

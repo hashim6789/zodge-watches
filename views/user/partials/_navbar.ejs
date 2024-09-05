@@ -11,7 +11,9 @@
         <div class="right-top-bar flex-w h-full">
           <% if (user) { %>
           <!-- If user is logged in -->
-          <a href="/account" class="flex-c-m trans-04 p-lr-25"> My Account </a>
+          <a href="/account/<%= user._id%>" class="flex-c-m trans-04 p-lr-25">
+            My Account
+          </a>
           <a href="/auth/logout" class="flex-c-m trans-04 p-lr-25"> Logout </a>
           <% } else { %>
           <!-- If user is not logged in -->

@@ -3,23 +3,34 @@ const UserModel = require("../../models/User");
 const OrderModel = require("../../models/Order");
 
 //get the account profile page
-const getAccount = async (req, res) => {
+// const getAccount = async (req, res) => {
+//   try {
+//     const userId = req.user?._id;
+//     const user = await UserModel.findById(userId);
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     const addresses = await AddressModel.find({ userId });
+
+//     const orders = await OrderModel.find({ userId });
+//     console.log(orders, addresses, user);
+//     res.render("user/login", {
+//       user,
+//       addresses,
+//       orders,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+const getAccountPage = async (req, res) => {
   try {
-    const userId = req.session?.user?._id || req.session?.passport.user.id;
-    const user = await UserModel.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const addresses = await AddressModel.find({ userId });
-
-    const orders = await OrderModel.find({ userId });
-    console.log(orders);
-    res.render("user/account", {
-      user,
-      addresses,
-      orders,
-    });
+    const userId = req.params.userId;
+    console.log(userId);
+    res.render("user/accountPage");
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -474,7 +485,7 @@ const sendReturnRequest = async (req, res) => {
 };
 
 module.exports = {
-  getAccount,
+  getAccountPage,
   getPersonalInfo,
   updatePersonalInfo,
   updatePersonal,
