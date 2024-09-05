@@ -60,21 +60,24 @@
                       <table class="table">
                         <thead>
                           <tr>
+                            <th>SI</th>
+                            <th>Order Date</th>
                             <th>Order ID</th>
-                            <th>Customer Name</th>
+                            <th>Customer</th>
                             <th>Total Price</th>
                             <th>Status</th>
-                            <th>Return Status</th> <!-- New column for Return Status -->
+                            <th>Return</th> <!-- New column for Return Status -->
                             <th>Payment Method</th>
-                            <th>Order Date</th>
                             <th>Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <% orders.forEach((order) => { %>
+                          <% orders.forEach((order, index) => { %>
                           <tr>
-                            <td><%= order._id %></td>
-                            <td><%= order.address.firstName %> <%= order.address.lastName %></td>
+                            <td><%= index+1 %></td>
+                            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                            <td><%= order.orderId %></td>
+                            <td><%= order.address.firstName %></td>
                             <td>$<%= order.totalPrice.toFixed(2) %></td>
                             <td><%= order.orderStatus %></td>
                             <td>
@@ -93,7 +96,6 @@
                               <% } %>
                             </td>
                             <td><%= order.paymentMethod %></td>
-                            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
                             <td>
                               <button
                                 class="btn btn-info"
