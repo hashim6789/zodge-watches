@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Coupon Management</title>
+    <!-- plugins:css -->
+    <link
+      rel="stylesheet"
+      href="/public/assets/vendors/mdi/css/materialdesignicons.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="/public/assets/vendors/css/vendor.bundle.base.css"
+    />
+    <!-- endinject -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/public/assets/css/style.css" />
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="/public/assets/images/favicon.png" />
+    <!-- Load jQuery from a CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <div class="container-scroller">
+      <!-- partial:partials/_sidebar.ejs -->
+      <%- include('partials/_sidebar') %>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_navbar.ejs -->
+        <%- include('partials/_navbar', { pageType: 'coupons' }) %>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <a href="/admin/dashboard">Admin</a>
+            > <a href="/admin/offers">Offer Management</a>
+            <div class="row">
+              <div class="col-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <div
+                      class="d-flex justify-content-between align-items-center mb-4"
+                    >
+                      <h4 class="card-title">Offer Management</h4>
+                      <button
+                        class="btn btn-success"
+                        data-toggle="modal"
+                        data-target="#createOfferModal"
+                      >
+                        Create New Offer
+                      </button>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>SI</th>
+                            <th>Title</th>
+                            <th>Discount (%)</th>
+                            <th>Offer Type</th>
+                            <th>Applied Item</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% offers.forEach((offer, idx) => { %>
+                          <tr>
+                            <td>
+                              <%= ((current - 1) * perPage) + (idx + 1) %>
+                            </td>
+                            <td><%= offer.title %></td>
+                            <td><%= offer.discountPercentage %></td>
+                            <td><%= offer.offerType %></td>
+                            <td>
+                              <%= offer.offerType === 'category' ?
+                              offer.category.name : offer.product.name %>
+                            </td>
+                            <td><%= offer.startDate.toLocaleDateString() %></td>
+                            <td><%= offer.endDate.toLocaleDateString() %></td>
+                            <td>
+                              <button
+                                class="btn btn-primary"
+                                data-toggle="modal"
+                                data-target="#editOfferModal"
+                                data-id="<%= offer._id %>"
+                                onclick="populateEditOfferModal('<%= offer._id %>')"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                id="listButton-<%= offer._id %>"
+                                class="btn <%= offer.isActive ? 'btn-danger' : 'btn-success' %>"
+                                onclick="confirmAndToggleListOffer('<%= offer._id %>', '<%= offer.isActive %>')"
+                              >
+                                <%= offer.isActive ? 'Inactive' : 'Active' %>
+                              </button>
+                            </td>
+                          </tr>
+                          <% }) %>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+                <% if (current > 1) { %>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page=<%= current - 1 %>"
+                    aria-label="Previous"
+                  >
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+                <% } %> <% for (let i = 1; i <= pages; i++) { %>
+                <li class="page-item <%= current == i ? 'active' : '' %>">
+                  <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                </li>
+                <% } %> <% if (current < pages) { %>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="?page=<%= ++current %>"
+                    aria-label="Next"
+                  >
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+                <% } %>
+              </ul>
+            </nav>
+          </div>
+
+          <!-- Modals for Create and Edit Offer -->
+          <!-- Implement CreateOfferModal and EditOfferModal according to your requirements -->
+
+          <!-- Create Offer Modal -->
+          <div
+            class="modal fade"
+            id="createOfferModal"
+            tabindex="-1"
+            aria-labelledby="createOfferModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <form id="createOfferForm">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="createOfferModalLabel">
+                      Create New Offer
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="form-group">
+                      <label for="offerTitle">Offer Title</label>
+                      <input
+                        type="text"
+                        id="offerTitle"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="discountPercentage"
+                        >Discount Percentage</label
+                      >
+                      <input
+                        type="number"
+                        id="discountPercentage"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="offerType">Offer Type</label>
+                      <select
+                        id="offerType"
+                        class="form-control"
+                        onchange="handleOfferTypeChange()"
+                        required
+                      >
+                        <option value="">Select Offer Type</option>
+                        <option value="category">Category</option>
+                        <option value="product">Product</option>
+                      </select>
+                    </div>
+                    <div class="form-group d-none" id="categoryGroup">
+                      <label for="category">Category</label>
+                      <select id="category" class="form-control">
+                        <option value="">Select Category</option>
+                      </select>
+                    </div>
+                    <div class="form-group d-none" id="productGroup">
+                      <label for="product">Product</label>
+                      <select id="product" class="form-control">
+                        <option value="">Select Product</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="startDate">Start Date</label>
+                      <input
+                        type="date"
+                        id="startDate"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="endDate">End Date</label>
+                      <input
+                        type="date"
+                        id="endDate"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Close
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                      Create Offer
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Offer Modal -->
+          <div
+            class="modal fade"
+            id="editOfferModal"
+            tabindex="-1"
+            aria-labelledby="editOfferModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <form id="editOfferForm">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="editOfferModalLabel">
+                      Edit Offer
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <input type="hidden" id="editOfferId" name="offerId" />
+
+                    <div class="form-group">
+                      <label for="editOfferTitle">Offer Title</label>
+                      <input
+                        type="text"
+                        id="editOfferTitle"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="editOfferDiscount">Discount (%)</label>
+                      <input
+                        type="number"
+                        id="editOfferDiscount"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+
+                    <div class="form-group">
+                      <!-- <label for="editOfferType">Offer Type</label> -->
+                      <input
+                        type="hidden"
+                        id="editOfferType"
+                        class="form-control"
+                        readonly
+                      />
+                    </div>
+
+                    <div class="form-group">
+                      <!-- <label for="editOfferCategoryOrProduct"
+                        >Category/Product Name</label
+                      > -->
+                      <input
+                        type="hidden"
+                        id="editOfferCategoryOrProduct"
+                        class="form-control"
+                        readonly
+                      />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="editOfferStartDate">Start Date</label>
+                      <input
+                        type="date"
+                        id="editOfferStartDate"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+
+                    <div class="form-group">
+                      <label for="editOfferEndDate">End Date</label>
+                      <input
+                        type="date"
+                        id="editOfferEndDate"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Close
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                      Save changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- End Modals -->
+          <!-- partial:partials/_footer.ejs -->
+          <%- include('partials/_footer') %>
+          <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+
+    <!-- plugins:js -->
+    <script src="/public/assets/vendors/js/vendor.bundle.base.js"></script>
+    <!-- endinject -->
+    <!-- Plugin js for this page -->
+    <!-- End plugin js for this page -->
+    <!-- inject:js -->
+    <script src="/public/assets/js/off-canvas.js"></script>
+    <script src="/public/assets/js/hoverable-collapse.js"></script>
+    <script src="/public/assets/js/misc.js"></script>
+    <script src="/public/assets/js/settings.js"></script>
+    <script src="/public/assets/js/todolist.js"></script>
+    <!-- endinject -->
+    <!-- Custom js for this page -->
+    <script src="/public/assets/js/dashboard.js"></script>
+    <!-- End custom js for this page -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+      function toggleOfferTarget() {
+        const offerType = document.getElementById("offerType").value;
+        const categoryField = document.getElementById("categoryField");
+        const productField = document.getElementById("productField");
+
+        if (offerType === "category") {
+          categoryField.style.display = "block";
+          productField.style.display = "none";
+        } else if (offerType === "product") {
+          productField.style.display = "block";
+          categoryField.style.display = "none";
+        } else {
+          categoryField.style.display = "none";
+          productField.style.display = "none";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const offerForm = document.getElementById("createOfferForm");
+
+        // Handle offer type change
+        window.handleOfferTypeChange = () => {
+          const offerType = document.getElementById("offerType").value;
+          const categoryGroup = document.getElementById("categoryGroup");
+          const productGroup = document.getElementById("productGroup");
+
+          if (offerType === "category") {
+            categoryGroup.classList.remove("d-none");
+            productGroup.classList.add("d-none");
+            fetchCategories();
+          } else if (offerType === "product") {
+            productGroup.classList.remove("d-none");
+            categoryGroup.classList.add("d-none");
+            fetchProducts();
+          } else {
+            categoryGroup.classList.add("d-none");
+            productGroup.classList.add("d-none");
+          }
+        };
+
+        // Fetch categories
+        function fetchCategories() {
+          axios
+            .get("/admin/categories/api/get-categories")
+            .then((response) => {
+              const categories = response.data;
+              const categorySelect = document.getElementById("category");
+              categorySelect.innerHTML =
+                '<option value="">Select Category</option>';
+              categories.forEach((category) => {
+                const option = document.createElement("option");
+                option.value = category._id;
+                option.text = category.name;
+                categorySelect.appendChild(option);
+              });
+            })
+            .catch((error) => {
+              console.error("Error fetching categories:", error);
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Failed to fetch categories!",
+              });
+            });
+        }
+
+        // Fetch products
+        function fetchProducts() {
+          axios
+            .get("/admin/products/api/get-products")
+            .then((response) => {
+              const products = response.data;
+              const productSelect = document.getElementById("product");
+              productSelect.innerHTML =
+                '<option value="">Select Product</option>';
+              products.forEach((product) => {
+                const option = document.createElement("option");
+                option.value = product._id;
+                option.text = product.name;
+                productSelect.appendChild(option);
+              });
+            })
+            .catch((error) => {
+              console.error("Error fetching products:", error);
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Failed to fetch products!",
+              });
+            });
+        }
+
+        // Handle form submission
+        offerForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+
+          const offerData = {
+            title: document.getElementById("offerTitle").value.toUpperCase(),
+            discountPercentage: parseInt(
+              document.getElementById("discountPercentage").value
+            ),
+            offerType: document.getElementById("offerType").value,
+            category: document.getElementById("category").value,
+            product: document.getElementById("product").value,
+            startDate: document.getElementById("startDate").value,
+            endDate: document.getElementById("endDate").value,
+          };
+
+          axios
+            .post("/admin/offers", offerData)
+            .then((response) => {
+              Swal.fire({
+                icon: "success",
+                title: "Offer Created",
+                text: "Your offer has been created successfully!",
+              }).then(() => {
+                $("#createOfferModal").modal("hide");
+                // Optionally refresh the offer list or take other actions
+              });
+            })
+            .catch((error) => {
+              console.error("Error creating offer:", error);
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Failed to create offer!",
+              });
+            });
+        });
+      });
+
+      // Function to populate the Edit Offer Modal with existing data from the table
+      function populateEditOfferModal(offerId) {
+        // Get the row corresponding to the clicked Edit button
+        const row = document
+          .querySelector(`button[data-id='${offerId}']`)
+          .closest("tr");
+
+        // Extract offer data from the table row
+        const offerTitle = row.children[1].innerText; // Title
+        const discountPercentage = row.children[2].innerText.replace("%", ""); // Discount
+        const offerType = row.children[3].innerText; // Offer Type
+        const offerCategoryOrProduct = row.children[4].innerText; // Category or Product Name
+        const startDate = row.children[5].innerText; // Start Date
+        const endDate = row.children[6].innerText; // End Date
+
+        // Populate the modal form fields with the extracted data
+        document.getElementById("editOfferId").value = offerId;
+        document.getElementById("editOfferTitle").value = offerTitle;
+        document.getElementById("editOfferDiscount").value = discountPercentage;
+        document.getElementById("editOfferType").value = offerType;
+        document.getElementById("editOfferCategoryOrProduct").value =
+          offerCategoryOrProduct; // For display purposes only
+        document.getElementById("editOfferStartDate").value =
+          formatDateForInput(startDate);
+        document.getElementById("editOfferEndDate").value =
+          formatDateForInput(endDate);
+      }
+
+      // Helper function to format the date for input[type="date"]
+      function formatDateForInput(dateString) {
+        const parts = dateString.split("/");
+        return `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(
+          2,
+          "0"
+        )}`;
+      }
+
+      // Handle the form submission and update the offer details
+      document
+        .getElementById("editOfferForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Get updated values from the form
+          const offerId = document.getElementById("editOfferId").value;
+          const updatedOfferTitle =
+            document.getElementById("editOfferTitle").value;
+          const updatedDiscountPercentage =
+            document.getElementById("editOfferDiscount").value;
+          const updatedStartDate =
+            document.getElementById("editOfferStartDate").value;
+          const updatedEndDate =
+            document.getElementById("editOfferEndDate").value;
+
+          // Send PUT request to update offer
+          axios
+            .put(`/admin/offers/${offerId}`, {
+              title: updatedOfferTitle.toUpperCase(),
+              discountPercentage: parseInt(updatedDiscountPercentage),
+              startDate: updatedStartDate,
+              endDate: updatedEndDate,
+            })
+            .then((response) => {
+              if (response.data.updatedOffer) {
+                Swal.fire(
+                  "Offer Updated",
+                  "The offer has been updated successfully.",
+                  "success"
+                ).then(() => {
+                  // Close the modal and reload the page to reflect updated data
+                  $("#editOfferModal").modal("hide");
+                  window.location.reload();
+                });
+              } else {
+                Swal.fire(
+                  "Error",
+                  "There was a problem updating the offer.",
+                  "error"
+                );
+              }
+            })
+            .catch((error) => {
+              Swal.fire("Error", "A server error occurred.", "error");
+            });
+        });
+    </script>
+
+    <script>
+      function confirmAndToggleListOffer(id, isActive) {
+        const action = isActive === "true" ? "Active" : "Inactive";
+
+        Swal.fire({
+          title: `Are you sure you want to ${action} this offer?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: `Yes, ${action} it!`,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            axios
+              .put(`/admin/offers/${id}/toggle`, {
+                isActive: isActive === "true" ? false : true,
+              })
+              .then((response) => {
+                const data = response.data.offer; // Assuming response contains the updated offer
+
+                // Select the button element using the offer id
+                const buttonElement = document.getElementById(
+                  `listButton-${data._id}`
+                );
+
+                // Toggle the button text between 'List' and 'Unlist'
+                const resultText = data.isActive ? "Inactive" : "Active";
+
+                // Toggle the button class between 'btn-success' and 'btn-danger'
+                const buttonClass = data.isActive
+                  ? "btn-danger"
+                  : "btn-success";
+
+                // Update button properties
+                buttonElement.className = `btn ${buttonClass}`;
+                buttonElement.innerHTML = resultText;
+                buttonElement.setAttribute(
+                  "onclick",
+                  `confirmAndToggleListOffer("${data._id}", "${data.isActive}")`
+                );
+
+                Swal.fire(
+                  `${action}ed!`,
+                  `Offer has been ${action.toLowerCase()}ed.`,
+                  "success"
+                );
+              })
+              .catch((error) => {
+                Swal.fire(
+                  "Error",
+                  "There was a problem updating the offer status.",
+                  "error"
+                );
+              });
+          }
+        });
+      }
+    </script>
+
+    <!-- <script>
+      // Coupon creation form submission
+      document
+        .getElementById("createCouponForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Accessing form values
+          const couponCode = document.getElementById("couponCode").value;
+          const expiryDate = document.getElementById("expiryDate").value;
+          const description = document.getElementById("description").value;
+          const discountValue = document.getElementById("discountValue").value;
+          const maximumPurchase =
+            document.getElementById("maximumPurchase").value;
+          const minimumPurchase =
+            document.getElementById("minimumPurchase").value;
+          const usageLimit = document.getElementById("usageLimit").value;
+
+          console.log(
+            couponCode,
+            expiryDate,
+            description,
+            discountValue,
+            maximumPurchase,
+            minimumPurchase,
+            usageLimit
+          );
+
+          // Axios POST request
+          axios
+            .post("/admin/coupons", {
+              code: couponCode.toUpperCase(),
+              expiryDate,
+              description,
+              discountValue,
+              maximumPurchase,
+              minimumPurchase,
+              usageLimit,
+            })
+            .then((response) => {
+              if (response.data.success) {
+                Swal.fire(
+                  "Coupon Created",
+                  "The coupon has been created successfully.",
+                  "success"
+                ).then(() => {
+                  // Close modal and reset form
+                  $("#createCouponModal").modal("hide");
+                  document.getElementById("createCouponForm").reset();
+                  window.location.reload(); // Reload the page to see the edit coupon
+                });
+              } else {
+                Swal.fire(
+                  "Error",
+                  "There was a problem creating the coupon.",
+                  "error"
+                );
+              }
+            })
+            .catch((error) => {
+              Swal.fire("Error", "A server error occurred.", "error");
+            });
+        });
+    </script>
+
+    <script>
+      function confirmAndToggleListCoupon(id, isListed) {
+        const action = isListed === "true" ? "Unlist" : "List";
+
+        Swal.fire({
+          title: `Are you sure you want to ${action} this coupon?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: `Yes, ${action} it!`,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            axios
+              .put(`/admin/coupons/${id}/unlist`, {
+                isListed: isListed === "true" ? false : true,
+              })
+              .then((response) => {
+                const data = response.data.coupon; // Assuming response contains the updated coupon
+
+                // Select the button element using the coupon id
+                const buttonElement = document.getElementById(
+                  `listButton-${data._id}`
+                );
+
+                // Toggle the button text between 'List' and 'Unlist'
+                const result = data.isListed ? "Unlist" : "List";
+
+                // Toggle the button class between 'btn-success' and 'btn-danger'
+                const buttonClass = data.isListed
+                  ? "btn-danger"
+                  : "btn-success";
+
+                // Update button properties
+                buttonElement.className = `btn ${buttonClass}`;
+                buttonElement.innerHTML = result;
+                buttonElement.setAttribute(
+                  "onclick",
+                  `confirmAndToggleListCoupon("${data._id}", "${data.isListed}")`
+                );
+
+                Swal.fire(
+                  `${action}ed!`,
+                  `Coupon has been ${action.toLowerCase()}ed.`,
+                  "success"
+                );
+              })
+              .catch((error) => {
+                Swal.fire(
+                  "Error",
+                  "There was a problem updating the coupon status.",
+                  "error"
+                );
+              });
+          }
+        });
+      }
+    </script>
+
+    <script>
+      // Function to populate edit coupon modal with existing data
+      // Function to populate edit coupon modal with existing data
+      function populateEditCouponModal(couponId) {
+        // Get the table row element that corresponds to this coupon
+        const row = document
+          .querySelector(`button[data-id='${couponId}']`)
+          .closest("tr");
+
+        // Extract the coupon data from the table cells
+        const couponCode = row.children[1].innerText; // Code
+        const couponDiscount = row.children[2].innerText.replace("%", ""); // Discount
+        const couponDescription = row.children[3].innerText; // Description
+        const couponExpiryDate = row.children[4].innerText; // Expiry Date
+        const purchaseRange = row.children[5].innerText.split("-"); // Purchase Range (Min and Max)
+        const couponMinPurchase = purchaseRange[0].trim(); // Minimum Purchase
+        const couponMaxPurchase = purchaseRange[1].trim(); // Maximum Purchase
+        const couponUsageLimit = row.children[6].innerText; // Usage Limit
+
+        // Populate the modal form fields with the extracted data
+        document.getElementById("editCouponId").value = couponId;
+        document.getElementById("editCouponCode").value = couponCode;
+        document.getElementById("editCouponDiscount").value = couponDiscount;
+        document.getElementById("editCouponDescription").value =
+          couponDescription;
+        document.getElementById("editCouponExpiry").value =
+          formatDateForInput(couponExpiryDate); // Format the date for input[type="date"]
+        document.getElementById("editCouponMinPurchase").value =
+          couponMinPurchase;
+        document.getElementById("editCouponMaxPurchase").value =
+          couponMaxPurchase;
+        document.getElementById("editCouponUsageLimit").value =
+          couponUsageLimit;
+      }
+
+      // Helper function to format the date into yyyy-mm-dd for input[type="date"]
+      function formatDateForInput(dateString) {
+        const parts = dateString.split("/");
+        return `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(
+          2,
+          "0"
+        )}`;
+      }
+
+      // Function to handle the form submission for editing the coupon
+      document
+        .getElementById("editCouponForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Get the updated coupon data from the form
+          const couponId = document.getElementById("editCouponId").value;
+          const updatedCouponCode =
+            document.getElementById("editCouponCode").value;
+          const updatedCouponExpiry =
+            document.getElementById("editCouponExpiry").value;
+          const updatedCouponDescription = document.getElementById(
+            "editCouponDescription"
+          ).value;
+          const updatedCouponDiscount =
+            document.getElementById("editCouponDiscount").value;
+          const updatedCouponMaxPurchase = document.getElementById(
+            "editCouponMaxPurchase"
+          ).value;
+          const updatedCouponMinPurchase = document.getElementById(
+            "editCouponMinPurchase"
+          ).value;
+          const updatedCouponUsageLimit = document.getElementById(
+            "editCouponUsageLimit"
+          ).value;
+
+          console.log("code = ", updatedCouponCode);
+
+          // Axios PUT request to update the coupon
+          axios
+            .put("/admin/coupons/" + couponId, {
+              code: updatedCouponCode.toUpperCase(),
+              expiryDate: updatedCouponExpiry,
+              description: updatedCouponDescription,
+              discountValue: updatedCouponDiscount,
+              maximumPurchase: updatedCouponMaxPurchase,
+              minimumPurchase: updatedCouponMinPurchase,
+              usageLimit: updatedCouponUsageLimit,
+            })
+            .then((response) => {
+              if (response.data.updatedCoupon) {
+                Swal.fire(
+                  "Coupon Updated",
+                  "The coupon has been updated successfully.",
+                  "success"
+                ).then(() => {
+                  // Close the modal and refresh the page to show updated data
+                  $("#editCouponModal").modal("hide");
+                  window.location.reload();
+                });
+              } else {
+                Swal.fire(
+                  "Error",
+                  "There was a problem updating the coupon.",
+                  "error"
+                );
+              }
+            })
+            .catch((error) => {
+              Swal.fire("Error", "A server error occurred.", "error");
+            });
+        });
+
+      // Delete coupon function
+      function deleteCoupon(id) {
+        if (confirm("Are you sure you want to delete this coupon?")) {
+          // Add your delete functionality here
+          console.log("Coupon deleted: ", id);
+        }
+      }
+    </script> -->
+  </body>
+</html>

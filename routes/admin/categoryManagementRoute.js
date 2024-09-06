@@ -19,6 +19,7 @@ const {
   editCategory,
   unlistCategory,
   searchCategories,
+  getAllCategoriesAPI,
 } = require("../../controllers/categoryController");
 
 // //for testing purpose
@@ -62,6 +63,9 @@ router.patch(
   authorizeAdminForModule("categoryManagement"),
   unlistCategory
 );
+
+//an api for getting all the category
+router.get("/api/get-categories", getAllCategoriesAPI);
 
 // //get - /admin/categories/search
 router.get("/search", searchCategories);

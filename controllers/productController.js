@@ -182,6 +182,15 @@ const searchProducts = (req, res) => {
   }
 };
 
+const getAllProductsAPI = async (req, res) => {
+  try {
+    const products = await ProductModel.find({ isListed: true }); // Fetch all categories from the database
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching categories", error });
+  }
+};
+
 module.exports = {
   getProducts,
   createProduct,
@@ -189,4 +198,5 @@ module.exports = {
   unlistProduct,
   getProductDetails,
   searchProducts,
+  getAllProductsAPI,
 };

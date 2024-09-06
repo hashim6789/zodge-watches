@@ -22,6 +22,7 @@ const {
   unlistProduct,
   getProductDetails,
   searchProducts,
+  getAllProductsAPI,
 } = require("../../controllers/productController");
 
 // //for uploading the images of the products
@@ -102,5 +103,7 @@ router.get(
 
 // //get - /admin/products/search
 router.get("/search", searchProducts);
+
+router.get("/api/get-products", getAllProductsAPI);
 
 module.exports = router;

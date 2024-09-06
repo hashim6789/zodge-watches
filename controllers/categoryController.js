@@ -163,10 +163,20 @@ const searchCategories = (req, res) => {
   res.redirect(`/admin/categories?query=${query}`);
 };
 
+const getAllCategoriesAPI = async (req, res) => {
+  try {
+    const categories = await CategoryModel.find({ isListed: true }); // Fetch all categories from the database
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching categories", error });
+  }
+};
+
 module.exports = {
   getCategory,
   createCategory,
   editCategory,
   unlistCategory,
   searchCategories,
+  getAllCategoriesAPI,
 };
