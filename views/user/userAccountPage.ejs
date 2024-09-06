@@ -27,7 +27,7 @@
       <!-- breadcrumb -->
       <div class="container pt-5">
         <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-          <a href="/user/auth/home" class="stext-109 cl8 hov-cl1 trans-04">
+          <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
             Home
             <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
           </a>
@@ -227,7 +227,7 @@
             <td>$<%= order.totalPrice.toFixed(2) %></td>
             <td>
               <!-- View Details Button -->
-              <a href="/user/profile/orders/<%= order._id %>" class="btn btn-info">View Details</a>
+              <a href="/profile/orders/<%= order._id %>/view" class="btn btn-info">View Details</a>
               
               <!-- Cancel Order Button -->
 <% if (order.orderStatus === 'placed' || order.orderStatus === 'shipped') { %> 
@@ -658,7 +658,7 @@ const userId = document.getElementById('userId').value;
 
 // Get values from the form input fields
 const firstName = document.getElementById('firstName').value;
-const secondName = document.getElementById('secondName').value;
+const lastName = document.getElementById('secondName').value;
 const phoneNo = document.getElementById('phoneNo').value;
 const email = document.getElementById('AddressEmail').value;
 const addressLine = document.getElementById('addressLine').value;
@@ -669,7 +669,7 @@ const city = document.getElementById('city').value;
 const flatNo = document.getElementById('flatNo').value;
           const data = {
             userId,
-            firstName, secondName, phoneNo, email, addressLine, pincode, state, country, city, flatNo
+            firstName, lastName, phoneNo, email, addressLine, pincode, state, country, city, flatNo
           };
 
           // const addressData = {};
@@ -678,7 +678,7 @@ const flatNo = document.getElementById('flatNo').value;
           // });
 
           axios
-            .post("/account/address", data)
+            .post("/profile/address", data)
             .then((response) => {
               if (response.status === 201) {
                 location.reload();
@@ -705,7 +705,7 @@ const flatNo = document.getElementById('flatNo').value;
 
           try {
             const response = await axios.patch(
-              "/account/personal/<%= user._id %>",
+              "/profile/personal/<%= user._id %>",
               data
             );
             if (response.status === 200) {
@@ -741,22 +741,14 @@ const pincode = document.getElementById('editZipCode').value;
 const country = document.getElementById('editCountry').value;
 const phoneNo = document.getElementById('editPhone').value;
 const flatNo = document.getElementById('editFlatNo').value;
+const addressData = {
+  userId, firstName, lastName, addressLine, city, state, pincode, phoneNo, country, flatNo
+}
 
           try {
             const response = await axios.put(
-              `/account/address/${addressId}`,
-              {
-                addressId,
-                firstName,
-                lastName,
-                addressLine,
-                city,
-                state,
-                pincode,
-                country,
-                phoneNo,
-                flatNo,
-              }
+              `/profile/address/${addressId}`,
+              addressData
             );
 
             // Handle success (e.g., show a success message, close modal, reload data, etc.)
@@ -774,12 +766,12 @@ const flatNo = document.getElementById('editFlatNo').value;
      <script>function deleteAddress(addressId) {
       if (confirm('Are you sure you want to delete this address?')) {
         axios
-          .delete(`/account/address/${addressId}`) 
-          .then(function (response) {
+          .delete(`/profile/address/${addressId}`) 
+          .then((response) => {
             document.querySelector(`[data-address-id='${addressId}']`).closest('.list-group-item').remove();
             alert('Address deleted successfully.');
           })
-          .catch(function (error) {
+          .catch((error) => {
             alert('Failed to delete the address.');
           });
       }
@@ -789,7 +781,7 @@ const flatNo = document.getElementById('editFlatNo').value;
     <!-- for cancel the order -->
     <script>
       function cancelOrder(orderId){
-        axios.patch(`/account/orders/cancel/${orderId}`).then((response) => {
+        axios.patch(`/profile/orders/${orderId}/cancel`).then((response) => {
           const updatedStatus = response.data.order.orderStatus;
           if(updatedStatus === "cancelled"){
             document.getElementById("cancelButton").style.display = "none";
@@ -820,8 +812,7 @@ const flatNo = document.getElementById('editFlatNo').value;
   }
 
   // Use Axios to send the return request
-  axios.post('/account/orders/return', {
-    orderId,
+  axios.patch(`/profile/orders/${orderId}/return`, {
     returnReason
   })
   .then(function(response) {
@@ -834,8 +825,8 @@ const flatNo = document.getElementById('editFlatNo').value;
       document.getElementById("returnButton").style.display = "none";
     }
     // Close the modal after the form is submitted successfully
-    // var returnReasonModal = new bootstrap.Modal(document.getElementById('returnReasonModal'));
-    //   returnReasonModal.hide();
+    var returnReasonModal = new bootstrap.Modal(document.getElementById('returnReasonModal'));
+      returnReasonModal.hide();
   })
   .catch(function(error) {
     console.error('Error:', error); // Log the error object for more information
@@ -848,7 +839,7 @@ const flatNo = document.getElementById('editFlatNo').value;
     <!-- for return the order
     <script>
       function returnOrder(orderId){
-        axios.patch(`/user/profile/orders/return/${orderId}`).then((response) => {
+        axios.patch(`/profile/orders/return/${orderId}`).then((response) => {
           const updatedStatus = response.data.order.orderStatus;
           if(updatedStatus === "requested"){
             document.getElementById("returnButton").style.display = "none";

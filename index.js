@@ -86,65 +86,65 @@ app.use("/", userRouter); // for admin router url
 
 //for testing
 
-app.get("/new", (req, res) =>
-  res.render("user/newProfile", {
-    user: {
-      _id: "66ba12a0b60c8ee3d46812fd",
-      googleId: "null",
-      firstName: "Jasim",
-      lastName: "Ihsan M",
-      email: "jasimihsan1234@gmail.com",
-      password: "$2a$10$9UZC0UoF8a7p2dMedJpFw.mjvqorlcKLVvkfyRCmivAYKOdyLrGJm",
-      role: "User",
-      isBlocked: false,
-      isVerified: true,
-      createdAt: "2024-08-12T13:48:16.243+00:00",
-      updatedAt: "2024-08-12T13:48:16.243+00:00",
-      __v: 0,
-    },
-    cart: {
-      _id: "66c1a7e3bd5a4a3884bb8e54",
-      products: [
-        {
-          productId: "66b21066179e1372e38545b6",
-          quantity: 2,
-          _id: "66d2a4ed936a39f6288bd37f",
-        },
-        {
-          productId: "66b20c63179e1372e3854593",
-          quantity: 1,
-          _id: "66d3338332314ede4aca8055",
-        },
-      ],
-      totalPrice: 88770,
-      updatedAt: "2024-08-31T15:15:15.898Z",
-      createdAt: "2024-08-18T07:50:59.431Z",
-      userId: "66be0418910daec07a9d471f",
-      __v: 116,
-    },
-    wishlist: {
-      _id: "66ce2df04115ce71e7692ac1",
-      userId: "66be0418910daec07a9d471f",
-      updatedAt: "2024-08-27T19:50:08.653Z",
-      productIds: [
-        {
-          _id: "66b20d3c179e1372e3854598",
-          name: "Titan Men's Timeless Style Watch",
-          price: 3195,
-          images: [Array],
-        },
-        {
-          _id: "66b20c63179e1372e3854593",
-          name: "Titan Zeal with 4.69 cm AMOLED Display",
-          price: 13500,
-          images: [Array],
-        },
-      ],
-      createdAt: "2024-08-27T19:50:08.653Z",
-      __v: 84,
-    },
-  })
-);
+// app.get("/new", (req, res) =>
+//   res.render("user/newProfile", {
+//     user: {
+//       _id: "66ba12a0b60c8ee3d46812fd",
+//       googleId: "null",
+//       firstName: "Jasim",
+//       lastName: "Ihsan M",
+//       email: "jasimihsan1234@gmail.com",
+//       password: "$2a$10$9UZC0UoF8a7p2dMedJpFw.mjvqorlcKLVvkfyRCmivAYKOdyLrGJm",
+//       role: "User",
+//       isBlocked: false,
+//       isVerified: true,
+//       createdAt: "2024-08-12T13:48:16.243+00:00",
+//       updatedAt: "2024-08-12T13:48:16.243+00:00",
+//       __v: 0,
+//     },
+//     cart: {
+//       _id: "66c1a7e3bd5a4a3884bb8e54",
+//       products: [
+//         {
+//           productId: "66b21066179e1372e38545b6",
+//           quantity: 2,
+//           _id: "66d2a4ed936a39f6288bd37f",
+//         },
+//         {
+//           productId: "66b20c63179e1372e3854593",
+//           quantity: 1,
+//           _id: "66d3338332314ede4aca8055",
+//         },
+//       ],
+//       totalPrice: 88770,
+//       updatedAt: "2024-08-31T15:15:15.898Z",
+//       createdAt: "2024-08-18T07:50:59.431Z",
+//       userId: "66be0418910daec07a9d471f",
+//       __v: 116,
+//     },
+//     wishlist: {
+//       _id: "66ce2df04115ce71e7692ac1",
+//       userId: "66be0418910daec07a9d471f",
+//       updatedAt: "2024-08-27T19:50:08.653Z",
+//       productIds: [
+//         {
+//           _id: "66b20d3c179e1372e3854598",
+//           name: "Titan Men's Timeless Style Watch",
+//           price: 3195,
+//           images: [Array],
+//         },
+//         {
+//           _id: "66b20c63179e1372e3854593",
+//           name: "Titan Zeal with 4.69 cm AMOLED Display",
+//           price: 13500,
+//           images: [Array],
+//         },
+//       ],
+//       createdAt: "2024-08-27T19:50:08.653Z",
+//       __v: 84,
+//     },
+//   })
+// );
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {

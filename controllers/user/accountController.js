@@ -26,16 +26,17 @@ const OrderModel = require("../../models/Order");
 //   }
 // };
 
-const getAccountPage = async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    console.log(userId);
-    res.render("user/accountPage");
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+// const getAccountPage = async (req, res) => {
+//   try {
+//     // const userId = req.params.userId;
+//     // console.log(userId);
+//     // const user = await UserModel.findById(userId);
+//     res.render("user/userAccountPage", { user: req.user });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
 
 //--------------------for personal information of a corresponding user--------------------------------------//
 
