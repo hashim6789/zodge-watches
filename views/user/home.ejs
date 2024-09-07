@@ -30,7 +30,7 @@
             <button
               class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1"
               data-filter="*"
-              onclick="fetchProducts()"
+              onclick="filterProducts('all', 1)"
             >
               All Products
             </button>
@@ -39,7 +39,7 @@
             <button
               class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5"
               id="categorySearch"
-              onclick="fetchProducts('<%= category._id %>')"
+              onclick="filterProducts('<%= category._id %>', 1)"
             >
               <%= category.name %>
             </button>
@@ -56,7 +56,7 @@
               <i
                 class="icon-close-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"
               ></i>
-              Filter
+              Sort
             </div>
 
             <div
@@ -268,42 +268,46 @@
                 </div>
 
                 <!-- Wishlist button -->
-                <!-- Wishlist button -->
                 <div class="block2-txt-child2 flex-r p-t-3">
                   <div
                     class="btn-addwish-b2 dis-block pos-relative js-addwish-b2"
                     data-id="<%= product._id %>"
                   >
                     <!-- Conditionally display heart icons based on wishlist status -->
-                    <% if (wishlist?.productIds.includes(product._id)) { %>
+                    <% const isInWishlist = wishlist?.productIds.some(item =>
+                    item._id.toString() === product._id.toString()); %>
+
+                    <!-- Product is in wishlist, show the "remove from wishlist" icon -->
+                    <% if (isInWishlist) { %>
                     <img
                       id="heart1-<%= product._id %>"
                       class="icon-heart1 dis-block trans-04 d-none"
                       src="/public/user/images/icons/icon-heart-01.png"
-                      alt="ICON"
-                      onclick="toggleWishlist('<%= product._id %>', false)"
+                      alt="Add to Wishlist"
+                      onclick="toggleWishlist('<%= product._id %>')"
                     />
                     <img
                       id="heart2-<%= product._id %>"
                       class="icon-heart2 dis-block trans-04"
                       src="/public/user/images/icons/icon-heart-02.png"
-                      alt="ICON"
-                      onclick="toggleWishlist('<%= product._id %>', true)"
+                      alt="Remove from Wishlist"
+                      onclick="toggleWishlist('<%= product._id %>')"
                     />
                     <% } else { %>
+                    <!-- Product is not in wishlist, show the "add to wishlist" icon -->
                     <img
                       id="heart1-<%= product._id %>"
                       class="icon-heart1 dis-block trans-04"
                       src="/public/user/images/icons/icon-heart-01.png"
-                      alt="ICON"
-                      onclick="toggleWishlist('<%= product._id %>', false)"
+                      alt="Add to Wishlist"
+                      onclick="toggleWishlist('<%= product._id %>')"
                     />
                     <img
                       id="heart2-<%= product._id %>"
                       class="icon-heart2 dis-block trans-04 d-none"
                       src="/public/user/images/icons/icon-heart-02.png"
-                      alt="ICON"
-                      onclick="toggleWishlist('<%= product._id %>', true)"
+                      alt="Remove from Wishlist"
+                      onclick="toggleWishlist('<%= product._id %>')"
                     />
                     <% } %>
                   </div>
@@ -321,22 +325,30 @@
             <li class="page-item">
               <a
                 class="page-link"
-                href="?page=<%= current - 1 %>"
+                data-page="<%= current - 1 %>"
                 aria-label="Previous"
+                onclick="fetchProducts('<%= currentCategory %>', '<%= current - 1 %>')"
               >
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
             <% } %> <% for (let i = 1; i <= pages; i++) { %>
             <li class="page-item <%= current == i ? 'active' : '' %>">
-              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+              <a
+                class="page-link"
+                data-page="<%= i %>"
+                onclick="fetchProducts('<%= currentCategory %>', '<%= i %>')"
+              >
+                <%= i %>
+              </a>
             </li>
             <% } %> <% if (current < pages) { %>
             <li class="page-item">
               <a
                 class="page-link"
-                href="?page=<%= ++current %>"
+                data-page="<%= current + 1 %>"
                 aria-label="Next"
+                onclick="fetchProducts('<%= currentCategory %>', '<%= current + 1 %>')"
               >
                 <span aria-hidden="true">&raquo;</span>
               </a>

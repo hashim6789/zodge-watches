@@ -88,8 +88,7 @@ const dummy = async (req, res) => {
 
 const getHome = async (req, res) => {
   try {
-    console.log(req.user);
-    const userId = req.session?.user?._id || req.user?._id;
+    const userId = req.user?._id;
     console.log(userId);
     let user = null;
     if (userId) {
@@ -122,7 +121,7 @@ const getHome = async (req, res) => {
         "productIds",
         "name price images"
       );
-      // console.log(wishlist);
+      console.log(wishlist);
       if (!wishlist) {
         wishlist = new WishlistModel({
           userId,
@@ -133,7 +132,7 @@ const getHome = async (req, res) => {
         wishlist.save();
       }
     }
-    // console.log(cart);
+    console.log(categories);
 
     res.render("user/home", {
       products,
@@ -141,6 +140,7 @@ const getHome = async (req, res) => {
       current: page,
       user,
       wishlist,
+      currentCategory: "all",
       pages: Math.ceil(count / perPage),
       cart,
     });
@@ -152,4 +152,53 @@ const getHome = async (req, res) => {
   }
 };
 
-module.exports = { getHome };
+const getProductsByPages = async (req, res) => {
+  try {
+    const category = req.query.category || "all";
+    const page = parseInt(req.query.page) || 1;
+    const limit = 8; // Products per page
+    const sortOption = req.query.sort || "newArrivals";
+
+    const query = category === "all" ? {} : { categoryId: category };
+
+    // Sorting options based on if-else
+    let sortCriteria = {};
+
+    if (sortOption === "priceLowToHigh") {
+      sortCriteria = { price: 1 }; // Sort by price ascending
+    } else if (sortOption === "priceHighToLow") {
+      sortCriteria = { price: -1 }; // Sort by price descending
+    } else if (sortOption === "lettersAscendingOrder") {
+      sortCriteria = { name: 1 }; // Sort alphabetically A-Z
+    } else if (sortOption === "lettersDescendingOrder") {
+      sortCriteria = { name: -1 }; // Sort alphabetically Z-A
+    } else if (sortOption === "popularity") {
+      sortCriteria = { popularity: -1 }; // Sort by popularity (assumes you have a popularity field)
+    } else {
+      sortCriteria = { createdAt: -1 }; // Default: Sort by new arrivals
+    }
+
+    // Fetching products from database based on category, pagination, and sorting
+    const products = await ProductModel.find(query)
+      .sort(sortCriteria)
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    // Count total products for pagination
+    const totalProducts = await ProductModel.countDocuments(query);
+    const pages = Math.ceil(totalProducts / limit);
+
+    // Send response back with products and pagination info
+    res.json({
+      products,
+      current: page,
+      pages,
+      currentCategory: category,
+    });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+};
+
+module.exports = { getHome, getProductsByPages };

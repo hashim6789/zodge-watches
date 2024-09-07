@@ -3,11 +3,7 @@ const bcrypt = require("bcryptjs");
 const passport = require("passport");
 const crypto = require("crypto");
 const UserModel = require("../../models/User");
-const OtpModel = require("../../models/Otp");
-const ProductModel = require("../../models/Product");
-const CategoryModel = require("../../models/Category");
-const CartModel = require("../../models/Cart");
-const WishlistModel = require("../../models/Wishlist");
+
 require("dotenv").config();
 
 /**--------------------for mail activities------------------ */
