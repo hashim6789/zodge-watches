@@ -4,6 +4,7 @@ const WishlistModel = require("../../models/Wishlist");
 const AddressModel = require("../../models/Address");
 const ProductModel = require("../../models/Product");
 const OrderModel = require("../../models/Order");
+const WalletModel = require("../../models/Wallet");
 
 const { createOrder } = require("../../config/razorpayService");
 const { v4: uuidv4 } = require("uuid");
@@ -104,7 +105,7 @@ const postCheckout = async (req, res) => {
       userId,
       products: orderProducts,
       totalPrice,
-      orderStatus: "placed",
+      orderStatus: "pending",
       address,
       paymentMethod,
     });
@@ -125,17 +126,36 @@ const postCheckout = async (req, res) => {
       });
     } else if (paymentMethod === "wallet") {
       // Deduct from wallet and confirm the order
-      const user = await UserModel.findById(userId);
-      if (user.walletBalance < totalPrice) {
+      const wallet = await WalletModel.findOne({ userId });
+
+      if (!wallet) {
+        return res
+          .status(404)
+          .json({ success: true, message: "the wallet is not found" });
+      }
+
+      if (wallet.balance < totalPrice) {
         return res
           .status(400)
           .json({ message: "Insufficient wallet balance." });
       }
-      user.walletBalance -= totalPrice;
-      await user.save();
-      return res
-        .status(200)
-        .json({ message: "Order placed successfully using Wallet!" });
+      wallet.balance -= totalPrice;
+
+      wallet.transactions.push({
+        type: "debit",
+        amount: totalPrice,
+        description: `Purchase for order #${newOrder.orderId}`,
+      });
+      await wallet.save();
+
+      newOrder.orderStatus = "placed";
+      newOrder.paymentStatus = "successful";
+      newOrder.save();
+      return res.status(200).json({
+        success: true,
+        message: "Order placed successfully using Wallet!",
+        order: newOrder,
+      });
     } else if (paymentMethod === "onlinePayment") {
       // Create an order with Razorpay
       const options = {

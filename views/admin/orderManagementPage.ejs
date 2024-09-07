@@ -92,7 +92,22 @@
                                 <span class="badge badge-info">N/A</span>
                               <% } %>
                             </td>
-                            <td><%= order.paymentMethod %></td>
+                            <td>
+                              <% 
+                              if (order.paymentStatus === 'pending') { %>
+                                <span 
+                                  style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; background-color: orange"></span>
+                                  <%}else if (order.paymentStatus === 'successful') { %>
+                                <span 
+                                  style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; background-color: green"></span>
+                                  <%}else if (order.paymentStatus === 'failed') { %>
+                                <span 
+                                  style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; background-color: red"></span>
+                                  <%} %>
+                              <!-- Circle icon for payment status -->
+                                
+                              <%= order.paymentMethod %>
+                            </td>
                             <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
                             <td>
                               <button

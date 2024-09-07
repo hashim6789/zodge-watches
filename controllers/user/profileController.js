@@ -3,6 +3,7 @@ const UserModel = require("../../models/User");
 const OrderModel = require("../../models/Order");
 const WishlistModel = require("../../models/Wishlist");
 const CartModel = require("../../models/Cart");
+const WalletModel = require("../../models/Wallet");
 
 //get the account profile page
 const getAccountPage = async (req, res) => {
@@ -20,10 +21,15 @@ const getAccountPage = async (req, res) => {
     });
 
     const orders = await OrderModel.find({ userId }).sort({ createdAt: -1 });
+    let wallet = await WalletModel.findOne({ userId });
+    if (!wallet) {
+      wallet = { balance: 0, transactions: [] };
+    }
     res.render("user/userAccountPage", {
       user,
       addresses,
       orders,
+      wallet,
       msg: null,
     });
   } catch (err) {

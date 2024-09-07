@@ -17,6 +17,7 @@ const OrderSchema = new Schema(
       type: String,
       required: true,
       enum: [
+        "pending",
         "failed",
         "placed",
         "shipped",

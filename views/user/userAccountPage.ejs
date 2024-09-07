@@ -61,6 +61,10 @@
                 <a class="nav-link" href="#" id="orders-link">Orders</a>
               </li>
               <li class="nav-item">
+                <a class="nav-link" href="#" id="wallet-link">My Wallet</a>
+              </li>
+              
+              <li class="nav-item">
                 <a class="nav-link" href="#" id="forgot-password-link"
                   >Reset Password</a
                 >
@@ -265,6 +269,48 @@
     </table>
   <% } %>
 </div>
+
+
+<!-- Wallet Section (Hidden Initially) -->
+<div id="wallet" class="d-none">
+  <h4>My Wallet</h4>
+  <div class="wallet-balance">
+    <h5>Wallet Balance: $<%= wallet.balance.toFixed(2) %></h5>
+  </div>
+
+  <div class="wallet-actions mt-4">
+    <!-- <button class="btn btn-success" id="addFundsBtn">Add Funds</button>
+    <button class="btn btn-primary" id="withdrawFundsBtn">Withdraw Funds</button> -->
+  </div>
+
+  <!-- Transaction History -->
+  <h5 class="mt-4">Transaction History</h5>
+  <% if (wallet.transactions.length === 0) { %>
+    <p>No transactions found.</p>
+  <% } else { %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% wallet.transactions.forEach(transaction => { %>
+          <tr>
+            <td><%= new Date(transaction.date).toLocaleDateString() %></td>
+            <td><%= transaction.description %></td>
+            <td>$<%= transaction.amount.toFixed(2) %></td>
+            <td><%= transaction.type === 'credit' ? 'Credit' : 'Debit' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
 
 
             <!-- Forgot Password Section (Hidden Initially) -->
@@ -642,342 +688,10 @@
   </div>
 </div>
 
-    
-
-
-
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="/public//user/js/userAccount.js"></script>
-
-    <!-- <script>
-      document
-        .getElementById("createAddress")
-        .addEventListener("submit", function (event) {
-          event.preventDefault();
-          // Get userId from the hidden input field
-const userId = document.getElementById('userId').value;
-
-// Get values from the form input fields
-const firstName = document.getElementById('firstName').value;
-const lastName = document.getElementById('secondName').value;
-const phoneNo = document.getElementById('phoneNo').value;
-const email = document.getElementById('AddressEmail').value;
-const addressLine = document.getElementById('addressLine').value;
-const pincode = document.getElementById('pincode').value;
-const state = document.getElementById('state').value;
-const country = document.getElementById('country').value;
-const city = document.getElementById('city').value;
-const flatNo = document.getElementById('flatNo').value;
-          const data = {
-            userId,
-            firstName, lastName, phoneNo, email, addressLine, pincode, state, country, city, flatNo
-          };
-
-          // const addressData = {};
-          // formData.forEach((value, key) => {
-          //   addressData[key] = value;
-          // });
-
-          axios
-            .post("/profile/address", data)
-            .then((response) => {
-              if (response.status === 201) {
-                location.reload();
-              } else {
-                alert("Failed to create address");
-              }
-            })
-            .catch((error) => {
-              console.error("Error creating address:", error);
-              alert("Address creation failed");
-            });
-        });
-    </script>
-    <script>
-      document
-        .getElementById("editProfileForm")
-        .addEventListener("submit", async function (event) {
-          event.preventDefault();
-
-          const data = {
-            firstName: document.getElementById("profileFirstName").value,
-            lastName: document.getElementById("profileLastName").value,
-          };
-
-          try {
-            const response = await axios.patch(
-              "/profile/personal/<%= user._id %>",
-              data
-            );
-            if (response.status === 200) {
-              alert("Profile updated successfully!");
-              window.location.reload();
-            } else {
-              alert("An error occurred while updating your profile.");
-            }
-          } catch (error) {
-            console.error("Error updating profile:", error);
-            alert("Failed to update profile.");
-          }
-        });
-    </script>
-
-    <script>
-      document
-        .getElementById("editAddress")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
-
-         // Get the value from the hidden input field
-const addressId = document.getElementById('addressId').value;
-
-// Get values from the form input fields
-const userId = document.getElementById('userId').value;
-const firstName = document.getElementById('editFirstName').value;
-const lastName = document.getElementById('editLastName').value;
-const addressLine = document.getElementById('editAddressLine').value;
-const city = document.getElementById('editCity').value;
-const state = document.getElementById('editState').value;
-const pincode = document.getElementById('editZipCode').value;
-const country = document.getElementById('editCountry').value;
-const phoneNo = document.getElementById('editPhone').value;
-const flatNo = document.getElementById('editFlatNo').value;
-const addressData = {
-  userId, firstName, lastName, addressLine, city, state, pincode, phoneNo, country, flatNo
-}
-
-          try {
-            const response = await axios.put(
-              `/profile/address/${addressId}`,
-              addressData
-            );
-
-            // Handle success (e.g., show a success message, close modal, reload data, etc.)
-            alert("Address updated successfully");
-            location.reload(); // Reload the page to reflect changes, or update the DOM as needed
-          } catch (error) {
-            // Handle error (e.g., show an error message)
-            console.error("Error updating address:", error);
-            alert("Failed to update address. Please try again.");
-          }
-        });
-    </script> -->
-
-    <!-- for deleting the address -->
-     <!-- <script>function deleteAddress(addressId) {
-      if (confirm('Are you sure you want to delete this address?')) {
-        axios
-          .delete(`/profile/address/${addressId}`) 
-          .then((response) => {
-            document.querySelector(`[data-address-id='${addressId}']`).closest('.list-group-item').remove();
-            alert('Address deleted successfully.');
-          })
-          .catch((error) => {
-            alert('Failed to delete the address.');
-          });
-      }
-    }
-    </script> -->
-
-    <!-- for cancel the order -->
-    <!-- <script>
-      function cancelOrder(orderId){
-        axios.patch(`/profile/orders/${orderId}/cancel`).then((response) => {
-          const updatedStatus = response.data.order.orderStatus;
-          if(updatedStatus === "cancelled"){
-            document.getElementById("cancelButton").style.display = "none";
-          }
-        })
-          .catch((error) => {
-            console.error("Error cancelling the order:", error);
-          });
-      }
-    </script> -->
-
-    <!-- <script>// Function to open the return modal and set the order ID
-      function openReturnModal(orderId) {
-        document.getElementById('orderIdForReturn').value = orderId;
-      }
-      
-      // Function to handle the return submission
-      function submitReturn() {
-  const orderId = document.getElementById('orderIdForReturn').value;
-  const returnReason = document.getElementById('returnReason').value;
-
-  console.log('Order ID:', orderId);
-  console.log('Return Reason:', returnReason);
-
-  if (!returnReason) {
-    alert("Please enter a return reason.");
-    return;
-  }
-
-  // Use Axios to send the return request
-  axios.patch(`/profile/orders/${orderId}/return`, {
-    returnReason
-  })
-  .then(function(response) {
-    console.log('Response:', response); // Log the entire response to check the structure
-
-    const updatedStatus = response.data.order.returnDetails.returnStatus;
-    console.log('Updated Status:', updatedStatus);
-
-    if (updatedStatus === "requested") {
-      document.getElementById("returnButton").style.display = "none";
-    }
-    // Close the modal after the form is submitted successfully
-    var returnReasonModal = new bootstrap.Modal(document.getElementById('returnReasonModal'));
-      returnReasonModal.hide();
-  })
-  .catch(function(error) {
-    console.error('Error:', error); // Log the error object for more information
-    alert('Failed to submit return request. Please try again.');
-  });
-}
-
-      </script> -->
-
-    <!-- for return the order
-    <script>
-      function returnOrder(orderId){
-        axios.patch(`/profile/orders/return/${orderId}`).then((response) => {
-          const updatedStatus = response.data.order.orderStatus;
-          if(updatedStatus === "requested"){
-            document.getElementById("returnButton").style.display = "none";
-          }
-        })
-          .catch((error) => {
-            console.error("Error send the request for returning the order:", error);
-          });
-      }
-    </script> -->
-
-    <!-- //for reset-password -->
-     <!-- <script>// public/js/resetPassword.js
-      document.getElementById('resetPassword').addEventListener('submit', function (event) {
-        event.preventDefault();
-      
-        const email = document.getElementById('email').value;
-      
-        axios.post('/auth/reset-password', {
-          email: email
-        })
-        .then(response => {
-          alert(response.data.message);
-          // Optionally, redirect the user or perform another action
-        })
-        .catch(error => {
-          console.error('There was an error resetting the password!', error);
-          alert(error.response.data.message || 'An error occurred while trying to reset your password.');
-        });
-      });
-      </script> -->
-
-    <!-- Custom JavaScript -->
-    <!-- <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // Sidebar navigation
-        const personalDetailsLink = document.getElementById(
-          "personal-details-link"
-        );
-        const addressesLink = document.getElementById("addresses-link");
-        const ordersLink = document.getElementById("orders-link");
-        const forgotPasswordLink = document.getElementById(
-          "forgot-password-link"
-        );
-
-        const personalDetailsSection =
-          document.getElementById("personal-details");
-        const addressesSection = document.getElementById("addresses");
-        const ordersSection = document.getElementById("orders");
-        const forgotPasswordSection =
-          document.getElementById("forgot-password");
-
-        personalDetailsLink.addEventListener("click", function () {
-          personalDetailsSection.classList.remove("d-none");
-          addressesSection.classList.add("d-none");
-          ordersSection.classList.add("d-none");
-          forgotPasswordSection.classList.add("d-none");
-          updateActiveNavLink(personalDetailsLink);
-        });
-
-        addressesLink.addEventListener("click", function () {
-          personalDetailsSection.classList.add("d-none");
-          addressesSection.classList.remove("d-none");
-          ordersSection.classList.add("d-none");
-          forgotPasswordSection.classList.add("d-none");
-          updateActiveNavLink(addressesLink);
-        });
-
-        ordersLink.addEventListener("click", function () {
-          personalDetailsSection.classList.add("d-none");
-          addressesSection.classList.add("d-none");
-          ordersSection.classList.remove("d-none");
-          forgotPasswordSection.classList.add("d-none");
-          updateActiveNavLink(ordersLink);
-        });
-
-        forgotPasswordLink.addEventListener("click", function () {
-          personalDetailsSection.classList.add("d-none");
-          addressesSection.classList.add("d-none");
-          ordersSection.classList.add("d-none");
-          forgotPasswordSection.classList.remove("d-none");
-          updateActiveNavLink(forgotPasswordLink);
-        });
-
-        function updateActiveNavLink(activeLink) {
-          document.querySelectorAll(".nav-link").forEach(function (link) {
-            link.classList.remove("active");
-          });
-          activeLink.classList.add("active");
-        }
-      });
-    </script>
-    <script>
-      // Populate modal fields with address data
-      var addressModal = document.getElementById("editAddressModal");
-      addressModal.addEventListener("show.bs.modal", function (event) {
-        var button = event.relatedTarget;
-        var addressId = button.getAttribute("data-address-id");
-        var firstName = button.getAttribute("data-address-first-name");
-        var lastName = button.getAttribute("data-address-last-name");
-        var addressLine = button.getAttribute("data-address-line1");
-        var city = button.getAttribute("data-address-city");
-        var state = button.getAttribute("data-address-state");
-        var zipCode = button.getAttribute("data-address-zip");
-        var country = button.getAttribute("data-address-country");
-        var phone = button.getAttribute("data-address-phone");
-        var flat = button.getAttribute("data-address-flat");
-
-        var modal = addressModal.querySelector("form");
-        modal.querySelector("#addressId").value = addressId;
-        modal.querySelector("#editFirstName").value = firstName;
-        modal.querySelector("#editLastName").value = lastName;
-        modal.querySelector("#editAddressLine").value = addressLine;
-        modal.querySelector("#editCity").value = city;
-        modal.querySelector("#editState").value = state;
-        modal.querySelector("#editZipCode").value = zipCode;
-        modal.querySelector("#editCountry").value = country;
-        modal.querySelector("#editPhone").value = phone;
-        modal.querySelector("#editFlatNo").value = flat;
-      });
-    </script>
-    <script>
-      var personalDetailsModal = document.getElementById("editPersonalDetailsModal");
-      personalDetailsModal.addEventListener("show.bs.modal", function (event) {
-        var button = event.relatedTarget;
-        var userId = button.getAttribute("data-user-id");
-        var firstName = button.getAttribute("data-user-first-name");
-        var lastName = button.getAttribute("data-user-last-name");
-    
-        var modal = personalDetailsModal.querySelector("form");
-        modal.querySelector("#editUserId").value = userId;
-        modal.querySelector("#profileFirstName").value = firstName;
-        modal.querySelector("#profileLastName").value = lastName;
-      });
-    </script> -->
       
     </body>
     

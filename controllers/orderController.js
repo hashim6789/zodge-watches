@@ -1,4 +1,6 @@
 const OrderModel = require("../models/Order");
+const WalletModel = require("../models/Wallet");
+const UserModel = require("../models/User");
 
 const getOrders = async (req, res) => {
   try {
@@ -9,6 +11,7 @@ const getOrders = async (req, res) => {
     let orders = [];
     // orders = await OrderModel.find({ name: new RegExp(query, "i") })
     orders = await OrderModel.find()
+      .sort({ createdAt: -1 })
       .skip((page - 1) * perPage)
       .limit(perPage);
     if (!orders) {
@@ -81,6 +84,11 @@ const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    if (updatedOrder.orderStatus === "delivered") {
+      updatedOrder.paymentStatus = "successful";
+      await updatedOrder.save();
+    }
+
     res.json({ status: updatedOrder.orderStatus });
   } catch (error) {
     console.error("Error updating order status:", error);
@@ -88,24 +96,24 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-//for handle the return request of the user like approve or rejected
 const handleReturnRequest = async (req, res) => {
   try {
     const orderId = req.params.orderId;
     const { returnStatus } = req.body;
-    console.log(returnStatus);
 
     const isReturnable = returnStatus === "approved";
-    const orderStatus = returnStatus === "completed" ? "returned" : "delivered";
+    if (returnStatus === "completed") {
+      // If returnStatus is 'completed', process refund
+      return refundToWallet(req, res, orderId);
+    }
 
+    // Update the order with the return status
     const order = await OrderModel.findByIdAndUpdate(
       orderId,
       {
         $set: {
           "returnDetails.returnStatus": returnStatus,
           "returnDetails.isReturnable": isReturnable,
-          orderStatus,
-          updatedAt: Date.now(),
         },
       },
       { new: true }
@@ -124,7 +132,63 @@ const handleReturnRequest = async (req, res) => {
       order,
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
+  }
+};
+
+// Approve return request and refund to wallet
+const refundToWallet = async (req, res, orderId) => {
+  try {
+    const order = await OrderModel.findById(orderId);
+
+    // Check if the order is already completed or invalid
+    if (!order || order.returnDetails.returnStatus === "completed") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or already completed return",
+      });
+    }
+
+    // Fetch user wallet
+    let wallet = await WalletModel.findOne({ userId: order.userId });
+
+    if (!wallet) {
+      wallet = new WalletModel({
+        userId: order.userId,
+        balance: 0, // Initialize balance to 0
+        transactions: [], // Empty transactions list
+      });
+    }
+
+    // Refund the total amount to the user's wallet
+    const refundAmount = order.totalPrice;
+    wallet.balance += refundAmount;
+
+    // Add a new transaction to the wallet
+    wallet.transactions.push({
+      type: "credit",
+      amount: refundAmount,
+      description: `Refund for order #${order.orderId}`,
+      date: new Date(),
+    });
+
+    await wallet.save();
+
+    // Update return status to completed
+    order.returnDetails.returnStatus = "completed";
+    order.orderStatus = "returned";
+    await order.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Return approved and amount credited to wallet",
+      order,
+      wallet, // Return wallet data for confirmation
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -133,4 +197,5 @@ module.exports = {
   getOrderDetails,
   updateOrderStatus,
   handleReturnRequest,
+  refundToWallet,
 };

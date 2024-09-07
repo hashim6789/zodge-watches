@@ -243,11 +243,13 @@ document.addEventListener("DOMContentLoaded", function () {
   const personalDetailsLink = document.getElementById("personal-details-link");
   const addressesLink = document.getElementById("addresses-link");
   const ordersLink = document.getElementById("orders-link");
+  const walletLink = document.getElementById("wallet-link");
   const forgotPasswordLink = document.getElementById("forgot-password-link");
 
   const personalDetailsSection = document.getElementById("personal-details");
   const addressesSection = document.getElementById("addresses");
   const ordersSection = document.getElementById("orders");
+  const walletSection = document.getElementById("wallet");
   const forgotPasswordSection = document.getElementById("forgot-password");
 
   personalDetailsLink.addEventListener("click", function () {
@@ -255,6 +257,7 @@ document.addEventListener("DOMContentLoaded", function () {
     addressesSection.classList.add("d-none");
     ordersSection.classList.add("d-none");
     forgotPasswordSection.classList.add("d-none");
+    walletSection.classList.add("d-none");
     updateActiveNavLink(personalDetailsLink);
   });
 
@@ -262,6 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
     personalDetailsSection.classList.add("d-none");
     addressesSection.classList.remove("d-none");
     ordersSection.classList.add("d-none");
+    walletSection.classList.add("d-none");
     forgotPasswordSection.classList.add("d-none");
     updateActiveNavLink(addressesLink);
   });
@@ -270,14 +274,24 @@ document.addEventListener("DOMContentLoaded", function () {
     personalDetailsSection.classList.add("d-none");
     addressesSection.classList.add("d-none");
     ordersSection.classList.remove("d-none");
+    walletSection.classList.add("d-none");
     forgotPasswordSection.classList.add("d-none");
     updateActiveNavLink(ordersLink);
+  });
+
+  document.getElementById("wallet-link").addEventListener("click", function () {
+    document.getElementById("personal-details").classList.add("d-none");
+    document.getElementById("addresses").classList.add("d-none");
+    document.getElementById("orders").classList.add("d-none");
+    document.getElementById("forgot-password").classList.add("d-none");
+    document.getElementById("wallet").classList.remove("d-none");
   });
 
   forgotPasswordLink.addEventListener("click", function () {
     personalDetailsSection.classList.add("d-none");
     addressesSection.classList.add("d-none");
     ordersSection.classList.add("d-none");
+    walletSection.classList.add("d-none");
     forgotPasswordSection.classList.remove("d-none");
     updateActiveNavLink(forgotPasswordLink);
   });
