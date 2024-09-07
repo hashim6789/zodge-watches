@@ -50,7 +50,7 @@ const postLogin = (req, res, next) => {
 //dashboard
 const getDashboard = (req, res) => {
   // res.status(200).json({ status: "success", message: "Its, dashboard" });
-  res.render("admin/demo-page", { pageType: null });
+  res.render("admin/adminDashboard", { pageType: null });
 };
 
 //for logout

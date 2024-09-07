@@ -136,24 +136,38 @@
               class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm"
             >
               <h4 class="mtext-109 cl2 p-b-30">Cart Totals</h4>
+              <!-- Subtotal -->
               <div class="flex-w flex-t bor12 p-b-13">
                 <div class="size-208">
                   <span class="stext-110 cl2"> Subtotal: </span>
                 </div>
                 <div class="size-209">
-                  <span id="subtotal" class="mtext-110 cl2"
-                    >₹ <%= (cart.totalPrice).toFixed(2) %></span
-                  >
+                  <span id="subtotal" class="mtext-110 cl2">
+                    ₹ <%= cart.products.reduce((acc, product) => acc +=
+                    (product.price * product.quantity), 0).toFixed(2) %>
+                  </span>
                 </div>
               </div>
+
+              <!-- Coupon Discount Field -->
+              <div class="flex-w flex-t p-t-15 p-b-13">
+                <div class="size-208">
+                  <span class="stext-110 cl2"> Coupon Discount: </span>
+                </div>
+                <div class="size-209">
+                  <span id="couponDiscountAmount" class="mtext-110 cl2"> </span>
+                </div>
+              </div>
+
+              <!-- Total -->
               <div class="flex-w flex-t p-t-27 p-b-33">
                 <div class="size-208">
                   <span class="mtext-101 cl2"> Total: </span>
                 </div>
                 <div class="size-209 p-t-1">
-                  <span class="mtext-110 cl2"
-                    >₹ <%= (cart.totalPrice).toFixed(2) %></span
-                  >
+                  <span id="totalAmount" class="mtext-110 cl2">
+                    ₹ <%= (cart.totalPrice).toFixed(2) %>
+                  </span>
                 </div>
               </div>
               <button
@@ -164,6 +178,53 @@
             </div>
           </div>
           <% } %>
+          <div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
+            <div class="flex-w flex-m m-r-20 m-tb-5">
+              <input
+                id="couponCode"
+                class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5"
+                type="text"
+                name="coupon"
+                placeholder="Coupon Code"
+              />
+              <button
+                class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5"
+                id="applyCouponBtn"
+                type="button"
+              >
+                Apply coupon
+              </button>
+            </div>
+
+            <button
+              class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10"
+              type="button"
+              onclick="removeCoupon()"
+            >
+              Remove Coupon
+            </button>
+          </div>
+
+          <!-- Add a section to display the coupon discount, if applied -->
+          <div
+            id="couponFeedback"
+            class="stext-101 cl2 m-tb-10"
+            style="display: none"
+          >
+            Coupon applied! Discount: ₹ <span id="couponDiscount"></span>
+          </div>
+
+          <!-- Error message for invalid coupon -->
+          <div
+            id="invalidCouponFeedback"
+            class="invalid-feedback"
+            style="display: none; color: red"
+          >
+            Invalid or expired coupon code.
+          </div>
+
+          <!-- Hidden field to store discount amount -->
+          <input type="hidden" id="discountAmount" value="0" />
         </div>
       </div>
     </form>
@@ -180,6 +241,179 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+      // Attach event listener for Apply Coupon button
+      document
+        .getElementById("applyCouponBtn")
+        .addEventListener("click", function () {
+          const couponCode = document.getElementById("couponCode").value;
+
+          // Send the coupon code to the server using Axios
+          if (couponCode) {
+            axios
+              .post("/cart/coupon/apply", { couponCode })
+              .then((response) => {
+                if (response.data.success) {
+                  console.log("testing");
+                  // If the coupon is valid, update the cart total and show the discount
+                  const discount = response.data.discountAmount;
+                  document.getElementById("couponDiscount").innerText =
+                    discount.toFixed(2);
+                  document.getElementById("couponFeedback").style.display =
+                    "block";
+                  document.getElementById(
+                    "couponDiscountAmount"
+                  ).innerText = `₹ ${discount.toFixed(2)}`;
+
+                  // Update the total price with the discount
+                  // const subtotalElement = document.getElementById("subtotal");
+                  // const originalTotal = parseFloat(
+                  //   subtotalElement.innerText.replace("₹ ", "")
+                  // );
+                  // const newTotal = originalTotal - discount;
+                  // subtotalElement.innerText = `₹ ${newTotal.toFixed(2)}`;
+
+                  // // Store the discount amount in a hidden field for further use
+                  // document.getElementById("discountAmount").value = discount;
+                } else {
+                  // Show invalid coupon message
+                  document.getElementById(
+                    "invalidCouponFeedback"
+                  ).style.display = "block";
+                }
+              })
+              .catch((error) => {
+                console.error(error);
+                // Handle errors like network issues
+                alert(error.response.data.message);
+              });
+          } else {
+            alert("Please enter a coupon code.");
+          }
+        });
+
+      // Function to update the cart
+      function removeCoupon() {
+        // Reset the coupon code input field
+        document.getElementById("couponCode").value = "";
+
+        // Remove the applied discount (set to 0)
+        const discount = 0;
+
+        // // Get the current subtotal from the cart
+        // const subtotalElement = document.getElementById("subtotal");
+        // const originalTotal = parseFloat(subtotalElement.innerText.replace("₹ ", ""));
+
+        // Since there's no discount, the new total will be the same as the original total
+        // const newTotal = originalTotal - discount;
+
+        // Update the total amount element with the original total price
+        // const totalElement = document.getElementById("totalAmount");
+        // totalElement.innerText = `₹ ${newTotal.toFixed(2)}`;
+
+        // Optionally, reset any hidden discount field to 0
+        document.getElementById("discountAmount").value = discount;
+
+        // Show a success message for the coupon removal
+        alert("Coupon removed successfully!");
+      }
+
+      //   document.getElementById(
+      //     "couponDiscountAmount"
+      //   ).innerText = `₹ ${discount.toFixed(2)}`;
+
+      //   // Calculate the new total by subtracting the discount
+      //   const newTotal = originalTotal - discount;
+
+      //   // Update the subtotal element with the new total price
+      //   subtotalElement.innerText = `₹ ${newTotal.toFixed(2)}`;
+
+      //   // Store the discount amount in a hidden field for further use
+      //   // document.getElementById("discountAmount").value = discount;
+
+      //   // Send the updated cart details to the server (placeholder)
+      //   alert("Cart updated successfully!");
+
+      //   // Here you can add logic to send updated cart details to the server
+      // }
+    </script>
+
+    <!-- <script>
+      // Function to apply the coupon code
+      function applyCoupon() {
+        const couponCode = document.getElementById("couponCode").value;
+        const feedback = document.getElementById("couponFeedback");
+
+        if (!couponCode) {
+          feedback.textContent = "Please enter a coupon code.";
+          feedback.className = "alert alert-danger";
+          feedback.style.display = "block";
+          return;
+        }
+
+        axios
+          .post("/apply-coupon", { coupon: couponCode })
+          .then((response) => {
+            if (response.data.success) {
+              feedback.textContent = "Coupon applied successfully!";
+              feedback.className = "alert alert-success";
+              feedback.style.display = "block";
+              updateCartTotals(response.data.cart); // Update cart totals with new data
+            } else {
+              feedback.textContent =
+                response.data.message || "Failed to apply coupon.";
+              feedback.className = "alert alert-danger";
+              feedback.style.display = "block";
+            }
+          })
+          .catch((error) => {
+            feedback.textContent = "An error occurred. Please try again.";
+            feedback.className = "alert alert-danger";
+            feedback.style.display = "block";
+          });
+      }
+
+      // Function to remove the applied coupon
+      function removeCoupon() {
+        axios
+          .post("/remove-coupon")
+          .then((response) => {
+            if (response.data.success) {
+              document.getElementById("couponCode").value = "";
+              document.getElementById("couponFeedback").textContent =
+                "Coupon removed successfully!";
+              document.getElementById("couponFeedback").className =
+                "alert alert-success";
+              document.getElementById("couponFeedback").style.display = "block";
+              updateCartTotals(response.data.cart); // Update cart totals with new data
+            } else {
+              document.getElementById("couponFeedback").textContent =
+                response.data.message || "Failed to remove coupon.";
+              document.getElementById("couponFeedback").className =
+                "alert alert-danger";
+              document.getElementById("couponFeedback").style.display = "block";
+            }
+          })
+          .catch((error) => {
+            document.getElementById("couponFeedback").textContent =
+              "An error occurred. Please try again.";
+            document.getElementById("couponFeedback").className =
+              "alert alert-danger";
+            document.getElementById("couponFeedback").style.display = "block";
+          });
+      }
+
+      // Function to update the cart totals
+      function updateCartTotals(cart) {
+        document.getElementById(
+          "subtotal"
+        ).textContent = `₹ ${cart.totalPrice.toFixed(2)}`;
+        document.getElementById(
+          "total"
+        ).textContent = `₹ ${cart.totalPrice.toFixed(2)}`;
+      }
+    </script> -->
 
     <!--===============================================================================================-->
     <script src="/public/user/vendor/jquery/jquery-3.2.1.min.js"></script>

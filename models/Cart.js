@@ -13,6 +13,10 @@ const CartsSchema = new Schema(
     ],
     totalPrice: { type: Number, required: true },
     userId: { type: Types.ObjectId, required: true },
+    coupon: {
+      code: { type: String, default: null },
+      discountAmount: { type: Number, default: null },
+    },
   },
   { timestamps: true }
 );

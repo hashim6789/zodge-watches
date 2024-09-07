@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Admin Dashboard</title>
+    <!-- plugins:css -->
+    <link
+      rel="stylesheet"
+      href="/public/assets/vendors/mdi/css/materialdesignicons.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="/public/assets/vendors/css/vendor.bundle.base.css"
+    />
+    <link rel="stylesheet" href="/public/assets/css/style.css" />
+    <link rel="shortcut icon" href="/public/assets/images/favicon.png" />
+    <!-- Include jsPDF library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+      /* Basic styling for modal */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+      }
+      .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        position: relative;
+      }
+      .close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-scroller">
+      <!-- Sidebar -->
+      <%- include('partials/_sidebar') %>
+
+      <!-- Main content -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- Navbar -->
+        <%- include('partials/_navbar') %>
+
+        <!-- Main Panel -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <h4 class="card-title">Admin Dashboard</h4>
+
+            <!-- Report Generation Form -->
+            <div class="row">
+              <div class="col-md-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 id="generateReport" class="card-title">
+                      Generate Sales Report
+                    </h5>
+                    <form id="reportForm">
+                      <div class="form-group">
+                        <label for="reportType">Select Report Type:</label>
+                        <select
+                          id="reportType"
+                          name="reportType"
+                          class="form-control"
+                        >
+                          <option value="yearly">Yearly</option>
+                          <option value="monthly">Monthly</option>
+                          <option value="weekly">Weekly</option>
+                          <option value="daily">Daily</option>
+                          <option value="custom">Custom Range</option>
+                        </select>
+                      </div>
+                      <div
+                        class="form-group"
+                        id="customDateRange"
+                        style="display: none"
+                      >
+                        <label for="startDate">Start Date:</label>
+                        <input
+                          type="date"
+                          id="startDate"
+                          name="startDate"
+                          class="form-control"
+                        />
+                        <label for="endDate">End Date:</label>
+                        <input
+                          type="date"
+                          id="endDate"
+                          name="endDate"
+                          class="form-control"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        id="generateReportButton"
+                        class="btn btn-danger"
+                      >
+                        PDF Report
+                      </button>
+                      <button
+                        type="button"
+                        id="generateExcelReportButton"
+                        class="btn btn-success"
+                      >
+                        XLS Report
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal -->
+            <div id="pdfModal" class="modal">
+              <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <iframe
+                  id="pdfIframe"
+                  style="width: 100%; height: 600px; border: none"
+                ></iframe>
+                <button id="downloadPdf">Download PDF</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <%- include('partials/_footer') %>
+        </div>
+      </div>
+    </div>
+
+    <!-- scripts -->
+    <script src="/public/assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="/public/assets/js/off-canvas.js"></script>
+    <script src="/public/assets/js/hoverable-collapse.js"></script>
+    <script src="/public/assets/js/template.js"></script>
+    <script src="/public/assets/js/settings.js"></script>
+    <script src="/public/assets/js/todolist.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- <script>
+      // Show or hide custom date range fields based on report type
+      document
+        .getElementById("reportType")
+        .addEventListener("change", function () {
+          const customRange = document.getElementById("customDateRange");
+          if (this.value === "custom") {
+            customRange.style.display = "block";
+          } else {
+            customRange.style.display = "none";
+          }
+        });
+
+      // Generate report button event listener
+      document
+        .getElementById("generateReportButton")
+        .addEventListener("click", async () => {
+          try {
+            const reportType = document.getElementById("reportType").value;
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("endDate").value;
+
+            // Send GET request to the server to fetch report data
+            const response = await axios.get("/admin/reports", {
+              params: {
+                reportType: reportType,
+                startDate: startDate,
+                endDate: endDate,
+              },
+            });
+
+            if (response.data.success) {
+              const data = response.data.ordersData;
+
+              console.log(data);
+
+              // Check if sales data is available and is an object with labels and values arrays
+              if (
+                data.sales &&
+                Array.isArray(data.sales.labels) &&
+                Array.isArray(data.sales.values)
+              ) {
+                console.log(data.sales);
+
+                // Generate PDF using jsPDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(18);
+                doc.text("Sales Report", 14, 22);
+                doc.setFontSize(12);
+                doc.text("Sales Data:", 14, 32);
+
+                let y = 40;
+                // Iterate over the sales data using the labels and values arrays
+                data.sales.labels.forEach((label, index) => {
+                  const value = data.sales.values[index];
+                  doc.text(`${label}: $${value}`, 14, y);
+                  y += 10;
+                });
+
+                // Add orders data to the PDF (optional)
+                doc.text("Orders Data:", 14, y + 10);
+                y += 20;
+                data.orders.labels.forEach((label, index) => {
+                  const value = data.orders.values[index];
+                  doc.text(`${label}: ${value} orders`, 14, y);
+                  y += 10;
+                });
+
+                // Convert PDF to Base64 and display it in the modal
+                const pdfDataUri = doc.output("datauristring");
+                document.getElementById("pdfIframe").src = pdfDataUri;
+
+                // Show the modal
+                document.getElementById("pdfModal").style.display = "flex";
+
+                // Download button event listener
+                document
+                  .getElementById("downloadPdf")
+                  .addEventListener("click", () => {
+                    doc.save("sales-report.pdf");
+                  });
+              } else {
+                console.warn("No sales data available.");
+                alert("No sales data available for the selected period.");
+              }
+            } else {
+              console.error("Failed to generate report:", response.statusText);
+              alert(response.data.message);
+            }
+          } catch (error) {
+            console.error("Error generating report:", error);
+
+            // Ensure error.response exists before accessing it
+            if (
+              error.response &&
+              error.response.data &&
+              error.response.data.message
+            ) {
+              alert(error.response.data.message);
+            } else {
+              alert("An unknown error occurred.");
+            }
+          }
+        });
+
+      function closeModal() {
+        document.getElementById("pdfModal").style.display = "none";
+      }
+    </script> -->
+
+    <script>
+      // Generate report button event listener for PDF
+      document
+        .getElementById("generateReportButton")
+        .addEventListener("click", async () => {
+          try {
+            const reportType = document.getElementById("reportType").value;
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("endDate").value;
+
+            // Send GET request to the server to fetch report data
+            const response = await axios.get("/admin/reports", {
+              params: {
+                reportType: reportType,
+                startDate: startDate,
+                endDate: endDate,
+              },
+            });
+
+            if (response.data.success) {
+              const data = response.data.ordersData;
+
+              console.log(data);
+
+              // Check if sales data is available and is an object with labels and values arrays
+              if (
+                data.sales &&
+                Array.isArray(data.sales.labels) &&
+                Array.isArray(data.sales.values)
+              ) {
+                console.log(data.sales);
+
+                // Generate PDF using jsPDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(18);
+                doc.text("Sales Report", 14, 22);
+                doc.setFontSize(12);
+                doc.text("Sales Data:", 14, 32);
+
+                let y = 40;
+                // Iterate over the sales data using the labels and values arrays
+                data.sales.labels.forEach((label, index) => {
+                  const value = data.sales.values[index];
+                  doc.text(`${label}: $${value}`, 14, y);
+                  y += 10;
+                });
+
+                // Add orders data to the PDF
+                doc.text("Orders Data:", 14, y + 10);
+                y += 20;
+                data.orders.labels.forEach((label, index) => {
+                  const value = data.orders.values[index];
+                  doc.text(`${label}: ${value} orders`, 14, y);
+                  y += 10;
+                });
+
+                // Convert PDF to Base64 and display it in the modal
+                const pdfDataUri = doc.output("datauristring");
+                document.getElementById("pdfIframe").src = pdfDataUri;
+
+                // Show the modal
+                document.getElementById("pdfModal").style.display = "flex";
+
+                // Download button event listener
+                document
+                  .getElementById("downloadPdf")
+                  .addEventListener("click", () => {
+                    doc.save("sales-report.pdf");
+                  });
+              } else {
+                console.warn("No sales data available.");
+                alert("No sales data available for the selected period.");
+              }
+            } else {
+              console.error("Failed to generate report:", response.statusText);
+              alert(response.data.message);
+            }
+          } catch (error) {
+            console.error("Error generating report:", error);
+
+            // Ensure error.response exists before accessing it
+            if (
+              error.response &&
+              error.response.data &&
+              error.response.data.message
+            ) {
+              alert(error.response.data.message);
+            } else {
+              alert("An unknown error occurred.");
+            }
+          }
+        });
+
+      // Generate Excel report button event listener
+      document
+        .getElementById("generateExcelReportButton")
+        .addEventListener("click", async () => {
+          try {
+            const reportType = document.getElementById("reportType").value;
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("endDate").value;
+
+            // Send GET request to the server to fetch report data
+            const response = await axios.get("/admin/reports", {
+              params: {
+                reportType: reportType,
+                startDate: startDate,
+                endDate: endDate,
+              },
+            });
+
+            if (response.data.success) {
+              const data = response.data.ordersData;
+              console.log(data);
+
+              // Create a new workbook and add sales and orders data to it
+              const workbook = XLSX.utils.book_new();
+
+              // Prepare Sales Data
+              const salesData = [["Date", "Sales"]];
+              data.sales.labels.forEach((label, index) => {
+                salesData.push([label, data.sales.values[index]]);
+              });
+              const salesSheet = XLSX.utils.aoa_to_sheet(salesData);
+
+              // Add sales sheet to the workbook
+              XLSX.utils.book_append_sheet(workbook, salesSheet, "Sales Data");
+
+              // Prepare Orders Data
+              const ordersData = [["Date", "Orders"]];
+              data.orders.labels.forEach((label, index) => {
+                ordersData.push([label, data.orders.values[index]]);
+              });
+              const ordersSheet = XLSX.utils.aoa_to_sheet(ordersData);
+
+              // Add orders sheet to the workbook
+              XLSX.utils.book_append_sheet(
+                workbook,
+                ordersSheet,
+                "Orders Data"
+              );
+
+              // Download the Excel file
+              XLSX.writeFile(workbook, "report.xlsx");
+            } else {
+              console.error("Failed to generate report:", response.statusText);
+              alert(response.data.message);
+            }
+          } catch (error) {
+            console.error("Error generating Excel report:", error);
+
+            // Ensure error.response exists before accessing it
+            if (
+              error.response &&
+              error.response.data &&
+              error.response.data.message
+            ) {
+              alert(error.response.data.message);
+            } else {
+              alert("An unknown error occurred.");
+            }
+          }
+        });
+
+      function closeModal() {
+        document.getElementById("pdfModal").style.display = "none";
+      }
+    </script>
+  </body>
+</html>

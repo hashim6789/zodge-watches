@@ -9,6 +9,11 @@ const {
   postCart,
 } = require("../../controllers/user/cartController");
 
+const {
+  applyCoupon,
+  removeCoupon,
+} = require("../../controllers/couponController");
+
 //for Authentication
 const {
   isAuthenticatedUser,
@@ -31,6 +36,8 @@ router.get("/", isAuthenticatedUser, authorizeUser, checkBlocked, getCart);
 router.post("/", isAuthenticatedUser, authorizeUser, checkBlocked, postCart);
 
 router.post("/add", isAuthenticatedUser, authorizeUser, addToCart);
+
+router.post("/coupon/apply", applyCoupon);
 
 router.patch(
   "/update-quantity",

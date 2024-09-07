@@ -63,7 +63,8 @@
                             <th>Discount</th>
                             <th>Description</th>
                             <th>Expiry Date</th>
-                            <th>Purchase Range</th>
+                            <th>Minimum Purchase</th>
+                            <th>Maximum Discount</th>
                             <th>Usage Limit</th>
                             <th>Action</th>
                           </tr>
@@ -76,15 +77,13 @@
                             </td>
 
                             <td><%= coupon.code %></td>
-                            <td><%= coupon.discountValue %>%</td>
+                            <td><%= coupon.discountPercentage %>%</td>
                             <td><%= coupon.description %></td>
                             <td>
                               <%= coupon.expiryDate.toLocaleDateString() %>
                             </td>
-                            <td>
-                              <%= coupon.minPurchaseAmount %> - <%=
-                              coupon.maxPurchaseAmount %>
-                            </td>
+                            <td><%= coupon.minPurchaseAmount %></td>
+                            <td><%= coupon. maxDiscountAmount %></td>
                             <td><%= coupon.usageLimit %></td>
                             <td>
                               <button
@@ -189,10 +188,10 @@
                       ></textarea>
                     </div>
                     <div class="form-group">
-                      <label for="discountValue">Discount Value (%)</label>
+                      <label for="discountPercentage">Discount %</label>
                       <input
                         type="number"
-                        id="discountValue"
+                        id="discountPercentage"
                         class="form-control"
                         required
                       />
@@ -207,7 +206,9 @@
                       />
                     </div>
                     <div class="form-group">
-                      <label for="minimumPurchase">Minimum Purchase</label>
+                      <label for="minimumPurchase"
+                        >Minimum Purchase Amount</label
+                      >
                       <input
                         type="number"
                         id="minimumPurchase"
@@ -216,14 +217,17 @@
                       />
                     </div>
                     <div class="form-group">
-                      <label for="maximumPurchase">Maximum Purchase</label>
+                      <label for="maximumDiscount"
+                        >Maximum Discount Amount</label
+                      >
                       <input
                         type="number"
-                        id="maximumPurchase"
+                        id="maximumDiscount"
                         class="form-control"
                         required
                       />
                     </div>
+
                     <div class="form-group">
                       <label for="usageLimit">Usage Limit</label>
                       <input
@@ -317,24 +321,21 @@
                     </div>
 
                     <div class="form-group">
-                      <label for="editCouponMaxPurchase"
-                        >Maximum Purchase</label
-                      >
-                      <input
-                        type="number"
-                        id="editCouponMaxPurchase"
-                        class="form-control"
-                        required
-                      />
-                    </div>
-
-                    <div class="form-group">
                       <label for="editCouponMinPurchase"
                         >Minimum Purchase</label
                       >
                       <input
                         type="number"
                         id="editCouponMinPurchase"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="editMaximumDiscount">Maximum discount</label>
+                      <input
+                        type="number"
+                        id="editMaximumDiscount"
                         class="form-control"
                         required
                       />
@@ -411,35 +412,37 @@
           e.preventDefault();
 
           // Accessing form values
-          const couponCode = document.getElementById("couponCode").value;
+          const code = document.getElementById("couponCode").value;
           const expiryDate = document.getElementById("expiryDate").value;
           const description = document.getElementById("description").value;
-          const discountValue = document.getElementById("discountValue").value;
-          const maximumPurchase =
-            document.getElementById("maximumPurchase").value;
-          const minimumPurchase =
+          const discountPercentage =
+            document.getElementById("discountPercentage").value;
+
+          const minPurchaseAmount =
             document.getElementById("minimumPurchase").value;
+          const maxDiscountAmount =
+            document.getElementById("maximumDiscount").value;
           const usageLimit = document.getElementById("usageLimit").value;
 
           console.log(
-            couponCode,
+            code,
             expiryDate,
             description,
-            discountValue,
-            maximumPurchase,
-            minimumPurchase,
+            discountPercentage,
+            minPurchaseAmount,
+            maxDiscountAmount,
             usageLimit
           );
 
           // Axios POST request
           axios
             .post("/admin/coupons", {
-              code: couponCode.toUpperCase(),
+              code: code.toUpperCase(),
               expiryDate,
               description,
-              discountValue,
-              maximumPurchase,
-              minimumPurchase,
+              discountPercentage,
+              minPurchaseAmount,
+              maxDiscountAmount,
               usageLimit,
             })
             .then((response) => {
@@ -538,13 +541,12 @@
 
         // Extract the coupon data from the table cells
         const couponCode = row.children[1].innerText; // Code
-        const couponDiscount = row.children[2].innerText.replace("%", ""); // Discount
+        const couponDiscount = row.children[2].innerText.replace("%", ""); // Discount (remove percentage sign)
         const couponDescription = row.children[3].innerText; // Description
         const couponExpiryDate = row.children[4].innerText; // Expiry Date
-        const purchaseRange = row.children[5].innerText.split("-"); // Purchase Range (Min and Max)
-        const couponMinPurchase = purchaseRange[0].trim(); // Minimum Purchase
-        const couponMaxPurchase = purchaseRange[1].trim(); // Maximum Purchase
-        const couponUsageLimit = row.children[6].innerText; // Usage Limit
+        const couponMinPurchase = row.children[5].innerText; // Minimum Purchase
+        const couponMaxDiscount = row.children[6].innerText; // Minimum Purchase
+        const couponUsageLimit = row.children[7].innerText; // Usage Limit
 
         // Populate the modal form fields with the extracted data
         document.getElementById("editCouponId").value = couponId;
@@ -556,19 +558,16 @@
           formatDateForInput(couponExpiryDate); // Format the date for input[type="date"]
         document.getElementById("editCouponMinPurchase").value =
           couponMinPurchase;
-        document.getElementById("editCouponMaxPurchase").value =
-          couponMaxPurchase;
+        document.getElementById("editMaximumDiscount").value =
+          couponMaxDiscount;
         document.getElementById("editCouponUsageLimit").value =
           couponUsageLimit;
       }
 
-      // Helper function to format the date into yyyy-mm-dd for input[type="date"]
+      // Helper function to format the date into YYYY-MM-DD for the input[type="date"] element
       function formatDateForInput(dateString) {
-        const parts = dateString.split("/");
-        return `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(
-          2,
-          "0"
-        )}`;
+        const date = new Date(dateString);
+        return date.toISOString().split("T")[0]; // Format the date into 'YYYY-MM-DD'
       }
 
       // Function to handle the form submission for editing the coupon
@@ -606,8 +605,7 @@
               code: updatedCouponCode.toUpperCase(),
               expiryDate: updatedCouponExpiry,
               description: updatedCouponDescription,
-              discountValue: updatedCouponDiscount,
-              maximumPurchase: updatedCouponMaxPurchase,
+              discountPercentage: updatedCouponDiscount,
               minimumPurchase: updatedCouponMinPurchase,
               usageLimit: updatedCouponUsageLimit,
             })

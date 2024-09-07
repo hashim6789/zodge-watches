@@ -12,7 +12,7 @@ const couponSchema = new Schema(
     description: {
       type: String,
     },
-    discountValue: {
+    discountPercentage: {
       type: Number,
       required: true,
     },
@@ -24,7 +24,7 @@ const couponSchema = new Schema(
       type: Number,
       default: 0,
     },
-    maxPurchaseAmount: {
+    maxDiscountAmount: {
       type: Number,
       default: 0,
     },
@@ -32,6 +32,7 @@ const couponSchema = new Schema(
       type: Number,
       default: 1,
     },
+
     isListed: { type: Boolean, required: true, default: true },
     usedCount: {
       type: Number,

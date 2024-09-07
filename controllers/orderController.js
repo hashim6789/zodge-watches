@@ -12,6 +12,7 @@ const getOrders = async (req, res) => {
     // orders = await OrderModel.find({ name: new RegExp(query, "i") })
     orders = await OrderModel.find()
       .sort({ createdAt: -1 })
+      .populate("userId", "firstName _id")
       .skip((page - 1) * perPage)
       .limit(perPage);
     if (!orders) {
