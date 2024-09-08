@@ -18,13 +18,14 @@ const {
   getOrderDetails,
   updateOrderStatus,
   handleReturnRequest,
+  searchOrders,
 } = require("../../controllers/orderController");
 
 // //for testing purpose
-// const test = (req, res, next) => {
-//   console.log(req.url);
-//   next();
-// };
+const test = (req, res, next) => {
+  console.log(req.url);
+  next();
+};
 
 // //get - /admin/orders/
 router.get(
@@ -60,5 +61,7 @@ router.patch(
   authorizeAdminForModule("orderManagement"),
   handleReturnRequest
 );
+
+router.get("/search", searchOrders);
 
 module.exports = router;

@@ -34,7 +34,7 @@
       <!-- partial -->
       <div class="container-fluid page-body-wrapper">
         <!-- partial:partials/_navbar.ejs -->
-        <%- include('partials/_navbar',{pageType:"order"}) %>
+        <%- include('partials/_navbar',{pageType:"orders"}) %>
         <!-- partial -->
         <div class="main-panel">
           <div class="content-wrapper">
@@ -78,7 +78,7 @@
                             <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
                             <td><%= order.orderId %></td>
                             <td><%= order.address.firstName %></td>
-                            <td>$<%= order.totalPrice.toFixed(2) %></td>
+                            <td>₹<%= order.totalPrice.toFixed(2) %></td>
                             <td><%= order.orderStatus %></td>
                             <td>
                               <% if (order.returnDetails.returnStatus) { %>
@@ -111,7 +111,6 @@
                                 
                               <%= order.paymentMethod %>
                             </td>
-                            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
                             <td>
                               <button
                                 class="btn btn-info"
@@ -328,6 +327,8 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
       function viewOrderDetails(orderId) {
         axios
@@ -409,149 +410,165 @@
           });
       }
 
-      // Function to initialize the status buttons based on the current order status
-      function initializeOrderStatusButtons(orderId, currentStatus) {
-        const orderStatusElement = document.getElementById("modalOrderStatus");
-        const orderStatusButtons =
-          document.getElementById("orderStatusButtons");
+      // Function to handle SweetAlert for success messages
+function showSuccessAlert(message) {
+  Swal.fire({
+    icon: "success",
+    title: "Success",
+    text: message,
+    confirmButtonText: "OK",
+  });
+}
 
-        orderStatusElement.textContent = currentStatus;
+// Function to handle SweetAlert for error messages
+function showErrorAlert(message) {
+  Swal.fire({
+    icon: "error",
+    title: "Error",
+    text: message,
+    confirmButtonText: "OK",
+  });
+}
 
-        orderStatusButtons.innerHTML = "";
+// Function to handle SweetAlert for confirmation messages
+function showConfirmationAlert(message, confirmCallback) {
+  Swal.fire({
+    title: "Are you sure?",
+    text: message,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes, do it!",
+    cancelButtonText: "Cancel",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      confirmCallback(); // Call the confirmed action
+    }
+  });
+}
 
-        const returnStatus =
-          document.getElementById("modalReturnStatus").textContent;
-        if (currentStatus === "placed") {
-          createStatusButton("shipped", orderId, orderStatusButtons);
-          createStatusButton("cancelled", orderId, orderStatusButtons);
-        } else if (currentStatus === "shipped") {
-          createStatusButton("delivered", orderId, orderStatusButtons);
-          createStatusButton("cancelled", orderId, orderStatusButtons);
-        } else if (currentStatus === "delivered") {
-          initializeReturnStatusButtons(orderId, returnStatus);
-        }
-      }
+// Function to initialize the status buttons based on the current order status
+function initializeOrderStatusButtons(orderId, currentStatus) {
+  const orderStatusElement = document.getElementById("modalOrderStatus");
+  const orderStatusButtons = document.getElementById("orderStatusButtons");
 
-      // Function to create a button with an event listener for updating status
-      function createStatusButton(status, orderId, container) {
-        const button = document.createElement("button");
-        button.className = "btn btn-outline-warning mr-2";
-        button.textContent = status;
+  orderStatusElement.textContent = currentStatus;
+  orderStatusButtons.innerHTML = "";
 
-        button.addEventListener("click", () => {
-          updateOrderStatus(orderId, status);
-        });
+  const returnStatus = document.getElementById("modalReturnStatus").textContent;
+  if (currentStatus === "placed") {
+    createStatusButton("shipped", orderId, orderStatusButtons);
+    createStatusButton("cancelled", orderId, orderStatusButtons);
+  } else if (currentStatus === "shipped") {
+    createStatusButton("delivered", orderId, orderStatusButtons);
+    createStatusButton("cancelled", orderId, orderStatusButtons);
+  } else if (currentStatus === "delivered") {
+    initializeReturnStatusButtons(orderId, returnStatus);
+  }
+}
 
-        container.appendChild(button);
-      }
+// Function to create a button with an event listener for updating status
+function createStatusButton(status, orderId, container) {
+  const button = document.createElement("button");
+  button.className = "btn btn-outline-warning mr-2";
+  button.textContent = status;
 
-      // Function to update order status via Axios patch request
-      function updateOrderStatus(orderId, newStatus) {
-        axios
-          .patch(`/admin/orders/change-status/${orderId}`, {
-            status: newStatus,
-          })
-          .then((response) => {
-            const updatedStatus = response.data.status;
-            initializeOrderStatusButtons(orderId, updatedStatus);
-          })
-          .catch((error) => {
-            console.error("Error updating order status:", error);
-          });
-      }
+  button.addEventListener("click", () => {
+    // Show confirmation dialog before updating the order status
+    showConfirmationAlert(`Are you sure you want to change the order status to ${status}?`, () => {
+      updateOrderStatus(orderId, status);
+    });
+  });
 
-      //for returnStatus
-      function initializeReturnStatusButtons(orderId, returnStatus) {
-        console.log(orderId, returnStatus);
-        const returnStatusElement =
-          document.getElementById("modalReturnStatus");
-        const returnReasonElement =
-          document.getElementById("modalReturnReason");
-        const returnStatusButtons = document.createElement("div");
-        const completeButton = document.createElement("div");
+  container.appendChild(button);
+}
 
-        returnStatusElement.textContent = returnStatus;
+// Function to update order status via Axios patch request with SweetAlert
+function updateOrderStatus(orderId, newStatus) {
+  axios
+    .patch(`/admin/orders/change-status/${orderId}`, {
+      status: newStatus,
+    })
+    .then((response) => {
+      const updatedStatus = response.data.status;
+      initializeOrderStatusButtons(orderId, updatedStatus);
+      showSuccessAlert(`Order status updated to ${updatedStatus} successfully.`);
+    })
+    .catch((error) => {
+      console.error("Error updating order status:", error);
+      showErrorAlert("Failed to update order status. Please try again.");
+    });
+}
 
-        returnReasonElement.innerHTML =
-          returnReasonElement.innerHTML.split("<div")[0];
+// Function to handle return requests via Axios POST request with SweetAlert
+function handleReturnRequest(orderId, status) {
+  axios
+    .patch(`/admin/orders/handle-return/${orderId}`, {
+      returnStatus: status,
+    })
+    .then((response) => {
+      const updatedReturnStatus = response.data.order.returnDetails.returnStatus;
+      //for changing the order status field of the modal
+      document.getElementById("modalOrderStatus").textContent =
+        response.data.order.orderStatus;
+      showSuccessAlert(`Return has been ${updatedReturnStatus} successfully.`);
+      initializeReturnStatusButtons(orderId, updatedReturnStatus);
+    })
+    .catch((error) => {
+      console.error("Error handling return request:", error);
+      showErrorAlert("Failed to process return request. Please try again.");
+    });
+}
 
-        if (returnStatus === "requested") {
-          returnStatusButtons.id = "returnStatusButtons";
-          returnStatusButtons.className = "mt-3";
+// Function to initialize the return status buttons based on return status
+function initializeReturnStatusButtons(orderId, returnStatus) {
+  const returnStatusElement = document.getElementById("modalReturnStatus");
+  const returnReasonElement = document.getElementById("modalReturnReason");
+  const returnStatusButtons = document.createElement("div");
 
-          createReturnButton(
-            "Approve",
-            orderId,
-            "approved",
-            returnStatusButtons
-          );
-          createReturnButton(
-            "Reject",
-            orderId,
-            "rejected",
-            returnStatusButtons
-          );
+  returnStatusElement.textContent = returnStatus;
+  returnReasonElement.innerHTML = returnReasonElement.innerHTML.split("<div")[0];
 
-          returnReasonElement.appendChild(returnStatusButtons);
-        } else if (returnStatus === "approved") {
-          returnStatusButtons.id = "returnStatusButtons";
-          returnStatusButtons.className = "mt-3";
+  if (returnStatus === "requested") {
+    returnStatusButtons.id = "returnStatusButtons";
+    returnStatusButtons.className = "mt-3";
+    createReturnButton("Approve", orderId, "approved", returnStatusButtons);
+    createReturnButton("Reject", orderId, "rejected", returnStatusButtons);
+    returnReasonElement.appendChild(returnStatusButtons);
+  } else if (returnStatus === "approved") {
+    returnStatusButtons.id = "returnStatusButtons";
+    returnStatusButtons.className = "mt-3";
+    createReturnButton("Completed", orderId, "completed", returnStatusButtons);
+    returnReasonElement.appendChild(returnStatusButtons);
+  }
+}
 
-          createReturnButton(
-            "Completed",
-            orderId,
-            "completed",
-            returnStatusButtons
-          );
-          returnReasonElement.appendChild(returnStatusButtons);
-        }
-      }
+// Function to create return request buttons with SweetAlert for handling return requests
+function createReturnButton(action, orderId, status, container) {
+  const button = document.createElement("button");
+  let className = "";
 
-      // Function to create a button with an event listener for handling return requests
-      function createReturnButton(action, orderId, status, container) {
-        console.log(action, orderId, status, container);
-        const button = document.createElement("button");
-        let className = "";
+  // Mapping actions to Bootstrap button classes
+  if (action === "Approve") {
+    className = "success"; // btn-success for green
+  } else if (action === "Reject") {
+    className = "danger"; // btn-danger for red
+  } else if (action === "Completed") {
+    className = "primary"; // btn-primary for blue
+  }
 
-        // Mapping actions to Bootstrap button classes
-        if (action === "Approve") {
-          className = "success"; // btn-success for green
-        } else if (action === "Reject") {
-          className = "danger"; // btn-danger for red
-        } else if (action === "Completed") {
-          className = "primary"; // Use a more visible color, e.g., btn-primary for blue
-        }
+  button.className = `btn btn-${className} mr-2`;
+  button.textContent = action;
 
-        button.className = `btn btn-${className} mr-2`;
-        button.textContent = action;
+  button.addEventListener("click", () => {
+    // Show confirmation dialog before handling return request
+    showConfirmationAlert(`Are you sure you want to ${action.toLowerCase()} the return request?`, () => {
+      handleReturnRequest(orderId, status);
+    });
+  });
 
-        button.addEventListener("click", () => {
-          handleReturnRequest(orderId, status);
-        });
+  container.appendChild(button);
+}
 
-        container.appendChild(button);
-      }
-
-      // Function to handle return requests via Axios POST request
-      function handleReturnRequest(orderId, status) {
-        axios
-          .patch(`/admin/orders/handle-return/${orderId}`, {
-            returnStatus: status,
-          })
-          .then((response) => {
-            const updatedReturnStatus =
-              response.data.order.returnDetails.returnStatus;
-            //for changing the order status filed of the modal
-            document.getElementById("modalOrderStatus").textContent =
-              response.data.order.orderStatus;
-            alert(`Return has been ${updatedReturnStatus} successfully.`);
-            initializeReturnStatusButtons(orderId, updatedReturnStatus);
-          })
-          .catch((error) => {
-            console.error("Error handling return request:", error);
-            alert("Failed to process return request. Please try again.");
-          });
-      }
     </script>
   </body>
 </html>

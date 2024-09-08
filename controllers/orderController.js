@@ -4,13 +4,12 @@ const UserModel = require("../models/User");
 
 const getOrders = async (req, res) => {
   try {
-    // const query = req.query.query || "";
+    const query = req.query.query || "";
     const page = req.query.page || 1;
     const perPage = 6;
 
     let orders = [];
-    // orders = await OrderModel.find({ name: new RegExp(query, "i") })
-    orders = await OrderModel.find()
+    orders = await OrderModel.find({ orderId: new RegExp(query, "i") })
       .sort({ createdAt: -1 })
       .populate("userId", "firstName _id")
       .skip((page - 1) * perPage)
@@ -193,10 +192,23 @@ const refundToWallet = async (req, res, orderId) => {
   }
 };
 
+//search categories
+const searchOrders = (req, res) => {
+  try {
+    const query = req.query.query;
+    console.log(query);
+    res.redirect(`/admin/orders?query=${query}`);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 module.exports = {
   getOrders,
   getOrderDetails,
   updateOrderStatus,
   handleReturnRequest,
   refundToWallet,
+  searchOrders,
 };
