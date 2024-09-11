@@ -1,4 +1,13 @@
 const express = require("express");
+const {
+  checkCartExists,
+  checkOrderExists,
+} = require("../../middlewares/orderMiddleware");
+const {
+  isAuthenticatedUser,
+  checkBlocked,
+} = require("../../middlewares/authenticationMiddlewares");
+const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
 const router = express.Router();
 const {
   getCheckout,
@@ -9,14 +18,37 @@ const {
 
 const { verifyPayment } = require("../../config/razorpayService");
 
-router.get("/", getCheckout);
+router.get(
+  "/",
+  isAuthenticatedUser,
+  authorizeUser,
+  checkCartExists,
+  getCheckout
+);
 
-router.post("/", postCheckout);
+router.post(
+  "/",
+  isAuthenticatedUser,
+  authorizeUser,
+  checkCartExists,
+  postCheckout
+);
 
-router.post("/verify-payment", verifyPayment);
+router.post(
+  "/verify-payment",
+  isAuthenticatedUser,
+  authorizeUser,
+  verifyPayment
+);
 
-router.get("/confirmation", getOrderConfirmation);
+router.get(
+  "/confirmation",
+  isAuthenticatedUser,
+  authorizeUser,
+  checkOrderExists,
+  getOrderConfirmation
+);
 
-router.get("/address/:index", getAddress);
+router.get("/address/:index", isAuthenticatedUser, authorizeUser, getAddress);
 
 module.exports = router;

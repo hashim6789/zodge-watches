@@ -486,7 +486,7 @@ const sendReturnRequest = async (req, res) => {
 };
 
 module.exports = {
-  getAccountPage,
+  // getAccountPage,
   getPersonalInfo,
   updatePersonalInfo,
   updatePersonal,

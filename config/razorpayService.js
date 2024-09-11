@@ -15,39 +15,28 @@ const verifyPayment = async (req, res) => {
   try {
     const { orderId, razorpayOrderId, paymentId, signature } = req.body;
 
-    console.log(orderId, razorpayOrderId, paymentId, signature);
+    console.log({ orderId, razorpayOrderId, paymentId, signature });
 
-    // Fetch the order from the database
     const order = await OrderModel.findById(orderId);
     if (!order || order.razorpayOrderId !== razorpayOrderId) {
       return res.status(400).json({ message: "Invalid Order." });
     }
 
-    // Generate the signature using the key secret
     const generatedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(`${razorpayOrderId}|${paymentId}`)
       .digest("hex");
 
-    // Compare the generated signature with the one sent from Razorpay
     if (generatedSignature !== signature) {
       return res.status(400).json({ message: "Payment verification failed." });
     }
 
-    // Update the order status to 'paid'
     order.paymentStatus = "successful";
+    order.orderStatus = "placed";
     await order.save();
 
-    // Finalize stock deduction
-    for (const product of order.products) {
-      const foundProduct = await ProductModel.findById(product.productId);
-      if (foundProduct) {
-        foundProduct.stock -= product.quantity;
-        await foundProduct.save();
-      }
-    }
+    await finalizeStockReduction(order.products);
 
-    // Send success response
     res.status(200).json({ message: "Payment verified successfully." });
   } catch (err) {
     console.error(err);
@@ -63,6 +52,16 @@ const createOrder = async (option) => {
     payment_capture: 1,
   };
   return await razorpayInstance.orders.create(options);
+};
+
+const finalizeStockReduction = async (orderProducts) => {
+  for (const product of orderProducts) {
+    const foundProduct = await ProductModel.findById(product.productId);
+    if (foundProduct) {
+      foundProduct.reservedStock -= product.quantity;
+      await foundProduct.save();
+    }
+  }
 };
 
 module.exports = { createOrder, verifyPayment };

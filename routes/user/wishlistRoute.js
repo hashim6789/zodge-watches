@@ -4,6 +4,7 @@ const router = express.Router();
 const {
   addToWishlist,
   removeFromWishlist,
+  fetchWishlist,
 } = require("../../controllers/user/wishlistController");
 
 //for Authentication
@@ -36,5 +37,7 @@ router.delete(
   checkBlocked,
   removeFromWishlist
 );
+
+router.get("/", fetchWishlist);
 
 module.exports = router;

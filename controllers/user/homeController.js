@@ -3,6 +3,7 @@ const CategoryModel = require("../../models/Category");
 const UserModel = require("../../models/User");
 const WishlistModel = require("../../models/Wishlist");
 const CartModel = require("../../models/Cart");
+const OfferModel = require("../../models/Offer");
 
 // const dummy = async (req, res) => {
 //   // const products = await ProductModel.find({ isListed: true });
@@ -89,19 +90,29 @@ const dummy = async (req, res) => {
 const getHome = async (req, res) => {
   try {
     const userId = req.user?._id;
-    console.log(userId);
     let user = null;
+
     if (userId) {
       user = await UserModel.findById(userId);
     }
-    // console.log(req.user);
+
     const page = req.query.page || 1;
     const perPage = 8;
-    const products = await ProductModel.find()
+
+    // Fetch products
+    const products = await ProductModel.find({ isListed: true })
+      .populate("categoryId", "name")
       .skip((page - 1) * perPage)
       .limit(perPage);
+
     const categories = await CategoryModel.find({ isListed: true });
     const count = await ProductModel.countDocuments();
+
+    const activeOffers = await OfferModel.find({
+      isActive: true,
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() },
+    });
 
     let cart = null;
     let wishlist = null;
@@ -115,13 +126,13 @@ const getHome = async (req, res) => {
           createdAt: Date.now(),
           updatedAt: Date.now(),
         });
-        cart.save();
+        await cart.save();
       }
+
       wishlist = await WishlistModel.findOne({ userId }).populate(
         "productIds",
         "name price images"
       );
-      console.log(wishlist);
       if (!wishlist) {
         wishlist = new WishlistModel({
           userId,
@@ -129,13 +140,48 @@ const getHome = async (req, res) => {
           createdAt: Date.now(),
           updatedAt: Date.now(),
         });
-        wishlist.save();
+        await wishlist.save();
       }
     }
-    console.log(categories);
 
+    // Calculate discounted price based on offers
+    const productsWithDiscount = products.map((product) => {
+      let discountedPrice = product.price;
+
+      // Check if any offers apply to this product
+      const applicableOffer = activeOffers.find((offer) => {
+        if (
+          offer.offerType === "product" &&
+          offer.product.toString() === product._id.toString()
+        ) {
+          return true; // Offer directly applies to the product
+        }
+        if (
+          offer.offerType === "category" &&
+          offer.category.toString() === product.categoryId.toString()
+        ) {
+          return true; // Offer applies to the product's category
+        }
+        return false;
+      });
+
+      // If an applicable offer exists, apply the discount
+      if (applicableOffer) {
+        discountedPrice =
+          product.price -
+          (product.price * applicableOffer.discountPercentage) / 100;
+      }
+
+      return {
+        ...product.toObject(),
+        discountedPrice, // Add discounted price to product object
+      };
+    });
+    console.log(productsWithDiscount);
+
+    // Render the home page with updated product prices
     res.render("user/home", {
-      products,
+      products: productsWithDiscount, // Send products with discounted prices
       categories,
       current: page,
       user,
@@ -152,47 +198,56 @@ const getHome = async (req, res) => {
   }
 };
 
+//get the products by pages , this is for rendering the pages of products dynamically
 const getProductsByPages = async (req, res) => {
   try {
     const category = req.query.category || "all";
     const page = parseInt(req.query.page) || 1;
-    const limit = 8; // Products per page
+    const limit = 8;
     const sortOption = req.query.sort || "newArrivals";
+    const searchQuery = req.query.search ? req.query.search.trim() : "";
 
-    const query = category === "all" ? {} : { categoryId: category };
+    let query = { isListed: true };
 
-    // Sorting options based on if-else
+    if (category !== "all") {
+      query.categoryId = category;
+    }
+
+    if (searchQuery) {
+      query.name = { $regex: new RegExp(searchQuery, "i") };
+    }
+
     let sortCriteria = {};
 
     if (sortOption === "priceLowToHigh") {
-      sortCriteria = { price: 1 }; // Sort by price ascending
+      sortCriteria = { price: 1 };
     } else if (sortOption === "priceHighToLow") {
-      sortCriteria = { price: -1 }; // Sort by price descending
+      sortCriteria = { price: -1 };
     } else if (sortOption === "lettersAscendingOrder") {
-      sortCriteria = { name: 1 }; // Sort alphabetically A-Z
+      sortCriteria = { name: 1 };
     } else if (sortOption === "lettersDescendingOrder") {
-      sortCriteria = { name: -1 }; // Sort alphabetically Z-A
+      sortCriteria = { name: -1 };
     } else if (sortOption === "popularity") {
-      sortCriteria = { popularity: -1 }; // Sort by popularity (assumes you have a popularity field)
-    } else {
-      sortCriteria = { createdAt: -1 }; // Default: Sort by new arrivals
+      sortCriteria = { soldCount: 1 };
     }
 
-    // Fetching products from database based on category, pagination, and sorting
     const products = await ProductModel.find(query)
       .sort(sortCriteria)
       .skip((page - 1) * limit)
       .limit(limit);
 
-    // Count total products for pagination
     const totalProducts = await ProductModel.countDocuments(query);
     const pages = Math.ceil(totalProducts / limit);
 
-    // Send response back with products and pagination info
+    const wishlist = req.user
+      ? await WishlistModel.findOne({ userId: req.user._id })
+      : null;
+
     res.json({
       products,
       current: page,
       pages,
+      wishlist,
       currentCategory: category,
     });
   } catch (error) {

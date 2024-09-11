@@ -39,6 +39,8 @@ router.post("/add", isAuthenticatedUser, authorizeUser, addToCart);
 
 router.post("/coupon/apply", applyCoupon);
 
+router.delete("/coupon/remove", removeCoupon);
+
 router.patch(
   "/update-quantity",
   checkBlocked,

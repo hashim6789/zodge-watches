@@ -66,7 +66,7 @@
               
               <li class="nav-item">
                 <a class="nav-link" href="#" id="forgot-password-link"
-                  >Reset Password</a
+                  >Change Password</a
                 >
               </li>
             </ul>
@@ -206,69 +206,99 @@
 
             
 
-            <!-- Orders Section (Hidden Initially) -->
-<div id="orders" class="d-none">
-  <h4>Orders</h4>
-  <% if (orders.length === 0) { %>
-    <p class="no-orders">There are no orders to display.</p>
-  <% } else { %>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>Date</th>
-          <th>Status</th>
-          <th>Total</th>
-          <th>Actions</th> <!-- Changed column name from "Details" to "Actions" -->
-        </tr>
-      </thead>
-      <tbody>
-        <% orders.forEach(order => { %>
-          <tr>
-            <td><%= order._id %></td>
-            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
-            <td><%= order.orderStatus %></td>
-            <td>$<%= order.totalPrice.toFixed(2) %></td>
-            <td>
-              <!-- View Details Button -->
-              <a href="/profile/orders/<%= order._id %>/view" class="btn btn-info">View Details</a>
-              
-              <!-- Cancel Order Button -->
-<% if (order.orderStatus === 'placed' || order.orderStatus === 'shipped') { %> 
-  <!-- Show the Cancel button only for orders that are Pending or Processing -->
-  <form id="cancelOrder" style="display:inline;">
-    <button id="cancelButton" onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">Cancel</button>
-  </form>
-  
-  <% } else if (order.orderStatus === "delivered" && order.returnDetails.returnStatus === null) { %>
-    <!-- Modify the Return button to open the modal -->
-    <button 
-    type="button" 
-    class="btn btn-warning" 
-    id="returnButton"
-    onclick="openReturnModal('<%= order._id %>')"
-    data-bs-toggle="modal" 
-    data-bs-target="#returnReasonModal"
-    >
-    Return
-  </button>
-  <% } else if (order.orderStatus === "cancelled") { %>
-    <button id="cancelButton" class="btn btn-danger" disabled>cancelled</button>
-  <% } else if (order.returnDetails.returnStatus === "requested") { %>
-    <button id="cancelButton" class="btn btn-danger" disabled>Requested</button>
-  <% } else if (order.returnDetails.returnStatus === "approved") { %>
-    <button id="cancelButton" class="btn btn-success  " disabled>Approved</button>
-  <% } else if (order.returnDetails.returnStatus === "rejected") { %>
-    <button id="cancelButton" class="btn btn-danger" disabled>Rejected</button>
-<% } %>
-
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  <% } %>
-</div>
+           <!-- Orders Section (Hidden Initially) -->
+           <div id="orders" class="d-none">
+            <h4>Orders</h4>
+            <div id="orders-table">
+              <% if (orders.length === 0) { %>
+                <p class="no-orders">There are no orders to display.</p>
+              <% } else { %>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Total</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="orders-body">
+                    <% orders.forEach(order => { %>
+                      <tr>
+                        <td><%= order.orderId %></td>
+                        <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                        <td><%= order.orderStatus %></td>
+                        <td>$<%= order.totalPrice.toFixed(2) %></td>
+                        <td>
+                          <!-- View Details Button -->
+                          <a href="/profile/orders/<%= order._id %>/view" class="btn btn-info">View Details</a>
+                          
+                          <!-- Cancel Order Button -->
+                          <% if (order.orderStatus === 'placed' || order.orderStatus === 'shipped') { %> 
+                            <form id="cancelOrder" style="display:inline;">
+                              <button id="cancelButton" onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">Cancel</button>
+                            </form>
+          
+                          <% } else if (order.orderStatus === "pending") { %> 
+                            <!-- Show Retry button for pending orders -->
+                            <button id="retryPaymentBtn" onclick="openPaymentRetryModal('<%= order._id %>', '<%= order.totalPrice %>')" class="btn btn-primary">Retry Payment</button>
+          
+                          <% } else if (order.orderStatus === "delivered" && order.returnDetails.returnStatus === null) { %>
+                            <!-- Return Button -->
+                            <button 
+                              type="button" 
+                              class="btn btn-warning" 
+                              id="returnButton"
+                              onclick="openReturnModal('<%= order._id %>')"
+                              data-bs-toggle="modal" 
+                              data-bs-target="#returnReasonModal"
+                            >
+                              Return
+                            </button>
+          
+                          <% } else if (order.orderStatus === "cancelled") { %>
+                            <button id="cancelButton" class="btn btn-danger" disabled>Cancelled</button>
+          
+                          <% } else if (order.returnDetails.returnStatus === "requested") { %>
+                            <button id="cancelButton" class="btn btn-danger" disabled>Requested</button>
+          
+                          <% } else if (order.returnDetails.returnStatus === "approved") { %>
+                            <button id="cancelButton" class="btn btn-success" disabled>Approved</button>
+          
+                          <% } else if (order.returnDetails.returnStatus === "rejected") { %>
+                            <button id="cancelButton" class="btn btn-danger" disabled>Rejected</button>
+                          <% } %>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              <% } %>
+            </div>
+          
+            <!-- Pagination Controls -->
+            <nav aria-label="Page navigation">
+              <ul class="pagination">
+                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                  <a class="page-link" href="#" onclick="changePage('<%= currentPage - 1 %>')" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                  <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                    <a class="page-link" href="#" onclick="changePage('<%= i %>')"><%= i %></a>
+                  </li>
+                <% } %>
+                <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                  <a class="page-link" href="#" onclick="changePage('<%= currentPage + 1 %>')" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+          
 
 
 <!-- Wallet Section (Hidden Initially) -->
@@ -315,7 +345,7 @@
 
             <!-- Forgot Password Section (Hidden Initially) -->
             <div id="forgot-password" class="d-none">
-              <h4>Reset Password</h4>
+              <h4>Change Password</h4>
               <form id="resetPassword">
                 <div class="mb-3">
                   <label for="email" class="form-label">Email Address</label>
@@ -329,7 +359,7 @@
                   />
                 </div>
                 <button type="submit" class="btn btn-primary">
-                  Reset Password
+                  Change Password
                 </button>
               </form>
             </div>
@@ -687,6 +717,223 @@
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  let currentPage = 1;
+  let totalPages = 1;
+  const limit = 6;
+
+  function fetchOrders(page) {
+    axios.get(`/profile/api/orders?page=${page}&limit=${limit}`)
+      .then(response => {
+        const orders = response.data.orders;
+        totalPages = response.data.totalPages;
+
+        // Update table
+        const ordersBody = document.getElementById("orders-body");
+        ordersBody.innerHTML = '';
+        orders.forEach(order => {
+          ordersBody.innerHTML += `
+            <tr>
+              <td>${order.orderId}</td>
+              <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+              <td>${order.orderStatus}</td>
+              <td>$${order.totalPrice.toFixed(2)}</td>
+              <td>
+                <a href="/profile/orders/${order._id}/view" class="btn btn-info">View Details</a>
+                ${order.orderStatus === 'placed' || order.orderStatus === 'shipped' ? `
+                  <form id="cancelOrder" style="display:inline;">
+                    <button id="cancelButton" onclick="cancelOrder('${order._id}')" class="btn btn-danger">Cancel</button>
+                  </form>
+                ` : ''}
+                ${order.orderStatus === "pending" ? `
+                  <button id="retryPaymentBtn" onclick="openPaymentRetryModal('${order._id}', '${order.totalPrice}')" class="btn btn-primary">Retry Payment</button>
+                ` : ''}
+                ${order.orderStatus === "delivered" && order.returnDetails.returnStatus === null ? `
+                  <button type="button" class="btn btn-warning" id="returnButton" onclick="openReturnModal('${order._id}')" data-bs-toggle="modal" data-bs-target="#returnReasonModal">Return</button>
+                ` : ''}
+                ${order.orderStatus === "cancelled" ? `<button id="cancelButton" class="btn btn-danger" disabled>Cancelled</button>` : ''}
+                ${order.returnDetails.returnStatus === "requested" ? `<button id="cancelButton" class="btn btn-danger" disabled>Requested</button>` : ''}
+                ${order.returnDetails.returnStatus === "approved" ? `<button id="cancelButton" class="btn btn-success" disabled>Approved</button>` : ''}
+                ${order.returnDetails.returnStatus === "rejected" ? `<button id="cancelButton" class="btn btn-danger" disabled>Rejected</button>` : ''}
+              </td>
+            </tr>
+          `;
+        });
+
+        // Update pagination
+        document.querySelector(".pagination").innerHTML = `
+          <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changePage(${currentPage - 1})" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          ${Array.from({ length: totalPages }, (_, i) => i + 1).map(i => `
+            <li class="page-item ${currentPage === i ? 'active' : ''}">
+              <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+            </li>
+          `).join('')}
+          <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changePage(${currentPage + 1})" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        `;
+      })
+      .catch(error => {
+        console.error('Error fetching orders:', error);
+      });
+  }
+
+  function changePage(page) {
+    if (page < 1 || page > Math.ceil(totalPages)) return;
+    currentPage = page;
+    fetchOrders(currentPage);
+  }
+
+  // Initial fetch
+  fetchOrders(currentPage);
+</script>
+
+
+<script>
+  
+ // Function to open a modal for payment retry
+// function openPaymentRetryModal(orderId, amount) {
+//   Swal.fire({
+//     title: "Payment Retry",
+//     text: "Please choose your preferred payment method",
+//     icon: "info",
+//     showCancelButton: true,
+//     confirmButtonText: "Proceed",
+//     cancelButtonText: "Cancel",
+//     input: 'radio',
+//     inputOptions: {
+//       'wallet': 'Wallet',
+//       'onlinePayment': 'Online Payment',
+//     },
+//     inputValidator: (value) => {
+//       if (!value) {
+//         return 'You need to choose a payment method!';
+//       }
+//     }
+//   }).then((result) => {
+//     if (result.isConfirmed) {
+//       const selectedPaymentMethod = result.value;
+      
+//       if (selectedPaymentMethod === "wallet") {
+//         // Handle wallet payment
+//         handleRetryOrderPlacement(orderId, "wallet");
+//       } else if (selectedPaymentMethod === "onlinePayment") {
+//         // Handle online payment with Razorpay
+//         retryRazorpayPayment(orderId, amount);
+//       }
+//     }
+//   });
+// }
+
+// // Function to retry order placement (wallet or COD in this case)
+// function handleRetryOrderPlacement(orderId, paymentMethod) {
+//   axios
+//     .post("/checkout/retry", {
+//       orderId,
+//       paymentMethod,
+//     })
+//     .then((response) => {
+//       const data = response.data;
+//       if (data.order) {
+//         Swal.fire(
+//           "Order Placed",
+//           "Your order has been placed successfully with retry.",
+//           "success"
+//         ).then(() => {
+//           localStorage.removeItem("failedOrder");
+//           window.location.href = "/checkout/confirmation";
+//         });
+//       } else {
+//         Swal.fire("Error", "Retry failed.", "error").then(() => {
+//           window.location.href = `/profile/${userId}`;
+//         });
+//       }
+//     })
+//     .catch((error) => {
+//       Swal.fire("Error", error.response.data.message, "error").then(() => {
+//         window.location.href = `/profile/${userId}`;
+//       });
+//     });
+// }
+
+// // Function to retry Razorpay payment
+// function retryRazorpayPayment(orderId, amount) {
+//   axios
+//     .post("/checkout/get-razorpay-details", { orderId })
+//     .then((response) => {
+//       const { razorpayOrderId, key_id, currency } = response.data;
+
+//       var options = {
+//         key: key_id,
+//         amount: amount,
+//         currency: currency,
+//         name: "Zodge Premium Watches",
+//         description: "Retry Order Payment",
+//         order_id: razorpayOrderId,
+//         handler: function (response) {
+//           // Handle successful Razorpay payment
+//           axios
+//             .post("/checkout/verify-payment", {
+//               orderId: orderId,
+//               razorpayOrderId: razorpayOrderId,
+//               paymentId: response.razorpay_payment_id,
+//               signature: response.razorpay_signature,
+//             })
+//             .then((response) => {
+//               if (response.data.message === "Payment verified successfully.") {
+//                 Swal.fire("Success", "Payment successful!", "success").then(() => {
+//                   localStorage.removeItem("failedOrder");
+//                   window.location.href = "/checkout/confirmation";
+//                 });
+//               } else {
+//                 Swal.fire("Error", "Payment verification failed.", "error").then(
+//                   () => {
+//                     window.location.href = `/checkout/retry`;
+//                   }
+//                 );
+//               }
+//             })
+//             .catch(() => {
+//               Swal.fire("Error", "Server error occurred during payment verification.", "error");
+//             });
+//         },
+//         prefill: {
+//           name: "<%= user.name %>",
+//           email: "<%= user.email %>",
+//           contact: "<%= user.contact %>",
+//         },
+//         theme: {
+//           color: "#3399cc",
+//         },
+//       };
+
+//       var paymentObject = new Razorpay(options);
+//       paymentObject.open();
+//     })
+//     .catch(() => {
+//       Swal.fire("Error", "Failed to fetch Razorpay details.", "error");
+//     });
+// }
+
+// // Function to handle retry button click
+// document.getElementById("retryPaymentBtn").addEventListener("click", function () {
+//   const failedOrder = JSON.parse(localStorage.getItem("failedOrder"));
+//   if (failedOrder) {
+//     const { orderId, amount } = failedOrder;
+//     openPaymentRetryModal(orderId, amount);
+//   }
+// });
+
+
+// </script>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

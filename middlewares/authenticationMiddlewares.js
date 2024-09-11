@@ -37,8 +37,8 @@ const redirectIfAuthenticated = (req, res, next) => {
   if (req.session?.admin && req.session?.admin?.role === "Admin") {
     return res.redirect("/admin/dashboard");
   } else if (req.isAuthenticated()) {
-    const returnTo = req.session.returnTo || "/"; // Use the stored return URL or default to home
-    delete req.session.returnTo; // Clear it after using
+    const returnTo = req.session.returnTo || "/";
+    delete req.session.returnTo;
     return res.redirect(returnTo);
   }
   next();

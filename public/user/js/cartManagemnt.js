@@ -1,5 +1,3 @@
-//for update the quantity of the product in the cart
-
 function updateQuantity(productId, changeQuantity, stock) {
   const inputField = document.querySelector(
     `input[name="num-product${productId}"]`
@@ -10,61 +8,117 @@ function updateQuantity(productId, changeQuantity, stock) {
   const maxQuantityPerPerson = 3;
 
   if (newQuantity > stock) {
-    // Display feedback and prevent quantity change
     feedback.style.display = "block";
+    feedback.textContent = "Stock limit exceeded!";
     inputField.value = stock;
   } else if (newQuantity > maxQuantityPerPerson) {
-    feedback.textContent = "You can purchase a maximum of 3 units per product.";
+    feedback.textContent = "Maximum 3 units per product.";
     feedback.style.display = "block";
     inputField.value = maxQuantityPerPerson;
   } else if (newQuantity <= 0) {
-    // Ensure quantity doesn't go below 1
     inputField.value = 1;
     feedback.style.display = "none";
   } else {
-    // Update quantity and hide feedback
     inputField.value = newQuantity;
     feedback.style.display = "none";
 
     // Update local storage
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const productIndex = cart.findIndex((item) => item.productId === productId);
+    const cart = JSON.parse(localStorage.getItem("cart")) || {
+      products: [],
+      totalPrice: 0,
+      coupon: null,
+    };
+
+    // Find the product in the cart
+    const productIndex = cart.products.findIndex(
+      (item) => item.productId === productId
+    );
 
     if (productIndex !== -1) {
-      cart[productIndex].quantity = newQuantity;
+      // Update the product quantity
+      cart.products[productIndex].quantity = newQuantity;
+
+      // Recalculate the subtotal (sum of all products' price * quantity)
+      let subtotal = 0;
+      cart.products.forEach((item) => {
+        subtotal += item.price * item.quantity;
+      });
+
+      // If a coupon is applied, recalculate the discount
+      if (cart.coupon) {
+        const discountPercentage = cart.coupon.discountPercentage;
+        const maxDiscountAmount = cart.coupon.maxDiscountAmount;
+        let discountAmount = (discountPercentage / 100) * subtotal;
+        if (maxDiscountAmount < discountAmount) {
+          discountAmount = maxDiscountAmount;
+        }
+        cart.coupon.discountAmount = discountAmount;
+        cart.totalPrice = subtotal - discountAmount;
+      } else {
+        // If no coupon, total price is just the subtotal
+        cart.totalPrice = subtotal;
+      }
+
+      // Update the cart in local storage
       localStorage.setItem("cart", JSON.stringify(cart));
+
+      // Update DOM elements to reflect the new subtotal and total price
+      document.getElementById("subtotal").innerText = `₹ ${subtotal.toFixed(
+        2
+      )}`;
+      if (cart.coupon) {
+        document.getElementById(
+          "couponDiscountAmount"
+        ).innerText = `₹ ${cart.coupon.discountAmount.toFixed(2)}`;
+        document.getElementById(
+          "totalAmount"
+        ).innerText = `₹ ${cart.totalPrice.toFixed(2)}`;
+      } else {
+        document.getElementById(
+          "totalAmount"
+        ).innerText = `₹ ${subtotal.toFixed(2)}`;
+      }
     }
 
-    // Send the updated quantity to the server
+    console.log(cart.totalPrice);
+    // Update server (if needed)
     axios
       .patch("/cart/update-quantity", {
         productId,
         changeQuantity,
+        totalPrice: cart.totalPrice,
       })
       .then((response) => {
         const product = response.data.product;
-        console.log("Quantity updated:", product);
+        const totalPrice = response.data.cartTotal;
 
-        // Update the product total price and cart subtotal in the UI
-        document.getElementById(`totalPrice-${productId}`).innerText = (
+        console.log("total price = ", totalPrice);
+        console.log("total", product);
+
+        document.getElementById(`totalPrice-${productId}`).innerHTML = (
           product.price * product.quantity
         ).toFixed(2);
-        document.getElementById("subtotal").innerHTML =
-          response.data.cartTotal.toFixed(2);
+        // document.getElementById("subtotal").innerText = newSubtotal.toFixed(2);
 
-        // SweetAlert2 Toast notification for success
+        // Handle coupon and update total price
+        // if (cart.coupon) {
+        //   const newTotalWithDiscount = newSubtotal - cart.coupon.discountAmount;
+        //   document.getElementById(
+        //     "totalAmount"
+        //   ).innerText = `₹ ${newTotalWithDiscount.toFixed(2)}`;
+        // } else {
+        //   document.getElementById(
+        //     "totalAmount"
+        //   ).innerText = `₹ ${newSubtotal.toFixed(2)}`;
+        // }
+
         Swal.fire({
-          toast: true, // Enables Toast mode
-          icon: "success", // Shows a success icon
-          title: "Quantity updated successfully", // Message displayed in the toast
-          position: "bottom", // Position at the bottom right
-          showConfirmButton: false, // Hides the confirm button
-          timer: 2000, // Display for 2 seconds
-          timerProgressBar: true, // Shows a progress bar for the timer
-          didOpen: (toast) => {
-            toast.addEventListener("mouseenter", Swal.stopTimer); // Stops the timer when mouse is over the toast
-            toast.addEventListener("mouseleave", Swal.resumeTimer); // Resumes the timer when mouse leaves the toast
-          },
+          toast: true,
+          icon: "success",
+          title: "Quantity updated",
+          position: "bottom",
+          showConfirmButton: false,
+          timer: 2000,
         });
       })
       .catch((error) => {
@@ -72,77 +126,100 @@ function updateQuantity(productId, changeQuantity, stock) {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: "An error occurred while updating the quantity. Please try again.",
-          confirmButtonText: "OK",
+          text: "Error updating quantity. Try again.",
         });
       });
   }
 }
 
-//   for remove the product from the cart
-
 function removeFromCart(productId) {
-  event.preventDefault(); // Prevent form submission
+  event.preventDefault();
 
-  // Use SweetAlert2 to create a confirmation dialog
   Swal.fire({
-    title: "Are you sure?", // The title of the alert
-    text: "You won't be able to revert this!", // Additional text to show in the alert
-    icon: "warning", // The icon type (warning, error, success, info)
-    showCancelButton: true, // Display the cancel button
-    confirmButtonColor: "#3085d6", // The color of the confirm button
-    cancelButtonColor: "#d33", // The color of the cancel button
-    confirmButtonText: "Yes, delete it!", // The text of the confirm button
-    cancelButtonText: "Cancel", // The text of the cancel button
+    title: "Are you sure?",
+    text: "You can't revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!",
   }).then((result) => {
     if (result.isConfirmed) {
-      // If the user confirms, proceed with the deletion
       axios
         .delete(`/cart/product/${productId}`)
         .then((response) => {
-          console.log("Product deleted from the cart", response.data);
+          // Remove the product row from the DOM
+          document.querySelector(`tr[data-product-id='${productId}']`).remove();
 
-          // Remove the row of the deleted product from the table
-          const productRow = document.querySelector(
-            `tr[data-product-id='${productId}']`
-          );
-          if (productRow) {
-            productRow.remove();
-          }
+          // Get the current cart from localStorage
+          const cart = JSON.parse(localStorage.getItem("cart")) || {
+            products: [],
+            totalPrice: 0,
+            coupon: null,
+          };
 
-          // Update subtotal in the UI
-          document.getElementById("subtotal").innerHTML =
-            response.data.cart.totalPrice.toFixed(2);
-
-          // Remove the product from local storage
-          const cart = JSON.parse(localStorage.getItem("cart")) || [];
-          const updatedCart = cart.filter(
+          // Filter out the removed product
+          cart.products = cart.products.filter(
             (item) => item.productId !== productId
           );
-          localStorage.setItem("cart", JSON.stringify(updatedCart));
 
-          // SweetAlert2 Toast notification for product removal
+          // Recalculate the subtotal (sum of all products' price * quantity)
+          let subtotal = 0;
+          cart.products.forEach((item) => {
+            subtotal += item.price * item.quantity;
+          });
+
+          // Handle coupon recalculation if it exists
+          if (cart.coupon) {
+            const discountPercentage = cart.coupon.discountPercentage;
+            const maxDiscountAmount = cart.coupon.maxDiscountAmount;
+            let discountAmount = (discountPercentage / 100) * subtotal;
+            if (maxDiscountAmount < discountAmount) {
+              discountAmount = maxDiscountAmount;
+            }
+            cart.coupon.discountAmount = discountAmount;
+            cart.totalPrice = subtotal - discountAmount;
+          } else {
+            // No coupon, total price is the subtotal
+            cart.totalPrice = subtotal;
+          }
+
+          // Update the cart in localStorage
+          localStorage.setItem("cart", JSON.stringify(cart));
+
+          // Update the subtotal and total price in the DOM
+          document.getElementById("subtotal").innerText = `₹ ${subtotal.toFixed(
+            2
+          )}`;
+          if (cart.coupon) {
+            document.getElementById(
+              "couponDiscountAmount"
+            ).innerText = `₹ ${cart.coupon.discountAmount.toFixed(2)}`;
+            document.getElementById(
+              "totalAmount"
+            ).innerText = `₹ ${cart.totalPrice.toFixed(2)}`;
+          } else {
+            document.getElementById(
+              "totalAmount"
+            ).innerText = `₹ ${subtotal.toFixed(2)}`;
+          }
+
+          // Display success message
           Swal.fire({
             toast: true,
             icon: "success",
-            title: "Product removed from the cart successfully",
+            title: "Product removed",
             position: "bottom",
             showConfirmButton: false,
             timer: 2000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-              toast.addEventListener("mouseenter", Swal.stopTimer);
-              toast.addEventListener("mouseleave", Swal.resumeTimer);
-            },
           });
         })
-        .catch((err) => {
-          console.error("Error deleting product from the cart:", err);
+        .catch((error) => {
+          console.error("Error removing product:", error);
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: "An error occurred while removing the product from the cart. Please try again.",
-            confirmButtonText: "OK",
+            text: "Could not remove the product. Try again.",
           });
         });
     }

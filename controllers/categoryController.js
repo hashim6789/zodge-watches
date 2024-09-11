@@ -81,7 +81,6 @@ const editCategory = async (req, res) => {
     const { categoryName } = req.body;
 
     console.log(categoryName);
-    // Check if the new category name already exists
     const existingCategory = await CategoryModel.findOne({
       name: categoryName,
     });

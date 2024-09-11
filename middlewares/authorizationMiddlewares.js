@@ -1,5 +1,3 @@
-// middleware/authorizationMiddleware.js
-
 // for user authorization
 function authorizeUser(req, res, next) {
   if (

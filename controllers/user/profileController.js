@@ -9,6 +9,10 @@ const WalletModel = require("../../models/Wallet");
 const getAccountPage = async (req, res) => {
   try {
     const userId = req.params.userId;
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 6; // Default to 6 orders per page
+    const skip = (page - 1) * limit;
+
     const user = await UserModel.findById(userId);
     if (!user) {
       return res
@@ -20,16 +24,28 @@ const getAccountPage = async (req, res) => {
       createdAt: -1,
     });
 
-    const orders = await OrderModel.find({ userId }).sort({ createdAt: -1 });
+    const [orders, totalOrders] = await Promise.all([
+      OrderModel.find({ userId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      OrderModel.countDocuments({ userId }),
+    ]);
+
     let wallet = await WalletModel.findOne({ userId });
     if (!wallet) {
       wallet = { balance: 0, transactions: [] };
     }
+
+    const totalPages = Math.ceil(totalOrders / limit);
+
     res.render("user/userAccountPage", {
       user,
       addresses,
       orders,
       wallet,
+      totalPages,
+      currentPage: page,
       msg: null,
     });
   } catch (err) {
@@ -275,6 +291,32 @@ const sendReturnRequest = async (req, res) => {
   });
 };
 
+const getOrdersList = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 6;
+  const skip = (page - 1) * limit;
+
+  try {
+    const orders = await OrderModel.find({ userId: req.user._id })
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+    const totalOrders = await OrderModel.countDocuments({
+      userId: req.user._id,
+    });
+
+    console.log(totalOrders);
+    res.json({
+      orders,
+      totalPages: Math.ceil(totalOrders / limit),
+      currentPage: page,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+};
+
 module.exports = {
   getAccountPage,
   updatePersonalInfo,
@@ -284,243 +326,5 @@ module.exports = {
   cancelOrder,
   viewOrderDetail,
   sendReturnRequest,
+  getOrdersList,
 };
-
-// const nodemailer = require("nodemailer");
-// const bcrypt = require("bcryptjs");
-// const passport = require("passport");
-// const crypto = require("crypto");
-// const UserModel = require("../../models/User");
-// const OtpModel = require("../../models/Otp");
-// const ProductModel = require("../../models/Product");
-// const CategoryModel = require("../../models/Category");
-// const CartModel = require("../../models/Cart");
-// const WishlistModel = require("../../models/Wishlist");
-// require("dotenv").config();
-
-// /**--------------------for mail activities------------------ */
-
-// const AddressModel = require("../../models/Address");
-// const UserModel = require("../../models/User");
-// const OrderModel = require("../../models/Order");
-
-// //get the account profile page
-// // const getAccount = async (req, res) => {
-// //   try {
-// //     const userId = req.user?._id;
-// //     const user = await UserModel.findById(userId);
-// //     if (!user) {
-// //       return res.status(404).json({ message: "User not found" });
-// //     }
-
-// //     const addresses = await AddressModel.find({ userId });
-
-// //     const orders = await OrderModel.find({ userId });
-// //     console.log(orders, addresses, user);
-// //     res.render("user/login", {
-// //       user,
-// //       addresses,
-// //       orders,
-// //     });
-// //   } catch (err) {
-// //     console.error(err);
-// //     res.status(500).json({ message: "Server error" });
-// //   }
-// // };
-
-// // const getAccountPage = async (req, res) => {
-// //   try {
-// //     // const userId = req.params.userId;
-// //     // console.log(userId);
-// //     // const user = await UserModel.findById(userId);
-// //     res.render("user/userAccountPage", { user: req.user });
-// //   } catch (err) {
-// //     console.error(err);
-// //     res.status(500).json({ message: "Server error" });
-// //   }
-// // };
-
-// //for getting the personal information
-// const getPersonalInfo = async (req, res) => {
-//   try {
-//     const userId = req.session?.user?._id || req.session?.passport.user.id;
-//     console.log(userId);
-//     let user = null;
-//     if (userId) {
-//       user = await UserModel.findById(userId);
-//       if (user) {
-//         return res.status(200).json({
-//           status: "Success",
-//           message: "The user information successfully",
-//           data: {
-//             firstName: user.firstName,
-//             lastName: user.lastName,
-//             email: user.email,
-//           },
-//         });
-//       }
-//     }
-//     res
-//       .status(404)
-//       .json({ status: "Failed", message: "the user is not found" });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-// //for updating the personal information by userId
-// const updatePersonalInfo = async (req, res) => {
-//   try {
-//     const userId = req.session?.user?._id || req.session?.passport.user.id;
-//     const { firstName, lastName } = req.body;
-//     let user = null;
-//     if (userId) {
-//       user = await UserModel.findByIdAndUpdate(
-//         userId,
-//         { firstName, lastName },
-//         { new: true }
-//       );
-
-//       return res.status(200).json({
-//         status: "Success",
-//         message: "The user information is updated successfully",
-//         data: {
-//           firstName: user.firstName,
-//           lastName: user.lastName,
-//           email: user.email,
-//         },
-//       });
-//     }
-//     res
-//       .status(404)
-//       .json({ status: "Failed", message: "the user is not found" });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-//
-// //--------------------for personal information of a corresponding user--------------------------------------//
-
-// //for getting the address of the corresponding user
-// const getAddresses = async (req, res) => {
-//   try {
-//     const userId = req.session?.user?._id || req.session?.passport.user.id;
-//     let addresses = [];
-//     if (userId) {
-//       const user = await UserModel.findById(userId);
-//       if (!user) {
-//         return res
-//           .status(404)
-//           .json({ status: "Failed", message: "the user is not found" });
-//       }
-//       addresses = await AddressModel.find({ userId });
-//       return res.status(200).json({
-//         status: "Success",
-//         message: "the addresses of the user is got successfully",
-//         data: addresses,
-//       });
-//     }
-//     res
-//       .status(404)
-//       .json({ status: "Failed", message: "The user is not found" });
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: "error",
-//       message: "Error updating user filed",
-//     });
-//   }
-// };
-
-//
-
-// //for edit the existing address
-// const editAddress = async (req, res) => {
-//   try {
-//     const addressId = req.params.id;
-//     const {
-//       userId,
-//       firstName,
-//       lastName,
-//       addressLine,
-//       city,
-//       state,
-//       pincode,
-//       country,
-//       phoneNo,
-//       flatNo,
-//     } = req.body;
-
-//     const address = await AddressModel.findByIdAndUpdate(
-//       addressId,
-//       {
-//         userId,
-//         firstName,
-//         lastName,
-//         addressLine,
-//         city,
-//         state,
-//         pincode,
-//         country,
-//         phoneNo,
-//         flatNo,
-//       },
-//       { new: true }
-//     );
-//     if (!address) {
-//       return res.status(404).json({
-//         status: "error",
-//         message: "Address is not found",
-//       });
-//     }
-//     return res.status(200).json({
-//       status: "success",
-//       message: "address is updated successfully",
-//       data: address,
-//     });
-//   } catch (err) {
-//     return res.status(500).json({
-//       status: "error",
-//       message: "Error updating address status",
-//     });
-//   }
-// };
-
-// //for deleting the existing address of the corresponding user
-// const deleteAddress = async (req, res) => {
-//   const userId = req.session?.user?._id || req.session?.passport.user.id;
-//   const addressId = req.params.addressId;
-//   const address = await AddressModel.findByIdAndDelete(addressId);
-
-//   if (!address) {
-//     return res.status(404).json({
-//       status: "Failed",
-//       message: "The address is not found",
-//     });
-//   }
-
-//   res.status(200).json({
-//     status: "Success",
-//     message: "The address is deleted successfully",
-//     address,
-//   });
-// };
-
-// module.exports = {
-//   getAccountPage,
-//   getPersonalInfo,
-//   updatePersonalInfo,
-//   updatePersonal,
-//   getAddresses,
-//   getAddressDetails,
-//   editAddressDetails,
-//   deleteAddressDetails,
-//   postAddress,
-//   editAddress,
-//   deleteAddress,
-//   getOrderDetail,
-//   cancelOrder,
-//   sendReturnRequest,
-// };

@@ -8,6 +8,7 @@ const {
   cancelOrder,
   viewOrderDetail,
   sendReturnRequest,
+  getOrdersList,
 } = require("../../controllers/user/profileController");
 
 const router = express.Router();
@@ -39,5 +40,8 @@ router.get("/orders/:orderId/view", viewOrderDetail);
 
 //return the delivered order
 router.patch("/orders/:orderId/return", sendReturnRequest);
+
+// Example route for fetching orders with pagination
+router.get("/api/orders", getOrdersList);
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const Wallet = require("../../models/Wallet");
 const User = require("../../models/User");
+const mongoose = require("mongoose");
 
 // Get wallet balance
 const getWalletBalance = async (req, res) => {
@@ -22,7 +23,6 @@ const addFundsToWallet = async (req, res) => {
     const wallet = await Wallet.findOne({ user: req.user._id });
     wallet.balance += amount;
 
-    // Record the transaction
     wallet.transactions.push({
       type: "credit",
       amount: amount,
@@ -48,10 +48,8 @@ const deductFromWallet = async (req, res) => {
       return res.status(400).json({ message: "Insufficient wallet balance" });
     }
 
-    // Deduct balance
     wallet.balance -= amount;
 
-    // Record the transaction
     wallet.transactions.push({
       type: "debit",
       amount: amount,
@@ -70,7 +68,26 @@ const deductFromWallet = async (req, res) => {
 // Get wallet transaction history
 const getTransactionHistory = async (req, res) => {
   try {
-    const wallet = await Wallet.findOne({ user: req.user._id });
+    const userId = req.user._id;
+    const wallet = await WalletModel.aggregate([
+      {
+        $match: { userId: mongoose.Types.ObjectId(userId) },
+      },
+      {
+        $project: {
+          userId: 1,
+          balance: 1,
+          transactions: {
+            $sortArray: {
+              input: "$transactions",
+              sortBy: { date: -1 },
+            },
+          },
+        },
+      },
+    ]);
+
+    console.log(wallet);
     if (!wallet) return res.status(404).json({ message: "Wallet not found" });
 
     res.status(200).json(wallet.transactions);

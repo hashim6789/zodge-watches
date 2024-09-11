@@ -14,7 +14,13 @@
           <a href="/profile/<%= user._id%>" class="flex-c-m trans-04 p-lr-25">
             My Account
           </a>
-          <a href="/auth/logout" class="flex-c-m trans-04 p-lr-25"> Logout </a>
+          <a
+            href="/auth/logout"
+            id="logoutLink"
+            class="flex-c-m trans-04 p-lr-25"
+          >
+            Logout
+          </a>
           <% } else { %>
           <!-- If user is not logged in -->
           <a href="/auth/login" class="flex-c-m trans-04 p-lr-25">Login</a>
@@ -153,7 +159,12 @@
           <a href="/account/<%= user._id %>" class="flex-c-m p-lr-10 trans-04"
             >My Account</a
           >
-          <a href="/auth/logout" class="flex-c-m p-lr-10 trans-04">Logout</a>
+          <a
+            id="logoutBtn"
+            href="/auth/logout"
+            class="flex-c-m p-lr-10 trans-04"
+            >Logout</a
+          >
           <% } else { %>
           <!-- If user is not logged in -->
           <a href="/auth/login" class="flex-c-m p-lr-10 trans-04">Login</a>
@@ -221,4 +232,22 @@
       </form>
     </div>
   </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const logoutLink = document.getElementById("logoutLink");
+
+      if (logoutLink) {
+        logoutLink.addEventListener("click", (event) => {
+          // Clear localStorage
+          localStorage.clear();
+
+          // Optionally, clear sessionStorage as well
+          sessionStorage.clear();
+
+          // Note: The default behavior of the link will still occur
+          // which means it will navigate to /auth/logout
+        });
+      }
+    });
+  </script>
 </header>

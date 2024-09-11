@@ -78,9 +78,12 @@
                             <td><%= offer.discountPercentage %></td>
                             <td><%= offer.offerType %></td>
                             <td>
-                              <%= offer.offerType === 'category' ?
-                              offer.category.name : offer.product.name %>
+                              <% const name = offer.offerType === 'category' &&
+                              offer.category ? offer.category.name :
+                              offer.offerType === 'product' && offer.product ?
+                              offer.product.name : 'N/A'; %> <%= name %>
                             </td>
+
                             <td><%= offer.startDate.toLocaleDateString() %></td>
                             <td><%= offer.endDate.toLocaleDateString() %></td>
                             <td>

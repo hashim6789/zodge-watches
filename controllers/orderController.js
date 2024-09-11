@@ -45,8 +45,8 @@ const getOrderDetails = async (req, res) => {
     const orderId = req.params.orderId;
 
     const order = await OrderModel.findById(orderId)
-      .populate("userId", "firstName lastName email") // populate user details
-      .populate("products.productId", "name price images"); // populate product details
+      .populate("userId", "firstName lastName email")
+      .populate("products.productId", "name price images");
 
     if (!order) {
       return res.status(404).json({
@@ -62,8 +62,6 @@ const getOrderDetails = async (req, res) => {
         order,
       },
     });
-
-    // This mock order can now be used in your view modal testing logic.
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
   }
@@ -103,11 +101,9 @@ const handleReturnRequest = async (req, res) => {
 
     const isReturnable = returnStatus === "approved";
     if (returnStatus === "completed") {
-      // If returnStatus is 'completed', process refund
       return refundToWallet(req, res, orderId);
     }
 
-    // Update the order with the return status
     const order = await OrderModel.findByIdAndUpdate(
       orderId,
       {
@@ -142,7 +138,6 @@ const refundToWallet = async (req, res, orderId) => {
   try {
     const order = await OrderModel.findById(orderId);
 
-    // Check if the order is already completed or invalid
     if (!order || order.returnDetails.returnStatus === "completed") {
       return res.status(400).json({
         success: false,
@@ -150,22 +145,19 @@ const refundToWallet = async (req, res, orderId) => {
       });
     }
 
-    // Fetch user wallet
     let wallet = await WalletModel.findOne({ userId: order.userId });
 
     if (!wallet) {
       wallet = new WalletModel({
         userId: order.userId,
-        balance: 0, // Initialize balance to 0
-        transactions: [], // Empty transactions list
+        balance: 0,
+        transactions: [],
       });
     }
 
-    // Refund the total amount to the user's wallet
     const refundAmount = order.totalPrice;
     wallet.balance += refundAmount;
 
-    // Add a new transaction to the wallet
     wallet.transactions.push({
       type: "credit",
       amount: refundAmount,
@@ -175,7 +167,6 @@ const refundToWallet = async (req, res, orderId) => {
 
     await wallet.save();
 
-    // Update return status to completed
     order.returnDetails.returnStatus = "completed";
     order.orderStatus = "returned";
     await order.save();
@@ -184,7 +175,7 @@ const refundToWallet = async (req, res, orderId) => {
       success: true,
       message: "Return approved and amount credited to wallet",
       order,
-      wallet, // Return wallet data for confirmation
+      wallet,
     });
   } catch (err) {
     console.error(err);

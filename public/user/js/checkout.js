@@ -178,13 +178,25 @@ function submitCheckout(event) {
       }
     });
   } else if (selectedPaymentMethod === "onlinePayment") {
-    const products = JSON.parse(localStorage.getItem("cart")) || []; // Assuming cart data is stored in local storage
+    // Retrieve the cart from local storage
+    const cart = JSON.parse(localStorage.getItem("cart")) || {};
+
+    // Access the products array from the cart
+    const products = cart.products || [];
+    const coupon = cart.coupon || {};
+
+    // Now 'products' contains the array of products
+    console.log("coupon = ", coupon);
+
+    // Now 'products' contains the array of products
+    console.log(products);
 
     // Online Payment with Razorpay
     axios
       .post("/checkout", {
         userId,
         products,
+        coupon,
         address,
         paymentMethod: "onlinePayment",
       })
@@ -200,22 +212,33 @@ function submitCheckout(event) {
           );
         } else {
           Swal.fire("Error", data.message, "error");
+          window.location.href = `/profile/${userId}`;
         }
       })
       .catch((error) => {
         Swal.fire("Error", "A server error occurred.", "error");
+        window.location.href = `/profile/${userId}`;
       });
   }
 }
 
 function handleOrderPlacement(paymentMethod, address, userId) {
-  const products = JSON.parse(localStorage.getItem("cart")) || []; // Assuming cart data is stored in local storage
+  // Retrieve the cart from local storage
+  const cart = JSON.parse(localStorage.getItem("cart")) || {};
+
+  // Access the products array from the cart
+  const products = cart.products || [];
+  const coupon = cart.coupon || {};
+
+  // Now 'products' contains the array of products
+  console.log("coupon = ", coupon);
 
   // Example function to handle order placement logic
   axios
     .post("/checkout", {
       userId,
       products,
+      coupon,
       address,
       paymentMethod,
     })
@@ -234,15 +257,17 @@ function handleOrderPlacement(paymentMethod, address, userId) {
           window.location.href = "/checkout/confirmation";
         });
       } else {
-        Swal.fire(
-          "Error",
-          "An error occurred while placing your order.",
-          "error"
-        );
+        Swal.fire("Error", "Payment verification failed.", "error").then(() => {
+          console.log("testing");
+          window.location.href = `/profile/${userId}`;
+        });
       }
     })
     .catch((error) => {
-      Swal.fire("Error", "A server error occurred.", "error");
+      Swal.fire("Error", error.response.data.message, "error").then(() => {
+        console.log("testing");
+        window.location.href = `/profile/${userId}`;
+      });
     });
 }
 
@@ -279,7 +304,19 @@ function initiateRazorpayPayment(
               window.location.href = "/checkout/confirmation";
             });
           } else {
-            Swal.fire("Error", "Payment verification failed.", "error");
+            Swal.fire("Error", "Payment verification failed.", "error").then(
+              () => {
+                localStorage.setItem(
+                  "failedOrder",
+                  JSON.stringify({
+                    orderId,
+                    amount,
+                    products: cart.products,
+                  })
+                );
+                window.location.href = "/checkout/retry";
+              }
+            );
           }
         })
         .catch((error) => {
@@ -288,6 +325,17 @@ function initiateRazorpayPayment(
             "Server error occurred during payment verification.",
             "error"
           );
+        })
+        .then(() => {
+          localStorage.setItem(
+            "failedOrder",
+            JSON.stringify({
+              orderId,
+              amount,
+              products: cart.products,
+            })
+          );
+          window.location.href = "/checkout/retry";
         });
     },
     prefill: {

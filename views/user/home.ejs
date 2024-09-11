@@ -253,16 +253,36 @@
                   >
                     <%= product.name %>
                   </a>
-                  <span class="stext-105 cl3"><%= product.price %></span>
+
+                  <!-- Original and discounted prices -->
+                  <div class="product-pricing">
+                    <% if (product.discountedPrice !== product.price) { %>
+                    <span class="stext-105 cl3">
+                      <del>$<%= product.price.toFixed(2) %></del>
+                    </span>
+                    <span class="stext-105 cl3 text-danger">
+                      $<%= product.discountedPrice.toFixed(2) %>
+                    </span>
+
+                    <!-- Calculate and display the discount percentage -->
+                    <% const discountPercentage = Math.round(((product.price -
+                    product.discountedPrice) / product.price) * 100); %>
+                    <span class="discount-label text-success ml-2">
+                      <%= discountPercentage %>% off
+                    </span>
+                    <% } else { %>
+                    <span class="stext-105 cl3"
+                      >$<%= product.price.toFixed(2) %></span
+                    >
+                    <% } %>
+                  </div>
 
                   <!-- Display messages below the price -->
                   <% if (!product.isListed) { %>
-                  <!-- Product is not listed -->
                   <div class="product-unavailable text-danger mt-2">
                     Currently unavailable
                   </div>
                   <% } else if (product.stock === 0) { %>
-                  <!-- Product is out of stock -->
                   <div class="out-of-stock text-danger mt-2">Out of Stock</div>
                   <% } %>
                 </div>
@@ -273,11 +293,10 @@
                     class="btn-addwish-b2 dis-block pos-relative js-addwish-b2"
                     data-id="<%= product._id %>"
                   >
-                    <!-- Conditionally display heart icons based on wishlist status -->
                     <% const isInWishlist = wishlist?.productIds.some(item =>
                     item._id.toString() === product._id.toString()); %>
 
-                    <!-- Product is in wishlist, show the "remove from wishlist" icon -->
+                    <!-- Conditionally display heart icons based on wishlist status -->
                     <% if (isInWishlist) { %>
                     <img
                       id="heart1-<%= product._id %>"
@@ -294,7 +313,6 @@
                       onclick="toggleWishlist('<%= product._id %>')"
                     />
                     <% } else { %>
-                    <!-- Product is not in wishlist, show the "add to wishlist" icon -->
                     <img
                       id="heart1-<%= product._id %>"
                       class="icon-heart1 dis-block trans-04"

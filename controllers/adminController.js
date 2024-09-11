@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const admin = {
   email: process.env.ADMIN_EMAIL,
-  password: process.env.ADMIN_PASSWORD, // In real applications, ensure to hash the password
+  password: process.env.ADMIN_PASSWORD,
   role: process.env.ADMIN_ROLE,
   permissions: process.env.ADMIN_PERMISSIONS.split(","),
 };

@@ -8,6 +8,7 @@ const productSchema = new Schema(
     categoryId: { type: Types.ObjectId, required: true, ref: "Categories" },
     price: { type: Number, required: true },
     stock: { type: Number, required: true },
+    reservedStock: { type: Number, required: true, default: 0 },
     images: [{ type: String, required: true }],
     isListed: { type: Boolean, default: true },
     soldCount: { type: Number, default: 0 },

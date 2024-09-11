@@ -33,7 +33,7 @@ const addToCart = async (req, res) => {
     if (!product) {
       return res
         .status(404)
-        .json({ status: "Error", message: "Product not found!" });
+        .json({ success: false, message: "Product not found!" });
     }
 
     let cart = await CartModel.findOne({ userId });
@@ -52,37 +52,40 @@ const addToCart = async (req, res) => {
     );
 
     if (existingProductIndex > -1) {
+      const previousQuantity = cart.products[existingProductIndex].quantity;
       cart.products[existingProductIndex].quantity = quantity;
+      cart.totalPrice += product.price * (quantity - previousQuantity);
     } else {
       cart.products.push({
         productId: productId,
         quantity: quantity,
         price: product.price,
       });
+      cart.totalPrice += product.price * quantity;
     }
 
-    cart.totalPrice += product.price * quantity;
     cart.updatedAt = Date.now();
 
     await cart.save();
 
     console.log("Product added to cart successfully");
     res.status(200).json({
-      status: "Success",
+      success: true,
       message: "Product added to cart!",
+      cart,
       product,
     });
   } catch (err) {
     console.error("Error in addToCart:", err);
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+    res.status(500).json({ success: false, message: "Server Error!!!" });
   }
 };
 
 const updateQuantity = async (req, res) => {
   try {
-    const { productId, changeQuantity } = req.body;
+    const { productId, changeQuantity, totalPrice } = req.body;
     const userId = req.user?._id;
-    console.log(userId);
+    console.log(totalPrice);
 
     const cart = await CartModel.findOne({ userId });
     if (!cart) {
@@ -103,21 +106,21 @@ const updateQuantity = async (req, res) => {
 
     cart.products[productIdx].quantity += changeQuantity;
 
-    const total = await cart.products.reduce(
-      async (totalPromise, currProduct) => {
-        const total = await totalPromise;
-        const product = await ProductModel.findById(currProduct.productId);
+    // const total = await cart.products.reduce(
+    //   async (totalPromise, currProduct) => {
+    //     const total = await totalPromise;
+    //     const product = await ProductModel.findById(currProduct.productId);
 
-        if (!product) {
-          throw new Error(`Product with ID ${currProduct.productId} not found`);
-        }
+    //     if (!product) {
+    //       throw new Error(`Product with ID ${currProduct.productId} not found`);
+    //     }
 
-        return total + product.price * currProduct.quantity;
-      },
-      Promise.resolve(0)
-    );
+    //     return total + product.price * currProduct.quantity;
+    //   },
+    //   Promise.resolve(0)
+    // );
 
-    cart.totalPrice = total;
+    cart.totalPrice = totalPrice;
 
     cart.updatedAt = Date.now();
     await cart.save();
@@ -133,6 +136,7 @@ const updateQuantity = async (req, res) => {
   }
 };
 
+//for deleting the cart products
 const deleteCartProduct = async (req, res) => {
   try {
     const productId = req.params.productId;
@@ -180,28 +184,29 @@ const deleteCartProduct = async (req, res) => {
   }
 };
 
+//proceed to checkout
 const postCart = async (req, res) => {
   try {
     const userId = req.user?._id;
-    console.log(userId);
-    const cart = await CartModel.findOne({ userId })
-      .populate("products.productId", "_id name images price stock")
-      .exec();
-    console.log(cart);
+    // console.log(userId);
+    const cart = await CartModel.findOne({ userId });
+    // .populate("products.productId", "_id name images price stock")
+    // .exec();
+    // console.log(cart);
 
     // After populating, you may need to map over `cart.products` to construct the desired structure:
-    const cartProducts = cart.products.map((product) => ({
-      name: product.productId.name,
-      images: product.productId.images,
-      _id: product.productId._id,
-      price: product.productId.price,
-      quantity: product.quantity,
-      stock: product.productId.stock,
-    }));
+    // const cartProducts = cart.products.map((product) => ({
+    //   name: product.productId.name,
+    //   images: product.productId.images,
+    //   _id: product.productId._id,
+    //   price: product.productId.price,
+    //   quantity: product.quantity,
+    //   stock: product.productId.stock,
+    // }));
 
-    console.log(cartProducts);
-
-    req.session.cartProducts = [...cartProducts];
+    // req.session.cartProducts = [...cartProducts];
+    req.session.cart = cart;
+    console.log("session = ", req.session.cart.products);
     // if (!req.session.steps) {
     //   req.session.steps = [];
     // }

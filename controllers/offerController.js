@@ -70,7 +70,6 @@ const createOffer = async (req, res) => {
       });
     }
 
-    // Ensure that category/product is a valid ObjectId
     if (
       offerData.category &&
       !mongoose.Types.ObjectId.isValid(offerData.category)
@@ -98,10 +97,8 @@ const createOffer = async (req, res) => {
       newOffer,
     });
   } catch (err) {
-    // Log the error for debugging
     console.error("Error creating offer:", err.message);
 
-    // Send error response
     return res
       .status(500)
       .json({ success: false, message: "Server error!!!", error: err.message });
@@ -114,7 +111,6 @@ const updateOffer = async (req, res) => {
     const offerData = req.body;
 
     console.log(offerData);
-    // Check if the new category name already exists
     const updatedOffer = await OfferModel.findByIdAndUpdate(
       offerId,
       offerData,
@@ -140,200 +136,25 @@ const updateOffer = async (req, res) => {
     });
   }
 };
-const toggleOffer = // Example Express route for toggling offer status
-  async (req, res) => {
-    try {
-      const { offerId } = req.params;
-      const { isActive } = req.body;
+const toggleOffer = async (req, res) => {
+  try {
+    const { offerId } = req.params;
+    const { isActive } = req.body;
 
-      // Update the offer status in the database
-      const updatedOffer = await OfferModel.findByIdAndUpdate(
-        offerId,
-        { isActive },
-        { new: true }
-      );
+    const updatedOffer = await OfferModel.findByIdAndUpdate(
+      offerId,
+      { isActive },
+      { new: true }
+    );
 
-      if (updatedOffer) {
-        return res.json({ success: true, offer: updatedOffer });
-      } else {
-        return res.json({ success: false });
-      }
-    } catch (error) {
-      return res.status(500).json({ success: false, error: error.message });
+    if (updatedOffer) {
+      return res.json({ success: true, offer: updatedOffer });
+    } else {
+      return res.json({ success: false });
     }
-  };
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
 
 module.exports = { getOffers, createOffer, updateOffer, toggleOffer };
-
-// const OfferModel = require("../models/Category");
-// const ProductModel = require("../models/Product");
-
-// //get all offers with pagination
-// const getCategory = async (req, res) => {
-//   try {
-//     const query = req.query.query || "";
-//     const page = req.query.page || 1;
-//     const perPage = 6;
-
-//     let offers = [];
-//     offers = await OfferModel.find({ name: new RegExp(query, "i") })
-//       .sort({ createdAt: -1 })
-//       .skip((page - 1) * perPage)
-//       .limit(perPage);
-//     if (!offers) {
-//       return res.render("admin/categoryManagementPage", {
-//         offers: null,
-//         current: page,
-//         pages: null,
-//       });
-//       //return res.status(200).json({
-//       //   status: "Success",
-//       //   message: "The page rendered successfully",
-//       // });
-//     }
-//     const count = await OfferModel.countDocuments({
-//       name: new RegExp(query, "i"),
-//     });
-//     res.render("admin/categoryManagementPage", {
-//       offers,
-//       current: page,
-//       perPage,
-//       pages: Math.ceil(count / perPage),
-//     });
-//   } catch (err) {
-//     res.status(404).json({ status: "Success", message: "Server error!!!" });
-//   }
-// };
-
-// //for create a new category
-// const createCategory = async (req, res) => {
-//   try {
-//     let { categoryName } = req.body;
-//     categoryName = categoryName.toUpperCase();
-//     let category = await OfferModel.findOne({ name: categoryName });
-//     console.log(category);
-//     if (!category) {
-//       category = new OfferModel({
-//         name: categoryName,
-//         isListed: true,
-//         createdAt: Date.now(),
-//         updatedAt: Date.now(),
-//       });
-//       await category.save();
-//       return res.status(200).json({
-//         status: "success",
-//         message: "category created successfully",
-//         data: {
-//           category,
-//         },
-//       });
-//     } else {
-//       return res.status(404).json({
-//         status: "Failed",
-//         message: "The category is already exists",
-//       });
-//     }
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: "error",
-//       message: "Error creating the category",
-//     });
-//   }
-// };
-
-// //for edit the existing category
-// const editCategory = async (req, res) => {
-//   try {
-//     const categoryId = req.params.categoryId;
-//     const { categoryName } = req.body;
-
-//     console.log(categoryName);
-//     // Check if the new category name already exists
-//     const existingCategory = await OfferModel.findOne({
-//       name: categoryName,
-//     });
-
-//     if (existingCategory && existingCategory._id.toString() !== categoryId) {
-//       return res.status(400).json({
-//         status: "error",
-//         message: "Category name already exists",
-//       });
-//     }
-
-//     const category = await OfferModel.findByIdAndUpdate(
-//       categoryId,
-//       { name: categoryName, updatedAt: Date.now() },
-//       { new: true }
-//     );
-
-//     if (!category) {
-//       return res.status(404).json({
-//         status: "error",
-//         message: "category not found",
-//       });
-//     }
-
-//     return res.status(200).json({
-//       status: "success",
-//       message: "category status updated successfully",
-//       data: category,
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: "error",
-//       message: "Error updating category status",
-//     });
-//   }
-// };
-
-// //for unlist the existing category
-// const unlistCategory = async (req, res) => {
-//   try {
-//     const categoryId = req.params.categoryId;
-//     const { isListed } = req.body;
-
-//     const category = await OfferModel.findByIdAndUpdate(
-//       categoryId,
-//       { isListed, updatedAt: Date.now() },
-//       { new: true }
-//     );
-
-//     if (!category) {
-//       return res.status(404).json({
-//         status: "error",
-//         message: "category not found",
-//       });
-//     } else {
-//       const products = await ProductModel.updateMany(
-//         { categoryId },
-//         { $set: { isListed } }
-//       );
-//     }
-
-//     return res.status(200).json({
-//       status: "success",
-//       message: "category status updated successfully",
-//       data: category,
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: "error",
-//       message: "Error updating category status",
-//     });
-//   }
-// };
-
-// //search offers
-// const searchCategories = (req, res) => {
-//   const query = req.query.query;
-//   console.log(query);
-//   res.redirect(`/admin/offers?query=${query}`);
-// };
-
-// module.exports = {
-//   getCategory,
-//   createCategory,
-//   editCategory,
-//   unlistCategory,
-//   searchCategories,
-// };

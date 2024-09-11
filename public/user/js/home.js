@@ -1,39 +1,79 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Fetch all products on page load with default category, page 1, and default sorting
+  // Fetch all products on page load with default category, page 1, sorting, and no search query
   let selectedCategory = "all"; // Default to 'all' category
   let selectedSort = "newArrivals"; // Default to 'newArrivals' sorting
-  fetchProducts("all", 1, "newArrivals");
+  let currentPage = 1; // Default to page 1
+  let searchQuery = ""; // Default to no search query
+
+  fetchProducts(selectedCategory, currentPage, selectedSort, searchQuery);
+
+  // Attach event listeners for search functionality
+  document
+    .getElementById("search-input")
+    .addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        searchProducts();
+      }
+    });
+  // document
+  //   .getElementById("search-button")
+  //   .addEventListener("click", searchProducts);
 });
 
-// Fetch products based on category, page, and sorting
-function fetchProducts(category = "all", page = 1, sort = "newArrivals") {
-  console.log(category, page, sort);
+// Fetch products based on category, page, sorting, and search query
+function fetchProducts(
+  category = "all",
+  page = 1,
+  sort = "newArrivals",
+  query = ""
+) {
+  console.log(category, page, sort, query);
   selectedCategory = category; // Set the current selected category
   selectedSort = sort; // Set the current selected sort method
+  searchQuery = query; // Set the current search query
 
-  const url = `/api/products?category=${category}&page=${page}&sort=${sort}`;
+  const url = `/api/products?category=${category}&page=${page}&sort=${sort}&search=${encodeURIComponent(
+    query
+  )}`;
 
   axios
     .get(url)
     .then((response) => {
-      const { products, current, pages, currentCategory } = response.data;
-      renderProducts(products);
+      const { products, current, pages, wishlist, currentCategory } =
+        response.data;
+      renderProducts(products, wishlist);
       updatePagination(current, pages, currentCategory);
     })
     .catch((error) => console.error("Error fetching products:", error));
 }
 
 function filterProducts(category, page) {
-  fetchProducts(category, page); // Invoke fetchProducts with category, page, and selected sort
+  fetchProducts(category, page, selectedSort, searchQuery); // Invoke fetchProducts with category, page, selected sort, and current search query
 }
 
-// Render products onto the page
-function renderProducts(products) {
+function renderProducts(products, wishlist = { productIds: [] }) {
+  console.log(wishlist);
   const productList = document.getElementById("product-list");
   productList.innerHTML = products
-    .map(
-      (product) => `
-      <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item ${product.categoryId}">
+    .map((product) => {
+      // Check if wishlist is null or undefined, and default to an empty object if so
+      const wishlistProductIds =
+        wishlist && wishlist.productIds ? wishlist.productIds : [];
+
+      const isInWishlist = wishlistProductIds.some(
+        (productId) => productId.toString() === product._id.toString()
+      );
+
+      console.log(isInWishlist);
+
+      // Determine if the product is out of stock
+      const isOutOfStock = product.stock < 1;
+
+      // Generate HTML for the product
+      return `
+      <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item ${
+        product.categoryId
+      }">
         <div class="block2">
           <div class="block2-pic hov-img0">
             <img src="/public/uploads/${product.images[0]}" alt="IMG-PRODUCT" />
@@ -45,14 +85,50 @@ function renderProducts(products) {
           </div>
           <div class="block2-txt flex-w flex-t p-t-14">
             <div class="block2-txt-child1 flex-col-l">
-              <a href="#" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">${product.name}</a>
+              <a href="#" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">${
+                product.name
+              }</a>
               <span class="stext-105 cl3">${product.price}</span>
+              <!-- Out of Stock Message -->
+              ${
+                isOutOfStock
+                  ? '<p class="text-danger mt-2">Out of Stock</p>'
+                  : ""
+              }
+            </div>
+            <!-- Wishlist button -->
+            <div class="block2-txt-child2 flex-r p-t-3">
+              <div class="btn-addwish-b2 dis-block pos-relative js-addwish-b2" data-id="${
+                product._id
+              }">
+                <!-- Add to Wishlist Icon -->
+                <img 
+                  id="heart1-${product._id}" 
+                  class="icon-heart1 dis-block trans-04 ${
+                    isInWishlist ? "d-none" : ""
+                  }" 
+                  src="/public/user/images/icons/icon-heart-01.png" 
+                  alt="Add to Wishlist" 
+                  onclick="toggleWishlist('${product._id}')"
+                />
+                <!-- Remove from Wishlist Icon -->
+                <img 
+                  id="heart2-${product._id}" 
+                  class="icon-heart2 dis-block trans-04 ${
+                    isInWishlist ? "" : "d-none"
+                  }" 
+                  src="/public/user/images/icons/icon-heart-02.png" 
+                  alt="Remove from Wishlist" 
+                  onclick="toggleWishlist('${product._id}')"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    `
-    )
+    `;
+    })
+
     .join("");
 }
 
@@ -66,7 +142,7 @@ function updatePagination(current, pages, currentCategory) {
             current - 1
           }" aria-label="Previous" onclick="fetchProducts('${currentCategory}', ${
             current - 1
-          }, '${selectedSort}')">&laquo;</a></li>`
+          }, '${selectedSort}', '${searchQuery}')">&laquo;</a></li>`
         : ""
     }
     ${Array.from(
@@ -77,7 +153,7 @@ function updatePagination(current, pages, currentCategory) {
           i + 1
         }" onclick="fetchProducts('${currentCategory}', ${
         i + 1
-      }, '${selectedSort}')">${i + 1}</a>
+      }, '${selectedSort}', '${searchQuery}')">${i + 1}</a>
       </li>
     `
     ).join("")}
@@ -87,10 +163,15 @@ function updatePagination(current, pages, currentCategory) {
             current + 1
           }" aria-label="Next" onclick="fetchProducts('${currentCategory}', ${
             current + 1
-          }, '${selectedSort}')">&raquo;</a></li>`
+          }, '${selectedSort}', '${searchQuery}')">&raquo;</a></li>`
         : ""
     }
   `;
+}
+
+function searchProducts() {
+  const query = document.getElementById("search-input").value.trim();
+  fetchProducts(selectedCategory, 1, selectedSort, query); // Fetch products with the current search query
 }
 
 // Handle sorting method selection and fetch products accordingly
@@ -162,66 +243,66 @@ function toggleHeartIcon(productId, isAdded) {
 //     });
 // }
 
-function searchProducts(event) {
-  // Check if the Enter key is pressed or the search button is clicked
-  if (event.key === "Enter" || event.type === "click") {
-    const query = document.getElementById("search-input").value.trim();
-    console.log(query);
+// function searchProducts(event) {
+//   // Check if the Enter key is pressed or the search button is clicked
+//   if (event.key === "Enter" || event.type === "click") {
+//     const query = document.getElementById("search-input").value.trim();
+//     console.log(query);
 
-    if (query) {
-      // If there is a query, make a GET request to the server to search products
-      axios
-        .get(`/user/shop/search?query=${encodeURIComponent(query)}`)
-        .then((response) => {
-          const products = response.data.data;
+//     if (query) {
+//       // If there is a query, make a GET request to the server to search products
+//       axios
+//         .get(`/user/shop/search?query=${encodeURIComponent(query)}`)
+//         .then((response) => {
+//           const products = response.data.data;
 
-          // Clear the current product list
-          document.getElementById("product-list").innerHTML = "";
+//           // Clear the current product list
+//           document.getElementById("product-list").innerHTML = "";
 
-          // Loop through the products and generate HTML for each product
-          products.forEach(function (product) {
-            const productHtml = `
-                    <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item ${product.categoryId}">
-                      <div class="block2">
-                        <div class="block2-pic hov-img0">
-                          <img src="/public/uploads/${product.images[0]}" alt="IMG-PRODUCT" />
-                          <form action="/user/shop/quickview/${product._id}">
-                            <button class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04" type="submit">
-                              Quick View
-                            </button>
-                          </form>
-                        </div>
-                        <div class="block2-txt flex-w flex-t p-t-14">
-                          <div class="block2-txt-child1 flex-col-l">
-                            <a href="#" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-                              ${product.name}
-                            </a>
-                            <span class="stext-105 cl3">${product.price}</span>
-                          </div>
-                          <div class="block2-txt-child2 flex-r p-t-3">
-                            <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2" data-id="${product._id}">
-                              <img class="icon-heart1 dis-block trans-04" src="/public/user/images/icons/icon-heart-01.png" alt="ICON" />
-                              <img class="icon-heart2 dis-block trans-04 ab-t-l" src="/public/user/images/icons/icon-heart-02.png" alt="ICON" />
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  `;
+//           // Loop through the products and generate HTML for each product
+//           products.forEach(function (product) {
+//             const productHtml = `
+//                     <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item ${product.categoryId}">
+//                       <div class="block2">
+//                         <div class="block2-pic hov-img0">
+//                           <img src="/public/uploads/${product.images[0]}" alt="IMG-PRODUCT" />
+//                           <form action="/user/shop/quickview/${product._id}">
+//                             <button class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04" type="submit">
+//                               Quick View
+//                             </button>
+//                           </form>
+//                         </div>
+//                         <div class="block2-txt flex-w flex-t p-t-14">
+//                           <div class="block2-txt-child1 flex-col-l">
+//                             <a href="#" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+//                               ${product.name}
+//                             </a>
+//                             <span class="stext-105 cl3">${product.price}</span>
+//                           </div>
+//                           <div class="block2-txt-child2 flex-r p-t-3">
+//                             <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2" data-id="${product._id}">
+//                               <img class="icon-heart1 dis-block trans-04" src="/public/user/images/icons/icon-heart-01.png" alt="ICON" />
+//                               <img class="icon-heart2 dis-block trans-04 ab-t-l" src="/public/user/images/icons/icon-heart-02.png" alt="ICON" />
+//                             </a>
+//                           </div>
+//                         </div>
+//                       </div>
+//                     </div>
+//                   `;
 
-            // Append each product's HTML to the product-list div
-            document
-              .getElementById("product-list")
-              .insertAdjacentHTML("beforeend", productHtml);
-          });
-        })
-        .catch((error) => {
-          console.error("There was an error searching for products!", error);
-          alert("Error loading products");
-        });
-    }
-  }
-}
+//             // Append each product's HTML to the product-list div
+//             document
+//               .getElementById("product-list")
+//               .insertAdjacentHTML("beforeend", productHtml);
+//           });
+//         })
+//         .catch((error) => {
+//           console.error("There was an error searching for products!", error);
+//           alert("Error loading products");
+//         });
+//     }
+//   }
+// }
 
 //for sort by price
 // function sortBy(sortMethod) {

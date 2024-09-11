@@ -266,3 +266,30 @@
     $(".js-modal1").removeClass("show-modal1");
   });
 })(jQuery);
+
+// main.js or cart.js or relevant file
+
+function initializeCart() {
+  if (!localStorage.getItem("cart")) {
+    localStorage.setItem(
+      "cart",
+      JSON.stringify({
+        products: [],
+        totalPrice: 0,
+        coupon: null,
+        address: null, // Address placeholder object
+      })
+    );
+  }
+}
+
+function initializeWishlist() {
+  if (!localStorage.getItem("wishlist")) {
+    localStorage.setItem(
+      "wishlist",
+      JSON.stringify({
+        productIds: [],
+      })
+    );
+  }
+}

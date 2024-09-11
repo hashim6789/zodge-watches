@@ -93,4 +93,18 @@ const removeFromWishlist = async (req, res) => {
   }
 };
 
-module.exports = { addToWishlist, removeFromWishlist };
+// Express.js example
+const fetchWishlist = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const wishlist = await WishlistModel.findOne({ userId }).populate(
+      "productIds"
+    );
+    res.json({ wishlist });
+  } catch (error) {
+    console.error("Error fetching wishlist:", error);
+    res.status(500).json({ error: "Failed to fetch wishlist" });
+  }
+};
+
+module.exports = { addToWishlist, removeFromWishlist, fetchWishlist };

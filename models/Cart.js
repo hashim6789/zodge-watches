@@ -15,7 +15,12 @@ const CartsSchema = new Schema(
     userId: { type: Types.ObjectId, required: true },
     coupon: {
       code: { type: String, default: null },
+      discountPercentage: { type: Number, default: null },
       discountAmount: { type: Number, default: null },
+      maxDiscountAmount: {
+        type: Number,
+        default: null,
+      },
     },
   },
   { timestamps: true }
