@@ -99,9 +99,10 @@ const postCheckout = async (req, res) => {
       });
     }
 
-    if (coupon) {
+    if (coupon?.discountAmount) {
       totalPrice -= coupon.discountAmount;
     }
+    console.log(totalPrice);
     // console.log("ordered products = ", orderProducts);
     // console.log("method = ", paymentMethod);
     let newOrder = new OrderModel({
