@@ -337,6 +337,8 @@
             const order = response.data.data.order;
             const address = order.address;
 
+
+
             const addressHTML = `
           <br>
           ${address.flatNo ? address.flatNo + ", " : ""}${
@@ -354,7 +356,7 @@
             } ${order.userId.lastName || ""}`;
             document.getElementById(
               "modalCustomerName"
-            ).textContent = `${address.firstName} ${address.lastName}`;
+            ).textContent = `${address.firstName || ""} ${address.lastName || ""}`;
             document.getElementById("modalOrderDate").textContent =
               order.createdAt;
             document.getElementById("modalShippingAddress").innerHTML =

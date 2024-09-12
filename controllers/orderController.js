@@ -48,6 +48,8 @@ const getOrderDetails = async (req, res) => {
       .populate("userId", "firstName lastName email")
       .populate("products.productId", "name price images");
 
+    console.log(order);
+
     if (!order) {
       return res.status(404).json({
         status: "Failed",
