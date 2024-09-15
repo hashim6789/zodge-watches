@@ -49,6 +49,43 @@
         cursor: pointer;
       }
     </style>
+    <style>
+      /* Add these styles to your existing styles */
+      .best-sellers-card {
+        height: 100%;
+      }
+      .best-sellers-list {
+        height: 300px;
+        overflow-y: auto;
+      }
+      .best-sellers-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+      }
+      .best-sellers-item img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        margin-right: 15px;
+        border-radius: 5px;
+      }
+      .best-sellers-item-details {
+        flex-grow: 1;
+      }
+      .best-sellers-item-name {
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: black;
+      }
+      .best-sellers-item-sales {
+        font-size: 0.9em;
+        color: #6c757d;
+      }
+    </style>
   </head>
   <body>
     <div class="container-scroller">
@@ -63,7 +100,17 @@
         <!-- Main Panel -->
         <div class="main-panel">
           <div class="content-wrapper">
-            <h4 class="card-title">Admin Dashboard</h4>
+            <div class="page-header">
+              <h3 class="page-title">Admin Dashboard</h3>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">Charts</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">
+                    Chart-js
+                  </li>
+                </ol>
+              </nav>
+            </div>
 
             <!-- Report Generation Form -->
             <div class="row">
@@ -127,6 +174,96 @@
                 </div>
               </div>
             </div>
+            <div class="row">
+              <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h2>Monthly Sales</h2>
+                    <canvas id="monthlySalesChart"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h2>Top Selling Watches</h2>
+                    <canvas id="topSellingWatchesChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h2>Customer Segmentation</h2>
+                    <canvas id="customerSegmentationChart"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h2>Top Selling Watches</h2>
+                    <canvas id="topSellingWatchesChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Best Selling Products and Categories -->
+            <div class="row">
+              <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card best-sellers-card">
+                  <div class="card-body">
+                    <h4 class="card-title">Top 3 Best Selling Categories</h4>
+                    <div class="best-sellers-list">
+                      <% topCategories.forEach((category, index) => { %>
+                      <div class="best-sellers-item">
+                        <!-- <img
+                          src="/public/uploads/<%= category.image %>"
+                          alt="<%= category.name %>"
+                        /> -->
+                        <div class="best-sellers-item-details">
+                          <div class="best-sellers-item-name">
+                            <%= index + 1 %>. <%= category.name %>
+                          </div>
+                          <div class="best-sellers-item-sales">
+                            Sales: <%= category.sales %>
+                          </div>
+                        </div>
+                      </div>
+                      <% }); %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card best-sellers-card">
+                  <div class="card-body">
+                    <h4 class="card-title">Top 5 Best Selling Products</h4>
+                    <div class="best-sellers-list">
+                      <% topProducts.forEach((product, index) => { %>
+                      <div class="best-sellers-item">
+                        <img
+                          src="/public/uploads/<%= product.image %>"
+                          alt="<%= product.name %>"
+                        />
+                        <div class="best-sellers-item-details">
+                          <div class="best-sellers-item-name">
+                            <%= index + 1 %>. <%= product.name %>
+                          </div>
+                          <div class="best-sellers-item-sales">
+                            Sales: <%= product.sales %>
+                          </div>
+                        </div>
+                      </div>
+                      <% }); %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <!-- Modal -->
             <div id="pdfModal" class="modal">
@@ -150,10 +287,14 @@
     <!-- scripts -->
     <script src="/public/assets/vendors/js/vendor.bundle.base.js"></script>
     <script src="/public/assets/js/off-canvas.js"></script>
+    <script src="/public/assets/js/chart.js"></script>
+    <!-- <script src="/public/assets/vendors/chart.js/Chart.min.js"></script> -->
+
     <script src="/public/assets/js/hoverable-collapse.js"></script>
-    <script src="/public/assets/js/template.js"></script>
+    <!-- <script src="/public/assets/js/template.js"></script> -->
     <script src="/public/assets/js/settings.js"></script>
     <script src="/public/assets/js/todolist.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
@@ -455,116 +596,121 @@
         document.getElementById("pdfModal").style.display = "none";
       }
     </script>
+
+    <script>
+      // admin-charts.js
+
+      // Monthly Sales Chart
+      function createMonthlySalesChart() {
+        const ctx = document
+          .getElementById("monthlySalesChart")
+          .getContext("2d");
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            datasets: [
+              {
+                label: "Monthly Sales",
+                data: [4000, 3000, 5000, 4500, 6000, 5500],
+                borderColor: "rgb(75, 192, 192)",
+                tension: 0.1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
+        });
+      }
+
+      // Top Selling Watches Chart
+      function createTopSellingWatchesChart() {
+        const ctx = document
+          .getElementById("topSellingWatchesChart")
+          .getContext("2d");
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: [
+              "Rolex Submariner",
+              "Omega Speedmaster",
+              "Tag Heuer Carrera",
+              "Cartier Tank",
+              "Patek Philippe Nautilus",
+            ],
+            datasets: [
+              {
+                label: "Units Sold",
+                data: [300, 250, 200, 150, 100],
+                backgroundColor: [
+                  "rgba(255, 99, 132, 0.2)",
+                  "rgba(54, 162, 235, 0.2)",
+                  "rgba(255, 206, 86, 0.2)",
+                  "rgba(75, 192, 192, 0.2)",
+                  "rgba(153, 102, 255, 0.2)",
+                ],
+                borderColor: [
+                  "rgba(255, 99, 132, 1)",
+                  "rgba(54, 162, 235, 1)",
+                  "rgba(255, 206, 86, 1)",
+                  "rgba(75, 192, 192, 1)",
+                  "rgba(153, 102, 255, 1)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
+        });
+      }
+
+      // Customer Segmentation Chart
+      function createCustomerSegmentationChart() {
+        const ctx = document
+          .getElementById("customerSegmentationChart")
+          .getContext("2d");
+        new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["Luxury", "Mid-range", "Entry-level"],
+            datasets: [
+              {
+                data: [400, 300, 200],
+                backgroundColor: [
+                  "rgba(255, 99, 132, 0.8)",
+                  "rgba(54, 162, 235, 0.8)",
+                  "rgba(255, 206, 86, 0.8)",
+                ],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+          },
+        });
+      }
+
+      // Call these functions when the DOM is fully loaded
+      document.addEventListener("DOMContentLoaded", function () {
+        // const monthlySalesData = "<%- JSON.stringify(monthlySales) %>";
+
+        createMonthlySalesChart();
+        createTopSellingWatchesChart();
+        createCustomerSegmentationChart();
+      });
+    </script>
   </body>
 </html>
-
-<!-- <script>
-      // Show or hide custom date range fields based on report type
-      document
-        .getElementById("reportType")
-        .addEventListener("change", function () {
-          const customRange = document.getElementById("customDateRange");
-          if (this.value === "custom") {
-            customRange.style.display = "block";
-          } else {
-            customRange.style.display = "none";
-          }
-        });
-
-      // Generate report button event listener
-      document
-        .getElementById("generateReportButton")
-        .addEventListener("click", async () => {
-          try {
-            const reportType = document.getElementById("reportType").value;
-            const startDate = document.getElementById("startDate").value;
-            const endDate = document.getElementById("endDate").value;
-
-            // Send GET request to the server to fetch report data
-            const response = await axios.get("/admin/reports", {
-              params: {
-                reportType: reportType,
-                startDate: startDate,
-                endDate: endDate,
-              },
-            });
-
-            if (response.data.success) {
-              const data = response.data.ordersData;
-
-              console.log(data);
-
-              // Check if sales data is available and is an object with labels and values arrays
-              if (
-                data.sales &&
-                Array.isArray(data.sales.labels) &&
-                Array.isArray(data.sales.values)
-              ) {
-                console.log(data.sales);
-
-                // Generate PDF using jsPDF
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                doc.setFontSize(18);
-                doc.text("Sales Report", 14, 22);
-                doc.setFontSize(12);
-                doc.text("Sales Data:", 14, 32);
-
-                let y = 40;
-                // Iterate over the sales data using the labels and values arrays
-                data.sales.labels.forEach((label, index) => {
-                  const value = data.sales.values[index];
-                  doc.text(`${label}: $${value}`, 14, y);
-                  y += 10;
-                });
-
-                // Add orders data to the PDF (optional)
-                doc.text("Orders Data:", 14, y + 10);
-                y += 20;
-                data.orders.labels.forEach((label, index) => {
-                  const value = data.orders.values[index];
-                  doc.text(`${label}: ${value} orders`, 14, y);
-                  y += 10;
-                });
-
-                // Convert PDF to Base64 and display it in the modal
-                const pdfDataUri = doc.output("datauristring");
-                document.getElementById("pdfIframe").src = pdfDataUri;
-
-                // Show the modal
-                document.getElementById("pdfModal").style.display = "flex";
-
-                // Download button event listener
-                document
-                  .getElementById("downloadPdf")
-                  .addEventListener("click", () => {
-                    doc.save("sales-report.pdf");
-                  });
-              } else {
-                console.warn("No sales data available.");
-                alert("No sales data available for the selected period.");
-              }
-            } else {
-              console.error("Failed to generate report:", response.statusText);
-              alert(response.data.message);
-            }
-          } catch (error) {
-            console.error("Error generating report:", error);
-
-            // Ensure error.response exists before accessing it
-            if (
-              error.response &&
-              error.response.data &&
-              error.response.data.message
-            ) {
-              alert(error.response.data.message);
-            } else {
-              alert("An unknown error occurred.");
-            }
-          }
-        });
-
-      function closeModal() {
-        document.getElementById("pdfModal").style.display = "none";
-      }
-    </script> -->

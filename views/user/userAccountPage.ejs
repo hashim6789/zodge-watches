@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Account Profile</title>
 
-
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -19,7 +18,6 @@
     ></script>
 
     <!-- Custom Fonts -->
-   
   </head>
 
   <body>
@@ -63,7 +61,7 @@
               <li class="nav-item">
                 <a class="nav-link" href="#" id="wallet-link">My Wallet</a>
               </li>
-              
+
               <li class="nav-item">
                 <a class="nav-link" href="#" id="forgot-password-link"
                   >Change Password</a
@@ -83,17 +81,16 @@
               >
                 <h4>Personal Information</h4>
                 <button
-  type="button"
-  class="btn btn-primary"
-  data-bs-toggle="modal"
-  data-bs-target="#editPersonalDetailsModal"
-  data-user-id="<%= user._id %>"
-  data-user-first-name="<%= user.firstName %>"
-  data-user-last-name="<%= user.lastName %>"
->
-  Edit
-</button>
-
+                  type="button"
+                  class="btn btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#editPersonalDetailsModal"
+                  data-user-id="<%= user._id %>"
+                  data-user-first-name="<%= user.firstName %>"
+                  data-user-last-name="<%= user.lastName %>"
+                >
+                  Edit
+                </button>
               </div>
               <div class="row mt-2">
                 <div class="col-md-6">
@@ -136,80 +133,200 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Addresses Section -->
+          <div id="addresses" class="d-none">
+            <h4>Addresses</h4>
+
+            <% if (addresses.length === 0) { %>
+            <p>No addresses found.</p>
+            <% } else { %>
+            <div class="list-group">
+              <% addresses.forEach(function(address) { %>
+              <div
+                class="list-group-item d-flex justify-content-between align-items-center"
+              >
+                <div>
+                  <h5><%= address.firstName %> <%= address.lastName %></h5>
+                  <p>
+                    <%= address.addressLine %><br />
+                    <%= address.city %>, <%= address.state %>, <%=
+                    address.pincode %>, <%= address.flatNo %><br />
+                    <%= address.country %><br />
+                    <small
+                      ><%= address.phoneNo %> <br /><%= address.email %>
+                    </small>
+                  </p>
+                </div>
+                <!-- Edit Address Button -->
+                <div class="d-flex">
+                  <button
+                    type="button"
+                    class="btn btn-primary me-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editAddressModal"
+                    data-address-id="<%= address._id %>"
+                    data-address-first-name="<%= address.firstName %>"
+                    data-address-last-name="<%= address.lastName %>"
+                    data-address-line1="<%= address.addressLine %>"
+                    data-address-city="<%= address.city %>"
+                    data-address-state="<%= address.state %>"
+                    data-address-zip="<%= address.pincode %>"
+                    data-address-country="<%= address.country %>"
+                    data-address-phone="<%= address.phoneNo %>"
+                    data-address-flat="<%= address.flatNo %>"
+                  >
+                    Edit Address
+                  </button>
+                  <!-- Delete Address Button -->
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    onclick="deleteAddress('<%= address._id %>')"
+                  >
+                    Delete Address
+                  </button>
+                </div>
+              </div>
+              <% }) %>
+            </div>
+            <% } %>
+
+            <button
+              id="createNewAddressBtn"
+              class="btn btn-success mt-3"
+              data-bs-toggle="modal"
+              data-bs-target="#createAddressModal"
+            >
+              Create New Address
+            </button>
+          </div>
+
+          <!-- Orders Section (Hidden Initially) -->
+          <!-- <div id="orders" class="d-none"> -->
+            <!-- Orders Section -->
+            <!-- Orders Section -->
+            <div id="orders" class="d-none">
+              <h4>Your Orders</h4>
+              <div id="orders-list">
+                <!-- Orders list will be populated by JavaScript -->
+              </div>
+
+              <!-- Pagination Controls -->
+              <% if (totalPages > 1) { %>
+              <nav aria-label="Order pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                  <li
+                    class="page-item <%= currentPage === 1 ? 'disabled' : '' %>"
+                  >
+                    <a
+                      class="page-link"
+                      href="#"
+                      onclick="changePage('<%= currentPage - 1 %>')"
+                      aria-label="Previous"
+                    >
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                  <% for (let i = 1; i <= totalPages; i++) { %>
+                  <li
+                    class="page-item <%= currentPage === i ? 'active' : '' %>"
+                  >
+                    <a class="page-link" href="#" onclick="changePage('<%= i %>')"
+                      ><%= i %></a
+                    >
+                  </li>
+                  <% } %>
+                  <li
+                    class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>"
+                  >
+                    <a
+                      class="page-link"
+                      href="#"
+                      onclick="changePage('<%= currentPage + 1 %>')"
+                      aria-label="Next"
+                    >
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+              <% } %>
             </div>
 
-           <!-- Addresses Section -->
-<div id="addresses" class="d-none">
-  <h4>Addresses</h4>
+            <!-- Order Details Section (Hidden Initially) -->
+            <div id="order-details" class="d-none">
+              <!-- Order details will be populated by JavaScript -->
+            </div>
 
-  <% if (addresses.length === 0) { %>
-  <p>No addresses found.</p>
-  <% } else { %>
-  <div class="list-group">
-    <% addresses.forEach(function(address) { %>
-    <div
-      class="list-group-item d-flex justify-content-between align-items-center"
-    >
-      <div>
-        <h5><%= address.firstName %> <%= address.lastName %></h5>
-        <p>
-          <%= address.addressLine %><br />
-          <%= address.city %>, <%= address.state %>, <%= address.pincode %>, <%= address.flatNo %><br />
-          <%= address.country %><br />
-          <small><%= address.phoneNo %> <br><%= address.email %> </small>
-        </p>
-      </div>
-      <!-- Edit Address Button -->
-      <div class="d-flex">
-        <button
-          type="button"
-          class="btn btn-primary me-2"
-          data-bs-toggle="modal"
-          data-bs-target="#editAddressModal"
-          data-address-id="<%= address._id %>"
-          data-address-first-name="<%= address.firstName %>"
-          data-address-last-name="<%= address.lastName %>"
-          data-address-line1="<%= address.addressLine %>"
-          data-address-city="<%= address.city %>"
-          data-address-state="<%= address.state %>"
-          data-address-zip="<%= address.pincode %>"
-          data-address-country="<%= address.country %>"
-          data-address-phone="<%= address.phoneNo %>"
-          data-address-flat="<%= address.flatNo %>"
-        >
-          Edit Address
-        </button>
-        <!-- Delete Address Button -->
-        <button
-          type="button"
-          class="btn btn-danger"
-          onclick="deleteAddress('<%= address._id %>')"
-        >
-          Delete Address
-        </button>
-      </div>
-    </div>
-    <% }) %>
-  </div>
-  <% } %>
+            <style>
+              #orders-list {
+                margin-top: 20px;
+              }
+              .order-item {
+                border: 1px solid #e0e0e0;
+                border-radius: 4px;
+                margin-bottom: 20px;
+                padding: 15px;
+                display: flex;
+                align-items: center;
+              }
+              .product-image {
+                width: 80px;
+                height: 80px;
+                object-fit: contain;
+                margin-right: 20px;
+              }
+              .product-info {
+                flex-grow: 1;
+              }
+              .product-name {
+                font-weight: bold;
+                margin-bottom: 5px;
+              }
+              .product-details {
+                color: #666;
+                font-size: 0.9em;
+              }
+              .product-price {
+                font-weight: bold;
+                margin-right: 20px;
+              }
+              .delivery-status {
+                text-align: right;
+              }
+              .delivered {
+                color: #007600;
+                font-weight: bold;
+              }
+              .status-processing {
+                color: #ff9900;
+              }
+              .status-shipped {
+                color: #1e90ff;
+              }
+              .status-cancelled {
+                color: #dc3545;
+              }
+              .review-link {
+                color: #007bff;
+                text-decoration: none;
+              }
+              .review-link:hover {
+                text-decoration: underline;
+              }
+            </style>
 
-  <button
-    id="createNewAddressBtn"
-    class="btn btn-success mt-3"
-    data-bs-toggle="modal"
-    data-bs-target="#createAddressModal"
-  >
-    Create New Address
-  </button>
-</div>
-
-
-            
-
-           <!-- Orders Section (Hidden Initially) -->
-           <div id="orders" class="d-none">
-            <h4>Orders</h4>
-            <div id="orders-table">
+            <script>
+              function changePage(page) {
+                // Implement page change logic here
+                console.log("Changing to page:", page);
+                // You might want to use AJAX to fetch and update the order list
+              }
+            </script>
+            <!-- <h4>Orders</h4> -->
+            <!-- <div id="orders-table">
               <% if (orders.length === 0) { %>
                 <p class="no-orders">There are no orders to display.</p>
               <% } else { %>
@@ -231,21 +348,17 @@
                         <td><%= order.orderStatus %></td>
                         <td>$<%= order.totalPrice.toFixed(2) %></td>
                         <td>
-                          <!-- View Details Button -->
                           <a href="/profile/orders/<%= order._id %>/view" class="btn btn-info">View Details</a>
                           
-                          <!-- Cancel Order Button -->
                           <% if (order.orderStatus === 'placed' || order.orderStatus === 'shipped') { %> 
                             <form id="cancelOrder" style="display:inline;">
                               <button id="cancelButton" onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">Cancel</button>
                             </form>
           
                           <% } else if (order.orderStatus === "pending") { %> 
-                            <!-- Show Retry button for pending orders -->
                             <button id="retryPaymentBtn" onclick="openPaymentRetryModal('<%= order._id %>', '<%= order.totalPrice %>')" class="btn btn-primary">Retry Payment</button>
           
                           <% } else if (order.orderStatus === "delivered" && order.returnDetails.returnStatus === null) { %>
-                            <!-- Return Button -->
                             <button 
                               type="button" 
                               class="btn btn-warning" 
@@ -275,10 +388,10 @@
                   </tbody>
                 </table>
               <% } %>
-            </div>
-          
+            </div> -->
+
             <!-- Pagination Controls -->
-            <nav aria-label="Page navigation">
+            <!-- <nav aria-label="Page navigation">
               <ul class="pagination">
                 <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
                   <a class="page-link" href="#" onclick="changePage('<%= currentPage - 1 %>')" aria-label="Previous">
@@ -297,51 +410,51 @@
                 </li>
               </ul>
             </nav>
-          </div>
-          
+          </div> -->
 
+            <!-- Wallet Section (Hidden Initially) -->
+            <div id="wallet" class="d-none">
+              <h4>My Wallet</h4>
+              <div class="wallet-balance">
+                <h5>Wallet Balance: $<%= wallet.balance.toFixed(2) %></h5>
+              </div>
 
-<!-- Wallet Section (Hidden Initially) -->
-<div id="wallet" class="d-none">
-  <h4>My Wallet</h4>
-  <div class="wallet-balance">
-    <h5>Wallet Balance: $<%= wallet.balance.toFixed(2) %></h5>
-  </div>
-
-  <div class="wallet-actions mt-4">
-    <!-- <button class="btn btn-success" id="addFundsBtn">Add Funds</button>
+              <div class="wallet-actions mt-4">
+                <!-- <button class="btn btn-success" id="addFundsBtn">Add Funds</button>
     <button class="btn btn-primary" id="withdrawFundsBtn">Withdraw Funds</button> -->
-  </div>
+              </div>
 
-  <!-- Transaction History -->
-  <h5 class="mt-4">Transaction History</h5>
-  <% if (wallet.transactions.length === 0) { %>
-    <p>No transactions found.</p>
-  <% } else { %>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Description</th>
-          <th>Amount</th>
-          <th>Type</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% wallet.transactions.forEach(transaction => { %>
-          <tr>
-            <td><%= new Date(transaction.date).toLocaleDateString() %></td>
-            <td><%= transaction.description %></td>
-            <td>$<%= transaction.amount.toFixed(2) %></td>
-            <td><%= transaction.type === 'credit' ? 'Credit' : 'Debit' %></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  <% } %>
-</div>
-
-
+              <!-- Transaction History -->
+              <h5 class="mt-4">Transaction History</h5>
+              <% if (wallet.transactions.length === 0) { %>
+              <p>No transactions found.</p>
+              <% } else { %>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% wallet.transactions.forEach(transaction => { %>
+                  <tr>
+                    <td>
+                      <%= new Date(transaction.date).toLocaleDateString() %>
+                    </td>
+                    <td><%= transaction.description %></td>
+                    <td>$<%= transaction.amount.toFixed(2) %></td>
+                    <td>
+                      <%= transaction.type === 'credit' ? 'Credit' : 'Debit' %>
+                    </td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+              <% } %>
+            </div>
 
             <!-- Forgot Password Section (Hidden Initially) -->
             <div id="forgot-password" class="d-none">
@@ -368,578 +481,749 @@
       </div>
     </div>
 
-
     <!-- modals for addresses -->
-     <!-- Create New Address Modal -->
-     <div
-     class="modal fade"
-     id="createAddressModal"
-     tabindex="-1"
-     aria-labelledby="createAddressModalLabel"
-     aria-hidden="true"
-   >
-     <div class="modal-dialog">
-       <div class="modal-content">
-         <div class="modal-header">
-           <h5 class="modal-title" id="createAddressModalLabel">
-             Create New Address
-           </h5>
-           <button
-             type="button"
-             class="btn-close"
-             data-bs-dismiss="modal"
-             aria-label="Close"
-           ></button>
-         </div>
-         <div class="modal-body">
-           <form id="createAddress">
-             <!-- Assuming userId is automatically assigned -->
-             <input
-               type="hidden"
-               name="userId"
-               id="userId"
-               value="<%= user._id %>"
-             />
-
-             <div class="mb-3">
-               <label for="firstName" class="form-label"
-                 >First Name</label
-               >
-               <input
-                 type="text"
-                 class="form-control"
-                 id="firstName"
-                 name="firstName"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="secondName" class="form-label"
-                 >Second Name</label
-               >
-               <input
-                 type="text"
-                 class="form-control"
-                 id="secondName"
-                 name="secondName"
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="phoneNo" class="form-label"
-                 >Phone Number</label
-               >
-               <input
-                 type="number"
-                 class="form-control"
-                 id="phoneNo"
-                 name="phoneNo"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="addressEmail" class="form-label">Email</label>
-               <input
-                 type="AddressEmail"
-                 class="form-control"
-                 id="AddressEmail"
-                 name="AddressEmail"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="addressLine" class="form-label"
-                 >Address Line</label
-               >
-               <input
-                 type="text"
-                 class="form-control"
-                 id="addressLine"
-                 name="addressLine"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="pincode" class="form-label">Pincode</label>
-               <input
-                 type="number"
-                 class="form-control"
-                 id="pincode"
-                 name="pincode"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="state" class="form-label">State</label>
-               <input
-                 type="text"
-                 class="form-control"
-                 id="state"
-                 name="state"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="country" class="form-label">Country</label>
-               <input
-                 type="text"
-                 class="form-control"
-                 id="country"
-                 name="country"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="city" class="form-label">City</label>
-               <input
-                 type="text"
-                 class="form-control"
-                 id="city"
-                 name="city"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="flatNo" class="form-label">Flat No</label>
-               <input
-                 type="text"
-                 class="form-control"
-                 id="flatNo"
-                 name="flatNo"
-               />
-             </div>
-
-             <button type="submit" class="btn btn-primary">
-               Save Address
-             </button>
-           </form>
-         </div>
-       </div>
-     </div>
-   </div>
-
-   <!-- Edit Address Modal -->
-   <div
-     class="modal fade"
-     id="editAddressModal"
-     tabindex="-1"
-     aria-labelledby="editAddressModalLabel"
-     aria-hidden="true"
-   >
-     <div class="modal-dialog">
-       <div class="modal-content">
-         <div class="modal-header">
-           <h5 class="modal-title" id="editAddressModalLabel">
-             Edit Address
-           </h5>
-           <button
-             type="button"
-             class="btn-close"
-             data-bs-dismiss="modal"
-             aria-label="Close"
-           ></button>
-         </div>
-         <div class="modal-body">
-           <form id="editAddress">
-             <input type="hidden" id="addressId" name="addressId" />
-             <input type="hidden" name="userId" id="userId">
-
-             <div class="mb-3">
-               <label for="firstName" class="form-label"
-                 >First Name</label
-               >
-               <input
-                 type="text"
-                 class="form-control"
-                 id="editFirstName"
-                 name="firstName"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="lastName" class="form-label"
-                 >Last Name</label
-               >
-               <input
-                 type="text"
-                 class="form-control"
-                 id="editLastName"
-                 name="lastName"
-                 
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="addressLine1" class="form-label"
-                 >Address Line</label
-               >
-               <input
-                 type="text"
-                 class="form-control"
-                 id="editAddressLine"
-                 name="addressLine1"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="city" class="form-label">City</label>
-               <input
-                 type="text"
-                 class="form-control"
-                 id="editCity"
-                 name="city"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="state" class="form-label">State</label>
-               <input
-                 type="text"
-                 class="form-control"
-                 id="editState"
-                 name="state"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="zipCode" class="form-label">Pincode</label>
-               <input
-                 type="number"
-                 class="form-control"
-                 id="editZipCode"
-                 name="zipCode"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="country" class="form-label">Country</label>
-               <input
-                 type="text"
-                 class="form-control"
-                 id="editCountry"
-                 name="country"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="phone" class="form-label">Phone</label>
-               <input
-                 type="text"
-                 class="form-control"
-                 id="editPhone"
-                 name="phone"
-                 required
-               />
-             </div>
-
-             <div class="mb-3">
-               <label for="flatNo" class="form-label">Flat No</label>
-               <input
-                 type="text"
-                 class="form-control"
-                 id="editFlatNo"
-                 name="flatNo"
-               />
-             </div>
-
-             <button type="submit" class="btn btn-primary">
-               Save changes
-             </button>
-           </form>
-         </div>
-       </div>
-     </div>
-   </div>
-
-
-   <!-- modal for editing the personal details  -->
-    <!-- Edit Personal Details Modal -->
-    <div class="modal fade" id="editPersonalDetailsModal" tabindex="-1" aria-labelledby="editPersonalDetailsModalLabel" aria-hidden="true">
+    <!-- Create New Address Modal -->
+    <div
+      class="modal fade"
+      id="createAddressModal"
+      tabindex="-1"
+      aria-labelledby="createAddressModalLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="editPersonalDetailsModalLabel">Edit Personal Details</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h5 class="modal-title" id="createAddressModalLabel">
+              Create New Address
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
           </div>
           <div class="modal-body">
-            <form id="editProfileForm">
-              <input type="hidden" id="editUserId" name="userId" />
-    
+            <form id="createAddress">
+              <!-- Assuming userId is automatically assigned -->
+              <input
+                type="hidden"
+                name="userId"
+                id="userId"
+                value="<%= user._id %>"
+              />
+
               <div class="mb-3">
                 <label for="firstName" class="form-label">First Name</label>
-                <input type="text" class="form-control" id="profileFirstName" name="firstName" required />
+                <input
+                  type="text"
+                  class="form-control"
+                  id="firstName"
+                  name="firstName"
+                  required
+                />
               </div>
-    
+
               <div class="mb-3">
-                <label for="lastName" class="form-label">Last Name</label>
-                <input type="text" class="form-control" id="profileLastName" name="lastName" />
+                <label for="secondName" class="form-label">Second Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="secondName"
+                  name="secondName"
+                />
               </div>
-    
-              <button type="submit" class="btn btn-primary">Save Changes</button>
+
+              <div class="mb-3">
+                <label for="phoneNo" class="form-label">Phone Number</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="phoneNo"
+                  name="phoneNo"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="addressEmail" class="form-label">Email</label>
+                <input
+                  type="AddressEmail"
+                  class="form-control"
+                  id="AddressEmail"
+                  name="AddressEmail"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="addressLine" class="form-label">Address Line</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="addressLine"
+                  name="addressLine"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="pincode" class="form-label">Pincode</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="pincode"
+                  name="pincode"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="state" class="form-label">State</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="state"
+                  name="state"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="country" class="form-label">Country</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="country"
+                  name="country"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="city" class="form-label">City</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="city"
+                  name="city"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="flatNo" class="form-label">Flat No</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="flatNo"
+                  name="flatNo"
+                />
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                Save Address
+              </button>
             </form>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Return Reason Modal -->
-<div class="modal fade" id="returnReasonModal" tabindex="-1" aria-labelledby="returnReasonModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="returnReasonModalLabel">Enter Return Reason</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="returnReasonForm">
-          <div class="mb-3">
-            <label for="returnReason" class="form-label">Reason for Return</label>
-            <textarea class="form-control" id="returnReason" rows="3" required></textarea>
+    <!-- Edit Address Modal -->
+    <div
+      class="modal fade"
+      id="editAddressModal"
+      tabindex="-1"
+      aria-labelledby="editAddressModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editAddressModalLabel">Edit Address</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
           </div>
-          <input type="hidden" id="orderIdForReturn" />
-          <button type="submit" class="btn btn-primary" onclick="submitReturn()">Submit</button>
-        </form>
+          <div class="modal-body">
+            <form id="editAddress">
+              <input type="hidden" id="addressId" name="addressId" />
+              <input type="hidden" name="userId" id="userId" />
+
+              <div class="mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editFirstName"
+                  name="firstName"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editLastName"
+                  name="lastName"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="addressLine1" class="form-label"
+                  >Address Line</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editAddressLine"
+                  name="addressLine1"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="city" class="form-label">City</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editCity"
+                  name="city"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="state" class="form-label">State</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editState"
+                  name="state"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="zipCode" class="form-label">Pincode</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="editZipCode"
+                  name="zipCode"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="country" class="form-label">Country</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editCountry"
+                  name="country"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="phone" class="form-label">Phone</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editPhone"
+                  name="phone"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="flatNo" class="form-label">Flat No</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editFlatNo"
+                  name="flatNo"
+                />
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                Save changes
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-  let currentPage = 1;
-  let totalPages = 1;
-  const limit = 6;
+    <!-- modal for editing the personal details  -->
+    <!-- Edit Personal Details Modal -->
+    <div
+      class="modal fade"
+      id="editPersonalDetailsModal"
+      tabindex="-1"
+      aria-labelledby="editPersonalDetailsModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editPersonalDetailsModalLabel">
+              Edit Personal Details
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="editProfileForm">
+              <input type="hidden" id="editUserId" name="userId" />
 
-  function fetchOrders(page) {
-    axios.get(`/profile/api/orders?page=${page}&limit=${limit}`)
-      .then(response => {
-        const orders = response.data.orders;
-        totalPages = response.data.totalPages;
+              <div class="mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="profileFirstName"
+                  name="firstName"
+                  required
+                />
+              </div>
 
-        // Update table
-        const ordersBody = document.getElementById("orders-body");
-        ordersBody.innerHTML = '';
-        orders.forEach(order => {
-          ordersBody.innerHTML += `
-            <tr>
-              <td>${order.orderId}</td>
-              <td>${new Date(order.createdAt).toLocaleDateString()}</td>
-              <td>${order.orderStatus}</td>
-              <td>$${order.totalPrice.toFixed(2)}</td>
-              <td>
-                <a href="/profile/orders/${order._id}/view" class="btn btn-info">View Details</a>
-                ${order.orderStatus === 'placed' || order.orderStatus === 'shipped' ? `
-                  <form id="cancelOrder" style="display:inline;">
-                    <button id="cancelButton" onclick="cancelOrder('${order._id}')" class="btn btn-danger">Cancel</button>
-                  </form>
-                ` : ''}
-                ${order.orderStatus === "pending" ? `
-                  <button id="retryPaymentBtn" onclick="openPaymentRetryModal('${order._id}', '${order.totalPrice}')" class="btn btn-primary">Retry Payment</button>
-                ` : ''}
-                ${order.orderStatus === "delivered" && order.returnDetails.returnStatus === null ? `
-                  <button type="button" class="btn btn-warning" id="returnButton" onclick="openReturnModal('${order._id}')" data-bs-toggle="modal" data-bs-target="#returnReasonModal">Return</button>
-                ` : ''}
-                ${order.orderStatus === "cancelled" ? `<button id="cancelButton" class="btn btn-danger" disabled>Cancelled</button>` : ''}
-                ${order.returnDetails.returnStatus === "requested" ? `<button id="cancelButton" class="btn btn-danger" disabled>Requested</button>` : ''}
-                ${order.returnDetails.returnStatus === "approved" ? `<button id="cancelButton" class="btn btn-success" disabled>Approved</button>` : ''}
-                ${order.returnDetails.returnStatus === "rejected" ? `<button id="cancelButton" class="btn btn-danger" disabled>Rejected</button>` : ''}
-              </td>
-            </tr>
-          `;
+              <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="profileLastName"
+                  name="lastName"
+                />
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                Save Changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      let currentPage = 1;
+      let totalPages = 1;
+      const limit = 6;
+
+      function fetchOrders(page) {
+        axios
+          .get(`/profile/api/orders?page=${page}&limit=${limit}`)
+          .then((response) => {
+            const orders = response.data.orders;
+            totalPages = response.data.totalPages;
+            console.log("Fetched orders: ", orders);
+
+            // Update order list
+            const ordersList = document.getElementById("orders-list");
+            ordersList.innerHTML = ""; // Clear previous order items
+
+            if (orders.length === 0) {
+              ordersList.innerHTML = `<p class="no-orders">You haven't placed any orders yet.</p>`;
+            } else {
+              orders.forEach((order) => {
+                order.products.forEach((product) => {
+                  ordersList.innerHTML += `
+                    <div class="order-item" data-order-id="${order._id}">
+                      <a href="/profile/orders/${order._id}/view"><img
+                        src="/public/uploads/${product.productId.images[0]}"
+                        alt="${product.productId.name}"
+                        class="product-image"
+                      /></a>
+                      <div class="product-info">
+                        <div class="product-name">${
+                          product.productId.name
+                        }</div>
+                      </div>
+                      <div class="product-price">
+                        ₹${product.price.toFixed(2)}
+                      </div>
+                      <div class="delivery-status">
+                        ${
+                          order.orderStatus === "delivered"
+                            ? `
+                            <div class="delivered">
+                              Delivered on ${new Date(
+                                order.createdAt
+                              ).toLocaleDateString("en-IN", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </div>
+                            <div>Your item has been delivered</div>
+                          `
+                            : order.orderStatus === "pending"
+                            ? `
+                            <div class="status-pending">Pending Payment</div>
+                            <button id="payNow" onclick="payNow('${order._id}')" class="pay-now-btn">
+                              Pay Now
+                            </button>
+                          `
+                            : `
+                            <div class="status-${order.orderStatus.toLowerCase()}">
+                              ${order.orderStatus}
+                            </div>
+                            <div>
+                              Estimated delivery: ${new Date(
+                                order.createdAt
+                              ).toLocaleDateString("en-IN", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </div>
+                          `
+                        }
+                      </div>
+                    </div>
+                  `;
+                });
+              });
+            }
+
+            // Update pagination
+            const pagination = document.querySelector(".pagination");
+            pagination.innerHTML = `
+              <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+                <a class="page-link" href="#" onclick="changePage(${
+                  currentPage - 1
+                })" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+              ${Array.from({ length: totalPages }, (_, i) => i + 1)
+                .map(
+                  (i) => `
+                <li class="page-item ${currentPage === i ? "active" : ""}">
+                  <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                </li>
+              `
+                )
+                .join("")}
+              <li class="page-item ${
+                currentPage === totalPages ? "disabled" : ""
+              }">
+                <a class="page-link" href="#" onclick="changePage(${
+                  currentPage + 1
+                })" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            `;
+          })
+          .catch((error) => {
+            console.error("Error fetching orders:", error);
+          });
+      }
+
+      function changePage(page) {
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        fetchOrders(currentPage);
+      }
+
+      // Initial fetch
+      fetchOrders(currentPage);
+    </script>
+
+    <!-- <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("object")
+        // Get all order items
+        const orderItems = document.querySelectorAll(".order-item");
+
+        // Loop through each order item and add a click event listener
+        orderItems.forEach((item) => {
+          item.addEventListener("click", function () {
+            const orderId = this.getAttribute("data-order-id");
+
+            // Redirect to the order details page
+            if (orderId) {
+              window.location.href = `/profile/orders/${orderId}/view`; // Make sure this route exists on the server
+            }
+          });
         });
-
-        // Update pagination
-        document.querySelector(".pagination").innerHTML = `
-          <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="changePage(${currentPage - 1})" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-          </li>
-          ${Array.from({ length: totalPages }, (_, i) => i + 1).map(i => `
-            <li class="page-item ${currentPage === i ? 'active' : ''}">
-              <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
-            </li>
-          `).join('')}
-          <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="changePage(${currentPage + 1})" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-          </li>
-        `;
-      })
-      .catch(error => {
-        console.error('Error fetching orders:', error);
       });
-  }
+    </script> -->
 
-  function changePage(page) {
-    if (page < 1 || page > Math.ceil(totalPages)) return;
-    currentPage = page;
-    fetchOrders(currentPage);
-  }
+    <script>
 
-  // Initial fetch
-  fetchOrders(currentPage);
-</script>
+      function payNow(orderId){
+        // const orderId = document.getElementById("payNow").getAttribute("data-order-id");
+        console.log(orderId)
 
+        axios
+      .post("/checkout/retry", {
+        orderId,
+      })
+      .then((response) => {
+        const data = response.data;
+        console.log(data)
+        if (data.success) {
+          initiateRazorpayPayment(
+            data.orderId,
+            data.razorpayOrderId,
+            data.amount,
+            data.currency,
+            data.key_id
+          );
+        } else {
+          Swal.fire("Error", data.message, "error");
+          // window.location.href = `/profile/<%= user._id %>`;
+        }
+      })
+      .catch((error) => {
+        Swal.fire("Error", "A server error occurred.", "error");
+        // window.location.href = `/profile/<%= user._id %>`;
+      });
+      }
+    
+    
+    
+    function initiateRazorpayPayment(
+      orderId,
+      razorpayOrderId,
+      amount,
+      currency,
+      key_id
+    ) {
+      var options = {
+        key: key_id,
+        amount: amount,
+        currency: currency,
+        name: "Zodge Premium Watches",
+        description: "Order Payment",
+        order_id: razorpayOrderId,
+        handler: function (response) {
+          // Call your backend to verify payment
+          axios
+            .post("/checkout/verify-payment", {
+              orderId: orderId,
+              razorpayOrderId: razorpayOrderId,
+              paymentId: response.razorpay_payment_id,
+              signature: response.razorpay_signature,
+            })
+            .then((response) => {
+              const data = response.data;
+              if (data.message === "Payment verified successfully.") {
+                Swal.fire("Success", "Payment successful!", "success").then(() => {
+                  console.log(localStorage.getItem("cart"));
+                  localStorage.removeItem("cart");
+                  console.log(localStorage.getItem("cart"));
+                  window.location.href = "/checkout/confirmation";
+                });
+              } else {
+                Swal.fire("Error", "Payment verification failed.", "error").then(
+                  () => {
+                    localStorage.setItem(
+                      "failedOrder",
+                      JSON.stringify({
+                        orderId,
+                        amount,
+                        products: cart.products,
+                      })
+                    );
+                    window.location.href = "/checkout/retry";
+                  }
+                );
+              }
+            })
+            .catch((error) => {
+              Swal.fire(
+                "Error",
+                "Server error occurred during payment verification.",
+                "error"
+              );
+            })
+            .then(() => {
+              localStorage.setItem(
+                "failedOrder",
+                JSON.stringify({
+                  orderId,
+                  amount,
+                  products: cart.products,
+                })
+              );
+              window.location.href = "/checkout/retry";
+            });
+        },
+        prefill: {
+          name: "<%= user.name %>",
+          email: "<%= user.email %>",
+          contact: "<%= user.contact %>",
+        },
+        theme: {
+          color: "#3399cc",
+        },
+      };
+    
+      var paymentObject = new Razorpay(options);
+      paymentObject.open();
+    }
+    
+    </script>
 
-<script>
-  
- // Function to open a modal for payment retry
-// function openPaymentRetryModal(orderId, amount) {
-//   Swal.fire({
-//     title: "Payment Retry",
-//     text: "Please choose your preferred payment method",
-//     icon: "info",
-//     showCancelButton: true,
-//     confirmButtonText: "Proceed",
-//     cancelButtonText: "Cancel",
-//     input: 'radio',
-//     inputOptions: {
-//       'wallet': 'Wallet',
-//       'onlinePayment': 'Online Payment',
-//     },
-//     inputValidator: (value) => {
-//       if (!value) {
-//         return 'You need to choose a payment method!';
-//       }
-//     }
-//   }).then((result) => {
-//     if (result.isConfirmed) {
-//       const selectedPaymentMethod = result.value;
-      
-//       if (selectedPaymentMethod === "wallet") {
-//         // Handle wallet payment
-//         handleRetryOrderPlacement(orderId, "wallet");
-//       } else if (selectedPaymentMethod === "onlinePayment") {
-//         // Handle online payment with Razorpay
-//         retryRazorpayPayment(orderId, amount);
-//       }
-//     }
-//   });
-// }
+    <script>
+      // Function to open a modal for payment retry
+      // function openPaymentRetryModal(orderId, amount) {
+      //   Swal.fire({
+      //     title: "Payment Retry",
+      //     text: "Please choose your preferred payment method",
+      //     icon: "info",
+      //     showCancelButton: true,
+      //     confirmButtonText: "Proceed",
+      //     cancelButtonText: "Cancel",
+      //     input: 'radio',
+      //     inputOptions: {
+      //       'wallet': 'Wallet',
+      //       'onlinePayment': 'Online Payment',
+      //     },
+      //     inputValidator: (value) => {
+      //       if (!value) {
+      //         return 'You need to choose a payment method!';
+      //       }
+      //     }
+      //   }).then((result) => {
+      //     if (result.isConfirmed) {
+      //       const selectedPaymentMethod = result.value;
 
-// // Function to retry order placement (wallet or COD in this case)
-// function handleRetryOrderPlacement(orderId, paymentMethod) {
-//   axios
-//     .post("/checkout/retry", {
-//       orderId,
-//       paymentMethod,
-//     })
-//     .then((response) => {
-//       const data = response.data;
-//       if (data.order) {
-//         Swal.fire(
-//           "Order Placed",
-//           "Your order has been placed successfully with retry.",
-//           "success"
-//         ).then(() => {
-//           localStorage.removeItem("failedOrder");
-//           window.location.href = "/checkout/confirmation";
-//         });
-//       } else {
-//         Swal.fire("Error", "Retry failed.", "error").then(() => {
-//           window.location.href = `/profile/${userId}`;
-//         });
-//       }
-//     })
-//     .catch((error) => {
-//       Swal.fire("Error", error.response.data.message, "error").then(() => {
-//         window.location.href = `/profile/${userId}`;
-//       });
-//     });
-// }
+      //       if (selectedPaymentMethod === "wallet") {
+      //         // Handle wallet payment
+      //         handleRetryOrderPlacement(orderId, "wallet");
+      //       } else if (selectedPaymentMethod === "onlinePayment") {
+      //         // Handle online payment with Razorpay
+      //         retryRazorpayPayment(orderId, amount);
+      //       }
+      //     }
+      //   });
+      // }
 
-// // Function to retry Razorpay payment
-// function retryRazorpayPayment(orderId, amount) {
-//   axios
-//     .post("/checkout/get-razorpay-details", { orderId })
-//     .then((response) => {
-//       const { razorpayOrderId, key_id, currency } = response.data;
+      // // Function to retry order placement (wallet or COD in this case)
+      // function handleRetryOrderPlacement(orderId, paymentMethod) {
+      //   axios
+      //     .post("/checkout/retry", {
+      //       orderId,
+      //       paymentMethod,
+      //     })
+      //     .then((response) => {
+      //       const data = response.data;
+      //       if (data.order) {
+      //         Swal.fire(
+      //           "Order Placed",
+      //           "Your order has been placed successfully with retry.",
+      //           "success"
+      //         ).then(() => {
+      //           localStorage.removeItem("failedOrder");
+      //           window.location.href = "/checkout/confirmation";
+      //         });
+      //       } else {
+      //         Swal.fire("Error", "Retry failed.", "error").then(() => {
+      //           window.location.href = `/profile/${userId}`;
+      //         });
+      //       }
+      //     })
+      //     .catch((error) => {
+      //       Swal.fire("Error", error.response.data.message, "error").then(() => {
+      //         window.location.href = `/profile/${userId}`;
+      //       });
+      //     });
+      // }
 
-//       var options = {
-//         key: key_id,
-//         amount: amount,
-//         currency: currency,
-//         name: "Zodge Premium Watches",
-//         description: "Retry Order Payment",
-//         order_id: razorpayOrderId,
-//         handler: function (response) {
-//           // Handle successful Razorpay payment
-//           axios
-//             .post("/checkout/verify-payment", {
-//               orderId: orderId,
-//               razorpayOrderId: razorpayOrderId,
-//               paymentId: response.razorpay_payment_id,
-//               signature: response.razorpay_signature,
-//             })
-//             .then((response) => {
-//               if (response.data.message === "Payment verified successfully.") {
-//                 Swal.fire("Success", "Payment successful!", "success").then(() => {
-//                   localStorage.removeItem("failedOrder");
-//                   window.location.href = "/checkout/confirmation";
-//                 });
-//               } else {
-//                 Swal.fire("Error", "Payment verification failed.", "error").then(
-//                   () => {
-//                     window.location.href = `/checkout/retry`;
-//                   }
-//                 );
-//               }
-//             })
-//             .catch(() => {
-//               Swal.fire("Error", "Server error occurred during payment verification.", "error");
-//             });
-//         },
-//         prefill: {
-//           name: "<%= user.name %>",
-//           email: "<%= user.email %>",
-//           contact: "<%= user.contact %>",
-//         },
-//         theme: {
-//           color: "#3399cc",
-//         },
-//       };
+      // // Function to retry Razorpay payment
+      // function retryRazorpayPayment(orderId, amount) {
+      //   axios
+      //     .post("/checkout/get-razorpay-details", { orderId })
+      //     .then((response) => {
+      //       const { razorpayOrderId, key_id, currency } = response.data;
 
-//       var paymentObject = new Razorpay(options);
-//       paymentObject.open();
-//     })
-//     .catch(() => {
-//       Swal.fire("Error", "Failed to fetch Razorpay details.", "error");
-//     });
-// }
+      //       var options = {
+      //         key: key_id,
+      //         amount: amount,
+      //         currency: currency,
+      //         name: "Zodge Premium Watches",
+      //         description: "Retry Order Payment",
+      //         order_id: razorpayOrderId,
+      //         handler: function (response) {
+      //           // Handle successful Razorpay payment
+      //           axios
+      //             .post("/checkout/verify-payment", {
+      //               orderId: orderId,
+      //               razorpayOrderId: razorpayOrderId,
+      //               paymentId: response.razorpay_payment_id,
+      //               signature: response.razorpay_signature,
+      //             })
+      //             .then((response) => {
+      //               if (response.data.message === "Payment verified successfully.") {
+      //                 Swal.fire("Success", "Payment successful!", "success").then(() => {
+      //                   localStorage.removeItem("failedOrder");
+      //                   window.location.href = "/checkout/confirmation";
+      //                 });
+      //               } else {
+      //                 Swal.fire("Error", "Payment verification failed.", "error").then(
+      //                   () => {
+      //                     window.location.href = `/checkout/retry`;
+      //                   }
+      //                 );
+      //               }
+      //             })
+      //             .catch(() => {
+      //               Swal.fire("Error", "Server error occurred during payment verification.", "error");
+      //             });
+      //         },
+      //         prefill: {
+      //           name: "<%= user.name %>",
+      //           email: "<%= user.email %>",
+      //           contact: "<%= user.contact %>",
+      //         },
+      //         theme: {
+      //           color: "#3399cc",
+      //         },
+      //       };
 
-// // Function to handle retry button click
-// document.getElementById("retryPaymentBtn").addEventListener("click", function () {
-//   const failedOrder = JSON.parse(localStorage.getItem("failedOrder"));
-//   if (failedOrder) {
-//     const { orderId, amount } = failedOrder;
-//     openPaymentRetryModal(orderId, amount);
-//   }
-// });
+      //       var paymentObject = new Razorpay(options);
+      //       paymentObject.open();
+      //     })
+      //     .catch(() => {
+      //       Swal.fire("Error", "Failed to fetch Razorpay details.", "error");
+      //     });
+      // }
 
+      // // Function to handle retry button click
+      // document.getElementById("retryPaymentBtn").addEventListener("click", function () {
+      //   const failedOrder = JSON.parse(localStorage.getItem("failedOrder"));
+      //   if (failedOrder) {
+      //     const { orderId, amount } = failedOrder;
+      //     openPaymentRetryModal(orderId, amount);
+      //   }
+      // });
 
-// </script>
+      //
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="/public//user/js/userAccount.js"></script>
-      
-    </body>
-    
+  </body>
 </html>

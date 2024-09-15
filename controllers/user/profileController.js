@@ -28,9 +28,12 @@ const getAccountPage = async (req, res) => {
       OrderModel.find({ userId })
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit),
+        .limit(limit)
+        .populate("products.productId", "name images"),
       OrderModel.countDocuments({ userId }),
     ]);
+
+    console.log(orders[0].products);
 
     let wallet = await WalletModel.findOne({ userId });
     if (!wallet) {
@@ -250,9 +253,13 @@ const viewOrderDetail = async (req, res) => {
       });
     }
 
-    res
-      .status(200)
-      .render("user/orderDetailsPage", { cart, order, user, wishlist });
+    res.status(200).render("user/orderDetailsPage", {
+      cart,
+      order,
+      user,
+      trackingSteps: ["placed", "shipped", "delivered"],
+      wishlist,
+    });
   } catch (err) {
     return res.status(500).json({
       status: "error",
@@ -301,6 +308,7 @@ const getOrdersList = async (req, res) => {
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit)
+      .populate("products.productId", "name images")
       .exec();
     const totalOrders = await OrderModel.countDocuments({
       userId: req.user._id,

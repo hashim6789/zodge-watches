@@ -3,47 +3,128 @@
   <head>
     <title>Order Details</title>
     <%- include('partials/_header') %>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+
     <style>
-      .order-details,
-      .order-products {
-        margin: 20px 0;
+      .order-details-container {
+        max-width: 1000px;
+        margin: 0 auto;
       }
-      .no-orders {
-        font-style: italic;
-        color: #666;
+      .order-section {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        padding: 20px;
+      }
+      .order-header {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+      }
+      .order-status {
+        font-size: 14px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-weight: bold;
+      }
+      .status-delivered {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .status-processing {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      .status-shipped {
+        background-color: #cce5ff;
+        color: #004085;
+      }
+      .product-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+      }
+      .product-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        margin-right: 15px;
+      }
+      .product-details {
+        flex-grow: 1;
+      }
+      .product-price {
+        font-weight: bold;
+        color: #b12704;
+      }
+      .btn-track-order {
+        background-color: #f0c14b;
+        border-color: #a88734 #9c7e31 #846a29;
+        color: #111;
+      }
+      .btn-track-order:hover {
+        background-color: #f4d078;
+      }
+      .invoice-section {
+        background-color: #f8f9fa;
       }
     </style>
   </head>
   <body class="animsition">
-    <!-- Header -->
-    <%- include('partials/_navbar', {user, wishlist, cart}) %>
+    <%- include('partials/_navbar', {user, wishlist, cart}) %> <%-
+    include('partials/_wishlist', {wishlist}) %>
+    <!-- breadcrumb -->
+    <div class="container pt-5">
+      <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+        <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+          Home
+          <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+        <a
+          href="/profile/<%= order.userId %>"
+          class="stext-109 cl8 hov-cl1 trans-04"
+        >
+          My Account
+          <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
 
-    <!-- Wishlist -->
-    <%- include('partials/_wishlist', {wishlist}) %>
+        <span class="stext-109 cl4"> Order Details </span>
+      </div>
+    </div>
 
-    <!-- Main Content -->
-    <div
-      class="order-details-container bg-white pt-5 p-4 rounded shadow-sm mb-5"
-    >
-      <h4 class="mb-4 pt-5">Order Summary</h4>
-
-      <!-- Order Information Section -->
-      <div class="order-info-section mb-4">
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <p><strong>Order ID:</strong> <%= order._id %></p>
-            <p>
-              <strong>Date:</strong> <%= new
-              Date(order.createdAt).toLocaleDateString() %>
-            </p>
-          </div>
-          <div class="col-md-6 mb-3">
-            <p><strong>Status:</strong> <%= order.orderStatus %></p>
-            <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
-          </div>
+    <div class="container order-details-container mt-5 mb-5">
+      <div class="order-section">
+        <div
+          class="order-header d-flex justify-content-between align-items-center"
+        >
+          <h4 class="mb-0">Order #<%= order.orderId.slice(-6) %></h4>
+          <span
+            class="order-status <%= order.orderStatus.toLowerCase() === 'delivered' ? 'status-delivered' : (order.orderStatus.toLowerCase() === 'processing' ? 'status-processing' : 'status-shipped') %>"
+          >
+            <%= order.orderStatus %>
+          </span>
         </div>
         <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-6">
+            <p>
+              <strong>Order Date:</strong> <%= new
+              Date(order.createdAt).toLocaleDateString() %>
+            </p>
+            <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+          </div>
+          <div class="col-md-6 text-md-right">
             <p>
               <strong>Total Amount:</strong> $<%= order.totalPrice.toFixed(2) %>
             </p>
@@ -51,57 +132,54 @@
         </div>
       </div>
 
-      <!-- Shipping Address Section -->
-      <h5 class="mb-3">Shipping Address</h5>
-      <div class="shipping-address-section border p-3 rounded mb-4">
-        <p class="mb-1">
-          <%= order.address.flatNo ? order.address.flatNo + ", " : "" %> <%=
+      <div class="order-section">
+        <h5 class="mb-3">Shipping Address</h5>
+        <p>
+          <%= order.address.flatNo ? order.address.flatNo + ", " : "" %><%=
           order.address.addressLine %>
         </p>
-        <p class="mb-1">
+        <p>
           <%= order.address.city %>, <%= order.address.state %> - <%=
           order.address.pincode %>
         </p>
-        <p class="mb-1"><%= order.address.country %></p>
-        <p class="mb-1">Phone: <%= order.address.phoneNo %></p>
-        <p class="mb-1">Email: <%= order.address.email %></p>
+        <p><%= order.address.country %></p>
+        <p>Phone: <%= order.address.phoneNo %></p>
+        <p>Email: <%= order.address.email %></p>
       </div>
 
-      <!-- Ordered Products Section -->
-      <h5 class="mb-3">Ordered Products</h5>
-      <table class="table table-bordered">
-        <thead class="thead-light">
-          <tr>
-            <th scope="col">Product Name</th>
-            <th scope="col">Image</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% order.products.forEach(item => { %>
-          <tr>
-            <td><%= item.productId.name %></td>
-            <td>
-              <img
-                src="/public/uploads/<%= item.productId.images[0] %>"
-                alt="<%= item.productId.name %>"
-                class="img-thumbnail"
-                style="width: 75px; height: auto"
-              />
-            </td>
-            <td><%= item.quantity %></td>
-            <td>$<%= item.price.toFixed(2) %></td>
-          </tr>
-          <% }) %>
-        </tbody>
-      </table>
+      <div class="order-section">
+        <h5 class="mb-3">Order Items</h5>
+        <% order.products.forEach(item => { %>
+        <div class="product-item">
+          <img
+            src="/public/uploads/<%= item.productId.images[0] %>"
+            alt="<%= item.productId.name %>"
+            class="product-image"
+          />
+          <div class="product-details">
+            <h6><%= item.productId.name %></h6>
+            <p>Quantity: <%= item.quantity %></p>
+          </div>
+          <div class="product-price">$<%= item.price.toFixed(2) %></div>
+        </div>
+        <% }) %>
+      </div>
 
-      <!-- Return Option or Order Tracking Section -->
-      <% if (order.orderStatus === 'Delivered') { %>
-      <div class="return-option mt-4">
-        <h5>Return Option</h5>
-        <form action="/orders/<%= order._id %>/return" method="post">
+      <% if (order.orderStatus !== 'Delivered') { %>
+      <div class="order-section text-center">
+        <h5 class="mb-3">Track Your Order</h5>
+        <button id="trackPackageBtn" class="btn btn-track-order">
+          Track Package
+        </button>
+        <p class="mt-2">
+          Estimated delivery: <%= new Date(new Date().setDate(new
+          Date().getDate() + 5)).toLocaleDateString() %>
+        </p>
+      </div>
+      <% } else { %>
+      <div class="order-section">
+        <h5 class="mb-3">Return Option</h5>
+        <form action="/orders/<%= order.orderId %>/return" method="post">
           <div class="form-group">
             <label for="returnReason">Return Reason:</label>
             <textarea
@@ -115,23 +193,418 @@
           <button type="submit" class="btn btn-danger">Request Return</button>
         </form>
       </div>
-      <% } else { %>
-      <div class="order-tracking mt-4">
-        <h5>Track Your Order</h5>
-        <p>Tracking details will be provided once the order is shipped.</p>
+      <% } %>
+
+      <div class="order-section invoice-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Invoice</h5>
+          <form action="/orders/<%= order.orderId %>/invoice" method="GET">
+            <button
+              id="downloadInvoice"
+              class="btn btn-sm btn-outline-primary"
+              data-order="<%= JSON.stringify(order) %>"
+            >
+              Download Invoice
+            </button>
+          </form>
+        </div>
+        <p>
+          <strong>Invoice Number:</strong> INV-<%= order.orderId.slice(-6) %>
+        </p>
+        <p>
+          <strong>Date of Issue:</strong> <%= new
+          Date(order.createdAt).toLocaleDateString() %>
+        </p>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% order.products.forEach(item => { %>
+            <tr>
+              <td><%= item.productId.name %></td>
+              <td><%= item.quantity %></td>
+              <td>$<%= item.price.toFixed(2) %></td>
+              <td>$<%= (item.quantity * item.price).toFixed(2) %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+          <tfoot class="mt-3">
+            <% const subTotal = order.products.reduce((acc, product) => acc +=
+            product.price ,0) %>
+            <tr>
+              <td colspan="3" class="text-right">Subtotal:</td>
+              <td>$<%= subTotal.toFixed(2) %></td>
+            </tr>
+            <tr>
+              <td colspan="3" class="text-right">Delivery Charge:</td>
+              <td>$<%= order.deliveryCharge.toFixed(2) %></td>
+            </tr>
+            <% if(order.couponDiscount) {%>
+            <tr>
+              <td colspan="3" class="text-right">Coupon Discount:</td>
+              <td>-$<%= order.couponDiscount.toFixed(2) %></td>
+            </tr>
+            <% } %>
+            <tr>
+              <td colspan="3" class="text-right"><strong>Total:</strong></td>
+              <td><strong>$<%= order.totalPrice.toFixed(2) %></strong></td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
+      <!-- Add Cancel Order Button -->
+      <% if (['pending', 'placed',
+      'shipped'].includes(order.orderStatus.toLowerCase())) { %>
+      <div class="mt-3">
+        <button
+          id="cancelOrderBtn"
+          class="btn btn-danger"
+          onclick="cancelOrder('<%= order._id %>')"
+        >
+          Cancel Order
+        </button>
+      </div>
+      <%} else if (order.orderStatus.toLowerCase() === 'cancelled') { %>
+      <p>The order cancelled</p>
+      <!-- Add return Order Button -->
+      <%} else if (order.orderStatus.toLowerCase() === 'delivered' &&
+      order.orderDetails?.orderStatus) { %>
+      <div class="mt-3">
+        <button
+          id="returnOrderBtn"
+          class="btn btn-warning"
+          onclick="openReturnModal('<%= order._id %>')"
+        >
+          send return request
+        </button>
+      </div>
+      <%} else if (order.returnDetails?.returnStatus) { %>
+      <p>Return Status: <%= order.returnDetails?.returnStatus %></p>
       <% } %>
     </div>
 
-    <!-- Footer -->
+    <!-- Tracking Modal Button -->
+
+    <!-- Tracking Modal -->
+    <div
+      id="trackingModal"
+      class="modal fade"
+      tabindex="-1"
+      role="dialog"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Track Your Order</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <h6 class="font-weight-bold mb-3">
+              Estimated Delivery: <%= new Date(new Date().setDate(new
+              Date().getDate() + 5)).toLocaleDateString() %>
+            </h6>
+            <div class="tracking-steps">
+              <% trackingSteps.forEach((step, index) => { %>
+              <div class="tracking-step d-flex mb-3">
+                <div
+                  class="step-number rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                  style="width: 30px; height: 30px"
+                >
+                  <%= index + 1 %>
+                </div>
+                <div class="step-details ml-3">
+                  <p class="mb-0 font-weight-bold"><%= step %></p>
+                  <!-- <p class="text-muted small mb-0">
+                    <%= step.date %> - <%= step.time %>
+                  </p>
+                  <p class="text-muted small mb-0"><%= step.location %></p> -->
+                </div>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <%- include('partials/_footer') %>
 
-    <!-- Back to top -->
     <div class="btn-back-to-top" id="myBtn">
       <span class="symbol-btn-back-to-top">
         <i class="zmdi zmdi-chevron-up"></i>
       </span>
     </div>
+
+    <!-- Return Reason Modal -->
+    <div
+      class="modal fade"
+      id="returnReasonModal"
+      tabindex="-1"
+      aria-labelledby="returnReasonModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="returnReasonModalLabel">
+              Enter Return Reason
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="returnReasonForm">
+              <div class="mb-3">
+                <label for="returnReason" class="form-label"
+                  >Reason for Return</label
+                >
+                <textarea
+                  class="form-control"
+                  id="returnReason"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+              <input type="hidden" id="orderIdForReturn" />
+              <button
+                type="submit"
+                class="btn btn-primary"
+                onclick="submitReturn()"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      // Function to cancel order with confirmation
+      function cancelOrder(orderId) {
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You will not be able to undo this action!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, cancel it!",
+          cancelButtonText: "No, keep it",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            axios
+              .patch(`/profile/orders/${orderId}/cancel`)
+              .then((response) => {
+                const updatedStatus = response.data.order.orderStatus;
+                if (updatedStatus === "cancelled") {
+                  document.getElementById("cancelButton").style.display =
+                    "none";
+                  Swal.fire(
+                    "Cancelled!",
+                    "Your order has been cancelled.",
+                    "success"
+                  );
+                }
+              })
+              .catch((error) => {
+                Swal.fire("Error", "Failed to cancel the order", "error");
+              });
+          }
+        });
+      }
+
+      // Function to handle the return order process
+      function openReturnModal(orderId) {
+        console.log(orderId);
+        document.getElementById("orderIdForReturn").value = orderId;
+
+        var returnReasonModal = new bootstrap.Modal(
+          document.getElementById("returnReasonModal")
+        );
+        returnReasonModal.show(); // Show the modal
+      }
+
+      document
+        .getElementById("returnReasonForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault(); // Prevent the default form submission
+
+          submitReturn();
+        });
+
+      function submitReturn() {
+        const orderId = document.getElementById("orderIdForReturn").value;
+        const returnReason = document.getElementById("returnReason").value;
+
+        if (!returnReason) {
+          Swal.fire("Warning", "Please enter a return reason.", "warning");
+          return;
+        }
+
+        axios
+          .patch(`/profile/orders/${orderId}/return`, { returnReason })
+          .then((response) => {
+            const updatedStatus =
+              response.data.order.returnDetails.returnStatus;
+            if (updatedStatus === "requested") {
+              document.getElementById("returnOrderBtn").style.display = "none";
+            }
+            Swal.fire(
+              "Success",
+              "Return request submitted successfully!",
+              "success"
+            ).then(() => {
+              var returnReasonModal = new bootstrap.Modal(
+                document.getElementById("returnReasonModal")
+              );
+              returnReasonModal.hide();
+            });
+          })
+          .catch(() => {
+            Swal.fire("Error", "Failed to submit return request", "error");
+          });
+      }
+    </script>
+    <script>
+      // Make sure to include the jsPDF library in your HTML file:
+
+      function generateInvoice(order) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Set font
+        doc.setFont("helvetica");
+
+        // Add header
+        doc.setFontSize(18);
+        doc.text("Invoice", 105, 15, null, null, "center");
+
+        // Add invoice details
+        doc.setFontSize(12);
+        console.log("orderId = ", order.orderId);
+        doc.text(`Invoice Number: INV-${order.orderId.slice(-6)}`, 20, 30);
+        doc.text(
+          `Date of Issue: ${new Date(order.createdAt).toLocaleDateString()}`,
+          20,
+          40
+        );
+
+        // Add customer details
+        doc.text("Bill To:", 20, 55);
+        doc.setFontSize(10);
+        doc.text(
+          `${order.address.flatNo ? order.address.flatNo + ", " : ""}${
+            order.address.addressLine
+          }`,
+          20,
+          62
+        );
+        doc.text(
+          `${order.address.city}, ${order.address.state} - ${order.address.pincode}`,
+          20,
+          69
+        );
+        doc.text(`${order.address.country}`, 20, 76);
+        doc.text(`Phone: ${order.address.phoneNo}`, 20, 83);
+        doc.text(`Email: ${order.address.email}`, 20, 90);
+
+        // Add table header
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Item", 20, 105);
+        doc.text("Qty", 100, 105);
+        doc.text("Price", 130, 105);
+        doc.text("Total", 160, 105);
+
+        // Add table content
+        doc.setFont("helvetica", "normal");
+        let yPos = 115;
+        order.products.forEach((item) => {
+          doc.text(item.productId.name, 20, yPos);
+          doc.text(item.quantity.toString(), 100, yPos);
+          doc.text(`$${item.price.toFixed(2)}`, 130, yPos);
+          doc.text(`$${(item.quantity * item.price).toFixed(2)}`, 160, yPos);
+          yPos += 10;
+        });
+
+        // Add totals
+        const subTotal = order.products.reduce(
+          (acc, product) => acc + product.price,
+          0
+        );
+        yPos += 10;
+        doc.text("Subtotal:", 130, yPos);
+        doc.text(`$${subTotal.toFixed(2)}`, 160, yPos);
+
+        yPos += 10;
+        doc.text("Delivery Charge:", 130, yPos);
+        doc.text(`$${order.deliveryCharge.toFixed(2)}`, 160, yPos);
+
+        if (order.couponDiscount) {
+          yPos += 10;
+          doc.text("Coupon Discount:", 130, yPos);
+          doc.text(`-$${order.couponDiscount.toFixed(2)}`, 160, yPos);
+        }
+
+        yPos += 10;
+        doc.setFont("helvetica", "bold");
+        doc.text("Total:", 130, yPos);
+        doc.text(`$${order.totalPrice.toFixed(2)}`, 160, yPos);
+
+        // Save the PDF
+        doc.save(`Invoice-${order.orderId.slice(-6)}.pdf`);
+      }
+
+      // Add click event listener to the Download Invoice button
+      document
+        .querySelector('form[action^="/orders/"][action$="/invoice"] button')
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+
+          // Retrieve the order as a string from the data-order attribute
+          const orderString = document
+            .getElementById("downloadInvoice")
+            .getAttribute("data-order");
+
+          try {
+            // Parse the string into a JavaScript object
+            const order = JSON.parse(orderString);
+            console.log("order = ", order);
+
+            // Call the generateInvoice function and pass the order object
+            generateInvoice(order);
+          } catch (error) {
+            console.error("Error parsing the JSON order: ", error);
+          }
+        });
+    </script>
+    <!-- JavaScript to handle modal -->
+    <script>
+      document
+        .getElementById("trackPackageBtn")
+        .addEventListener("click", function () {
+          $("#trackingModal").modal("show");
+        });
+    </script>
 
     <%- include('partials/_scripts') %>
   </body>

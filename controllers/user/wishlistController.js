@@ -96,7 +96,7 @@ const removeFromWishlist = async (req, res) => {
 // Express.js example
 const fetchWishlist = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id;
     const wishlist = await WishlistModel.findOne({ userId }).populate(
       "productIds"
     );

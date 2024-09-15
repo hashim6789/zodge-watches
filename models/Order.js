@@ -12,6 +12,7 @@ const OrderSchema = new Schema(
         quantity: { type: Number, required: true },
       },
     ],
+    deliveryCharge: { type: Number, required: true, default: 50 },
     totalPrice: { type: Number, required: true },
     orderStatus: {
       type: String,
@@ -26,11 +27,13 @@ const OrderSchema = new Schema(
         "returned",
       ],
     },
+
+    couponDiscount: { type: Number, default: 0 },
     userId: { type: Types.ObjectId, required: true, ref: "Users" },
     paymentMethod: {
       type: String,
       required: true,
-      enum: ["wallet", "cod","onlinePayment" ],
+      enum: ["wallet", "cod", "onlinePayment"],
     },
     paymentStatus: {
       type: String,

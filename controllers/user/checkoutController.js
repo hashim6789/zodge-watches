@@ -99,9 +99,15 @@ const postCheckout = async (req, res) => {
       });
     }
 
+    let couponDiscount = 0;
     if (coupon?.discountAmount) {
       totalPrice -= coupon.discountAmount;
+      couponDiscount = coupon.discountAmount;
     }
+
+    //for decreasing the delivery charge
+    const deliveryCharge = 50;
+    totalPrice += deliveryCharge;
     console.log(totalPrice);
     // console.log("ordered products = ", orderProducts);
     // console.log("method = ", paymentMethod);
@@ -109,6 +115,7 @@ const postCheckout = async (req, res) => {
       orderId: generateOrderId(),
       userId,
       products: orderProducts,
+      couponDiscount,
       totalPrice,
       orderStatus: "pending",
       address,
@@ -198,6 +205,55 @@ const postCheckout = async (req, res) => {
   }
 };
 
+const retryPayment = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+
+    // Find the order in the database
+    const order = await OrderModel.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found." });
+    }
+
+    // Check if the order's payment status is failed or pending
+    if (order.paymentStatus !== "pending") {
+      return res.status(400).json({
+        message: "Payment for this order cannot be retried.",
+      });
+    }
+
+    // Generate a new Razorpay order for retry
+    const options = {
+      amount: order.totalPrice,
+      currency: "INR",
+      receipt: order.orderId,
+    };
+
+    const razorpayOrder = await createOrder(options);
+    console.log(razorpayOrder);
+
+    // Update the order with the new Razorpay order ID
+    order.razorpayOrderId = razorpayOrder.id;
+    order.paymentStatus = "pending"; // Reset payment status for retry
+    await order.save();
+
+    // Send the new order details to the frontend
+    return res.status(200).json({
+      success: true,
+      message: "Payment retry initiated. Proceed to payment.",
+      orderId: order._id,
+      razorpayOrderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      key_id: process.env.RAZORPAY_KEY_ID,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error during payment retry." });
+  }
+};
+
 //finally the order confirmation page rendering
 const getOrderConfirmation = async (req, res) => {
   try {
@@ -275,6 +331,7 @@ module.exports = {
   getCheckout,
   getAddress,
   postCheckout,
+  retryPayment,
   getOrderConfirmation,
   getPaymentRetryPage,
 };

@@ -54,6 +54,7 @@ function filterProducts(category, page) {
 function renderProducts(products, wishlist = { productIds: [] }) {
   console.log(wishlist);
   const productList = document.getElementById("product-list");
+  productList.style.height = "756.575px";
   productList.innerHTML = products
     .map((product) => {
       // Check if wishlist is null or undefined, and default to an empty object if so

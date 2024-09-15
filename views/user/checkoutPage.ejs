@@ -192,7 +192,6 @@
               </div>
 
               <!-- Confirm Address Checkbox -->
-              <!-- Confirm Address Checkbox -->
               <div class="form-group p-b-23">
                 <div class="form-check">
                   <input
@@ -294,6 +293,68 @@
             </button>
           </div>
         </div> -->
+        <div class="col-md-5 col-lg-4">
+          <div class="p-lr-15-lg">
+            <h4 class="mtext-109 cl2 p-b-30">Order Summary</h4>
+            <!-- Subtotal -->
+            <div class="flex-w flex-t bor12 p-b-13">
+              <div class="size-208">
+                <span class="stext-110 cl2"> Subtotal: </span>
+              </div>
+              <div class="size-209">
+                <span id="subtotal" class="mtext-110 cl2">
+                  ₹ <%= cart.products.reduce((acc, product) => acc +=
+                  (product.price * product.quantity), 0).toFixed(2) %>
+                </span>
+              </div>
+            </div>
+
+            <!-- Coupon Discount Field -->
+            <div class="flex-w flex-t p-t-15 p-b-13">
+              <div class="size-208">
+                <span class="stext-110 cl2"> Coupon Discount: </span>
+              </div>
+              <div class="size-209">
+                <span id="couponDiscountAmount" class="mtext-110 cl2">
+                  ₹ <%= cart.coupon.discountAmount || "0.00" %>
+                </span>
+              </div>
+            </div>
+
+            <!-- Delivery Charges -->
+            <div class="flex-w flex-t p-t-27 p-b-33">
+              <div class="size-208">
+                <span class="mtext-101 cl2"> Delivery Charges: </span>
+              </div>
+              <div class="size-209">
+                <span id="deliveryCharges" class="mtext-110 cl2">
+                  ₹ <%= (0).toFixed(2) %>
+                  <!-- Initially, delivery charge is set to 0 -->
+                </span>
+              </div>
+            </div>
+
+            <!-- Total -->
+            <div class="flex-w flex-t p-t-27 p-b-33">
+              <div class="size-208">
+                <span class="mtext-101 cl2"> Total: </span>
+              </div>
+              <div class="size-209 p-t-1">
+                <span id="totalAmount" class="mtext-110 cl2">
+                  ₹ <%= (cart.totalPrice).toFixed(2) %>
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer"
+              onclick=""
+            >
+              Place Order
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -324,7 +385,6 @@
 
     <script src="/public/user/js/main.js"></script>
 
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

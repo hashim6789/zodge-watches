@@ -239,9 +239,7 @@ const getProductsByPages = async (req, res) => {
     const totalProducts = await ProductModel.countDocuments(query);
     const pages = Math.ceil(totalProducts / limit);
 
-    const wishlist = req.user
-      ? await WishlistModel.findOne({ userId: req.user._id })
-      : null;
+    const wishlist = await WishlistModel.findOne({ userId: req.user?._id });
 
     res.json({
       products,

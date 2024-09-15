@@ -13,6 +13,7 @@ const {
   getCheckout,
   getAddress,
   postCheckout,
+  retryPayment,
   getOrderConfirmation,
 } = require("../../controllers/user/checkoutController");
 
@@ -33,6 +34,8 @@ router.post(
   checkCartExists,
   postCheckout
 );
+
+router.post("/retry", retryPayment);
 
 router.post(
   "/verify-payment",

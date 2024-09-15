@@ -36,7 +36,31 @@ document.addEventListener("DOMContentLoaded", function () {
       fetchPincodeDetails(pincodeInput.value);
     }
   });
+
+  // Listen for form submission
+  document
+    .getElementById("placeOrderBtn")
+    .addEventListener("click", submitCheckout);
 });
+
+function getTotalCartPrice() {
+  // Replace this with your actual logic to get the cart total
+  // For example, fetching from local storage or API
+  const cart = JSON.parse(localStorage.getItem("cart")) || {};
+  const products = cart.products || [];
+
+  // Assuming each product has a price and quantity
+  let totalPrice = 0;
+  products.forEach((product) => {
+    totalPrice += product.price * product.quantity;
+  });
+
+  if (cart.coupon) {
+    totalPrice -= cart.coupon.discountAmount;
+  }
+
+  return totalPrice;
+}
 
 function checkAddressFields() {
   const firstName = document.getElementById("firstName").value.trim();
@@ -62,18 +86,6 @@ function checkAddressFields() {
   } else {
     document.getElementById("confirmAddress").disabled = true;
   }
-}
-
-function togglePaymentOptions(checkbox) {
-  // Get all payment method radio buttons
-  const paymentMethods = document.querySelectorAll(
-    'input[name="paymentMethod"]'
-  );
-
-  // Enable or disable payment options based on checkbox state
-  paymentMethods.forEach((paymentMethod) => {
-    paymentMethod.disabled = !checkbox.checked;
-  });
 }
 
 // Add event listener to the address dropdown to call checkAddressFields
@@ -125,6 +137,52 @@ function populateAddress(select) {
     });
 }
 
+function togglePaymentOptions(checkbox) {
+  // Get all payment method radio buttons
+  const paymentMethods = document.querySelectorAll(
+    'input[name="paymentMethod"]'
+  );
+
+  const deliveryCharge = 50; // Fixed delivery charge
+  const deliveryChargeElement = document.getElementById("deliveryCharges");
+  const totalAmountElement = document.getElementById("totalAmount");
+
+  // Fetch existing subtotal and coupon discount from the DOM
+  const subtotal = parseFloat(
+    document.getElementById("subtotal").innerText.replace("₹", "")
+  );
+  const couponDiscount = parseFloat(
+    document.getElementById("couponDiscountAmount").innerText.replace("₹", "")
+  );
+
+  // Calculate the new total
+  let total = subtotal - couponDiscount;
+
+  // Check if the address checkbox is checked
+  if (checkbox.checked) {
+    // Apply delivery charge if the checkbox is checked
+    deliveryChargeElement.innerText = `₹ ${deliveryCharge.toFixed(2)}`;
+    total += deliveryCharge; // Add delivery charge to the total
+  } else {
+    // Remove the delivery charge if unchecked
+    deliveryChargeElement.innerText = "₹ 0.00";
+  }
+
+  // Update the total amount in the DOM
+  totalAmountElement.innerText = `₹ ${total.toFixed(2)}`;
+
+  // Enable or disable payment options based on checkbox state
+  paymentMethods.forEach((paymentMethod) => {
+    paymentMethod.disabled = !checkbox.checked;
+  });
+}
+
+function submitCheckoutFromSummary() {
+  // Trigger the form submission programmatically
+  // document.getElementById("checkoutForm").submit();
+  submitCheckout(this);
+}
+
 function submitCheckout(event) {
   event.preventDefault(); // Prevent form from submitting the default way
 
@@ -145,22 +203,37 @@ function submitCheckout(event) {
   const selectedPaymentMethod = document.querySelector(
     'input[name="paymentMethod"]:checked'
   ).value;
+
+  const totalCartPrice = getTotalCartPrice();
+
   if (selectedPaymentMethod === "cod") {
-    // COD Confirmation
-    Swal.fire({
-      title: "Confirm Order",
-      text: "Are you sure you want to place this order with Cash on Delivery?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, place order!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Handle COD order placement
-        handleOrderPlacement("cod", address, userId);
-      }
-    });
+    const totalCartPrice = getTotalCartPrice(); // Function to calculate total price from the cart
+
+    if (totalCartPrice > 5000) {
+      // Show warning if total price exceeds 5000
+      Swal.fire({
+        title: "COD Not Available",
+        text: "Cash on Delivery is not available for orders above 5000.",
+        icon: "error",
+        confirmButtonText: "Okay",
+      });
+    } else {
+      // COD Confirmation
+      Swal.fire({
+        title: "Confirm Order",
+        text: "Are you sure you want to place this order with Cash on Delivery?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, place order!",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Handle COD order placement
+          handleOrderPlacement("cod", address, userId);
+        }
+      });
+    }
   } else if (selectedPaymentMethod === "wallet") {
     // Wallet Confirmation
     Swal.fire({
