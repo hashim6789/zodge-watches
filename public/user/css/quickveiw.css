@@ -1,3 +1,13 @@
+.original-price {
+  text-decoration: line-through;
+  color: #999; /* Gray color for original price */
+}
+
+.discounted-price {
+  color: #d9534f; /* Red color for discounted price */
+  font-weight: bold;
+}
+
 .image-sidebar {
   float: left;
   width: 100px;

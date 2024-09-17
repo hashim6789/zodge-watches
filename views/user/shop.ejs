@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Home</title>
+    <title>Shop</title>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <%- include('partials/_header') %>
@@ -222,117 +222,7 @@
         </div>
 
         <div id="product-list" class="row isotope-grid">
-          <% products.forEach(function(product) { %>
-          <div
-            class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item <%= product.categoryId %>"
-          >
-            <div class="block2">
-              <div class="block2-pic hov-img0">
-                <img
-                  src="/public/uploads/<%= product.images[0] %>"
-                  alt="IMG-PRODUCT"
-                />
-
-                <!-- Quick View Button for available products -->
-                <form action="/shop/products/<%= product._id %>">
-                  <button
-                    class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04"
-                    type="submit"
-                  >
-                    Quick View
-                  </button>
-                </form>
-              </div>
-
-              <!-- Product details -->
-              <div class="block2-txt flex-w flex-t p-t-14">
-                <div class="block2-txt-child1 flex-col-l">
-                  <a
-                    href="#"
-                    class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6"
-                  >
-                    <%= product.name %>
-                  </a>
-
-                  Original and discounted prices
-                  <div class="product-pricing">
-                    <% if (product.discountedPrice !== product.price) { %>
-                    <span class="stext-105 cl3">
-                      <del>$<%= product.price.toFixed(2) %></del>
-                    </span>
-                    <span class="stext-105 cl3 text-danger">
-                      $<%= product.price.toFixed(2) %>
-                    </span>
-
-                    <% const discountPercentage = Math.round(((product.price -
-                    product.discountedPrice) / product.price) * 100); %>
-                    <span class="discount-label text-success ml-2">
-                      <%= discountPercentage %>% off
-                    </span>
-                    <% } else { %>
-                    <span class="stext-105 cl3"
-                      >$<%= product.price.toFixed(2) %></span
-                    >
-                    <% } %>
-                  </div>
-
-                  <!-- Display messages below the price -->
-                  <% if (!product.isListed) { %>
-                  <div class="product-unavailable text-danger mt-2">
-                    Currently unavailable
-                  </div>
-                  <% } else if (product.stock === 0) { %>
-                  <div class="out-of-stock text-danger mt-2">Out of Stock</div>
-                  <% } %>
-                </div>
-
-                <!-- Wishlist button -->
-                <div class="block2-txt-child2 flex-r p-t-3">
-                  <div
-                    class="btn-addwish-b2 dis-block pos-relative js-addwish-b2"
-                    data-id="<%= product._id %>"
-                  >
-                    <% const isInWishlist = wishlist?.productIds.some(item =>
-                    item._id.toString() === product._id.toString()); %>
-
-                    <!-- Conditionally display heart icons based on wishlist status -->
-                    <% if (isInWishlist) { %>
-                    <img
-                      id="heart1-<%= product._id %>"
-                      class="icon-heart1 dis-block trans-04 d-none"
-                      src="/public/user/images/icons/icon-heart-01.png"
-                      alt="Add to Wishlist"
-                      onclick="toggleWishlist('<%= product._id %>')"
-                    />
-                    <img
-                      id="heart2-<%= product._id %>"
-                      class="icon-heart2 dis-block trans-04"
-                      src="/public/user/images/icons/icon-heart-02.png"
-                      alt="Remove from Wishlist"
-                      onclick="toggleWishlist('<%= product._id %>')"
-                    />
-                    <% } else { %>
-                    <img
-                      id="heart1-<%= product._id %>"
-                      class="icon-heart1 dis-block trans-04"
-                      src="/public/user/images/icons/icon-heart-01.png"
-                      alt="Add to Wishlist"
-                      onclick="toggleWishlist('<%= product._id %>')"
-                    />
-                    <img
-                      id="heart2-<%= product._id %>"
-                      class="icon-heart2 dis-block trans-04 d-none"
-                      src="/public/user/images/icons/icon-heart-02.png"
-                      alt="Remove from Wishlist"
-                      onclick="toggleWishlist('<%= product._id %>')"
-                    />
-                    <% } %>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <% }); %>
+          <!-- here the products are populated -->
         </div>
 
         <!-- Pagination -->

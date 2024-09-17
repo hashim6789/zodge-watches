@@ -12,7 +12,7 @@ const OfferSchema = new Schema(
     discountValue: { type: Number, required: true },
     categoryId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
+      ref: "Categories",
       required: true,
     }, // Only category reference
     expiryDate: { type: Date, required: true },

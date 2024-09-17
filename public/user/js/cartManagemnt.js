@@ -212,6 +212,11 @@ function removeFromCart(productId) {
             position: "bottom",
             showConfirmButton: false,
             timer: 2000,
+          }).then(() => {
+            const cartIcon = document.getElementById("cartIcon");
+            if (cartIcon) {
+              cartIcon.setAttribute("data-notify", cart.products.length);
+            }
           });
         })
         .catch((error) => {

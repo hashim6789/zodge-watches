@@ -487,12 +487,13 @@
         const action = isListed === "true" ? "Unlist" : "List";
 
         Swal.fire({
-          title: `Are you sure you want to ${action} this coupon?`,
+          text: `Are you sure you want to ${action} this coupon?`,
           icon: "warning",
           showCancelButton: true,
+          confirmButtonText: `Yes, ${action} it!`,
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
-          confirmButtonText: `Yes, ${action} it!`,
+          cancelButtonText: "Cancel",
         }).then((result) => {
           if (result.isConfirmed) {
             axios

@@ -26,7 +26,7 @@
               Home
               <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
             </a>
-            <a href="#" class="stext-109 cl8 hov-cl1 trans-04">
+            <a href="/shop" class="stext-109 cl8 hov-cl1 trans-04">
               Shop
               <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
             </a>
@@ -95,25 +95,58 @@
                     class="fa fa-star <%= ratings >= 5 ? 'checked' : '' %>"
                   ></span>
                 </div>
-                <div class="flex-m bor9 p-r-10 m-r-11">
-                  <a
-                    href=""
-                    class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100"
-                    data-tooltip="Add to Wishlist"
-                    onclick=""
-                  >
-                    <i class="zmdi zmdi-favorite"></i>
-                  </a>
-                </div>
+                <% const isInWishlist = wishlist?.productIds.some(item =>
+                item._id.toString() === product._id.toString()); %>
+
+                <!-- Conditionally display heart icons based on wishlist status -->
+                <% if (isInWishlist) { %>
+                <img
+                  id="heart1-<%= product._id %>"
+                  class="icon-heart1 dis-block trans-04 d-none"
+                  src="/public/user/images/icons/icon-heart-01.png"
+                  alt="Add to Wishlist"
+                  onclick="toggleWishlist('<%= product._id %>')"
+                />
+                <img
+                  id="heart2-<%= product._id %>"
+                  class="icon-heart2 dis-block trans-04"
+                  src="/public/user/images/icons/icon-heart-02.png"
+                  alt="Remove from Wishlist"
+                  onclick="toggleWishlist('<%= product._id %>')"
+                />
+                <% } else { %>
+                <img
+                  id="heart1-<%= product._id %>"
+                  class="icon-heart1 dis-block trans-04"
+                  src="/public/user/images/icons/icon-heart-01.png"
+                  alt="Add to Wishlist"
+                  onclick="toggleWishlist('<%= product._id %>')"
+                />
+                <img
+                  id="heart2-<%= product._id %>"
+                  class="icon-heart2 dis-block trans-04 d-none"
+                  src="/public/user/images/icons/icon-heart-02.png"
+                  alt="Remove from Wishlist"
+                  onclick="toggleWishlist('<%= product._id %>')"
+                />
+                <% } %>
               </div>
 
               <!-- Price -->
-              <!-- <span class="mtext-106 cl2">
-                $<%= product.price %> <% if(product.discount) { %>
-                <span class="discount">-$<%= product.discount %></span>
-                <% } %>
-              </span> -->
-              <span class="mtext-106 cl2"> $<%= product.price %> </span>
+              <span class="mtext-106 cl2">
+                <!-- Display the original price with a line-through if there is a discount -->
+                <% if (discountedPrice < product.price && discountedPrice !== 0)
+                { %>
+                <span class="original-price">
+                  $<%= product.price.toFixed(2) %>
+                </span>
+                <span class="discounted-price">
+                  $<%= discountedPrice.toFixed(2) %>
+                </span>
+                <% } else { %>
+                <!-- Display only the original price if there's no discount -->
+                $<%= product.price.toFixed(2) %> <% } %>
+              </span>
 
               <!-- Discounts or Coupons Applied -->
               <!-- <% if(product.discount) { %>
@@ -214,7 +247,7 @@
               <!-- Related Product Recommendations -->
 
               <!-- Social Media and Wishlist -->
-              <div class="flex-w flex-m p-l-100 p-t-40 respon7">
+              <!-- <div class="flex-w flex-m p-l-100 p-t-40 respon7">
                 <a
                   href="#"
                   class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100"
@@ -236,11 +269,11 @@
                 >
                   <i class="fa fa-google-plus"></i>
                 </a>
-              </div>
+              </div> -->
 
               <!-- highlights -->
               <!-- highlights -->
-              <div class="highlights p-4 bg-light rounded shadow-sm">
+              <!-- <div class="highlights p-4 bg-light rounded shadow-sm">
                 <h5 class="text-primary font-weight-bold">
                   Product Highlights
                 </h5>
@@ -267,7 +300,7 @@
                     Multiple time zone functionality
                   </li>
                 </ul>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -343,11 +376,15 @@
             // SweetAlert for success message
             Swal.fire({
               icon: "success",
-              title: "Success!",
+              title: "Added to Cart",
               text: `${product.name} added to cart successfully!`,
-              confirmButtonText: "OK",
+              showConfirmButton: false,
+              timer: 2000,
             }).then(() => {
-              location.reload();
+              const cartIcon = document.getElementById("cartIcon");
+              if (cartIcon) {
+                cartIcon.setAttribute("data-notify", cart.products.length);
+              }
             });
           })
           .catch((error) => {
@@ -484,5 +521,6 @@
         }
       });
     </script>
+    <script src="/public/user/js/wishlist.js"></script>
   </body>
 </html>

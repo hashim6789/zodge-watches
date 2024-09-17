@@ -38,7 +38,8 @@ function addToWishlist(productId) {
   axios
     .post("/wishlist/add", { productId })
     .then((response) => {
-      if (response.data.data) {
+      const wishlist = response.data.data;
+      if (wishlist) {
         toggleHeartIcon(productId, true);
         Swal.fire({
           icon: "success",
@@ -48,6 +49,10 @@ function addToWishlist(productId) {
           timer: 2000,
         });
         fetchWishlist(); // Update wishlist UI
+        const wishlistIcon = document.getElementById("wishlistIcon");
+        if (wishlistIcon) {
+          wishlistIcon.setAttribute("data-notify", wishlist.productIds.length);
+        }
       } else {
         Swal.fire({
           icon: "error",
@@ -72,7 +77,8 @@ function removeFromWishlist(productId) {
   axios
     .delete(`/wishlist/${productId}/remove`)
     .then((response) => {
-      if (response.data.data) {
+      const wishlist = response.data.data;
+      if (wishlist) {
         toggleHeartIcon(productId, false);
         Swal.fire({
           icon: "success",
@@ -82,6 +88,10 @@ function removeFromWishlist(productId) {
           timer: 2000,
         });
         fetchWishlist(); // Update wishlist UI
+        const wishlistIcon = document.getElementById("wishlistIcon");
+        if (wishlistIcon) {
+          wishlistIcon.setAttribute("data-notify", wishlist.productIds.length);
+        }
       } else {
         Swal.fire({
           icon: "error",

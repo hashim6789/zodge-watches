@@ -14,6 +14,7 @@ const {
 const {
   getOffers,
   createOffer,
+  getOffer,
   updateOffer,
   toggleOffer,
 } = require("../../controllers/offerController");
@@ -27,6 +28,8 @@ router.get(
   authorizeAdminForModule("offerManagement"),
   getOffers
 );
+
+router.get("/:offerId", getOffer);
 
 router.post(
   "/",

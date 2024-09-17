@@ -18,8 +18,14 @@ const getShop = async (req, res) => {
       user = await UserModel.findById(userId);
     }
 
-    const page = req.query.page || 1;
+    const page = parseInt(req.query.page) || 1;
     const perPage = 8;
+
+    // Fetch active offers
+    const activeOffers = await OfferModel.find({
+      isActive: true,
+      expiryDate: { $gte: new Date() },
+    }).populate("categoryId", "name");
 
     // Fetch products
     const products = await ProductModel.find({ isListed: true })
@@ -27,17 +33,45 @@ const getShop = async (req, res) => {
       .skip((page - 1) * perPage)
       .limit(perPage);
 
+    // Fetch categories
     const categories = await CategoryModel.find({ isListed: true });
     const count = await ProductModel.countDocuments();
 
-    const activeOffers = await OfferModel.find({
-      isActive: true,
-      startDate: { $lte: new Date() },
-      endDate: { $gte: new Date() },
+    // Apply offers to products (generate discountedPrice dynamically)
+    const productsWithDiscount = products.map((product) => {
+      let discountedPrice = product.price;
+      const applicableOffers = activeOffers.filter((offer) =>
+        offer.categoryId.equals(product.categoryId._id)
+      );
+
+      if (applicableOffers.length > 0) {
+        const highestOffer = applicableOffers.reduce((max, offer) =>
+          offer.discountValue > max.discountValue ? offer : max
+        );
+
+        if (highestOffer.discountType === "percentage") {
+          discountedPrice =
+            product.price - (product.price * highestOffer.discountValue) / 100;
+        } else if (highestOffer.discountType === "flat") {
+          discountedPrice = product.price - highestOffer.discountValue;
+        }
+
+        // Ensure discountedPrice is not negative
+        discountedPrice = Math.max(discountedPrice, 0);
+      }
+
+      // Add discountedPrice to product object temporarily
+      return {
+        ...product.toObject(),
+        discountedPrice, // Add this property without modifying the original schema
+      };
     });
+
+    // console.log(productsWithDiscount);
 
     let cart = null;
     let wishlist = null;
+
     if (userId) {
       cart = await CartModel.findOne({ userId });
       if (!cart) {
@@ -66,9 +100,9 @@ const getShop = async (req, res) => {
       }
     }
 
-    // Render the home page with updated product prices
+    // Render the shop page with products that have calculated discounted prices
     res.render("user/shop", {
-      products, // Send products with discounted prices
+      products: productsWithDiscount, // Send products with dynamically calculated discounted prices
       categories,
       current: page,
       user,
@@ -78,33 +112,112 @@ const getShop = async (req, res) => {
       cart,
     });
   } catch (err) {
+    console.error("Error fetching shop data:", err);
     res.status(500).json({
       status: "Error",
-      message: "The server error",
+      message: "The server encountered an error",
     });
   }
 };
 
-//for rendering the quick view (Product details page);
+// //for rendering the quick view (Product details page);
+// const getProductDetails = async (req, res) => {
+//   try {
+//     const productId = req.params.productId;
+//     const userId = req.user?._id;
+//     let user = null;
+//     let cart = null;
+//     let wishlist = null;
+//     if (userId) {
+//       user = await UserModel.findById(userId);
+//       cart = await CartModel.findOne({ userId });
+//       wishlist = await WishlistModel.findOne({ userId }).populate(
+//         "productIds",
+//         "name price images"
+//       );
+//     }
+//     const product = await ProductModel.findById(productId);
+//     res.render("user/quickview", { product, ratings: 4, user, wishlist, cart });
+//   } catch (error) {
+//     console.error("Error fetching product:", error);
+//     res.status(500).send("Server error");
+//   }
+// };
+
 const getProductDetails = async (req, res) => {
   try {
     const productId = req.params.productId;
     const userId = req.user?._id;
-    let user = null;
-    let cart = null;
-    let wishlist = null;
+
+    // Fetch product details
+    const product = await ProductModel.findById(productId);
+    if (!product) {
+      return res.status(404).send("Product not found");
+    }
+
+    const productOffers = await OfferModel.find({
+      isActive: true,
+      categoryId: product.categoryId,
+      expiryDate: { $gte: new Date() },
+    }).populate("categoryId", "name");
+
+    // console.log("offers = ", productOffers);
+    let discountedPrice = product.price;
+
+    if (productOffers.length > 0) {
+      const highestOffer = productOffers.reduce((max, offer) =>
+        offer.discountValue > max.discountValue ? offer : max
+      );
+
+      if (highestOffer.discountType === "percentage") {
+        discountedPrice =
+          product.price - (product.price * highestOffer.discountValue) / 100;
+      } else if (highestOffer.discountType === "flat") {
+        discountedPrice = product.price - highestOffer.discountValue;
+      }
+
+      // Ensure discountedPrice is not negative
+      discountedPrice = Math.max(discountedPrice, 0);
+    }
+
+    console.log("discount = ", discountedPrice);
+
+    // Fetch user-specific data if logged in
+    let userData = { user: null, cart: null, wishlist: null };
     if (userId) {
-      user = await UserModel.findById(userId);
-      cart = await CartModel.findOne({ userId });
-      wishlist = await WishlistModel.findOne({ userId }).populate(
+      userData.user = await UserModel.findById(userId);
+      userData.cart = await CartModel.findOne({ userId });
+      userData.wishlist = await WishlistModel.findOne({ userId }).populate(
         "productIds",
         "name price images"
       );
     }
-    const product = await ProductModel.findById(productId);
-    res.render("user/quickview", { product, ratings: 4, user, wishlist, cart });
+
+    // console.log("user = ", userData);
+
+    // // Fetch related products
+    // const relatedProducts = await ProductModel.find({
+    //   categoryId: product.categoryId,
+    //   _id: { $ne: product._id },
+    // }).limit(4);
+
+    // console.log("related = ", relatedProducts);
+
+    // Fetch product ratings and reviews
+    // const ratings = await RatingModel.find({ productId });
+    // const averageRating =
+    //   ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length || 0;
+
+    res.render("user/quickview", {
+      product,
+      discountedPrice,
+      averageRating: 4,
+      ratings: 4,
+      // relatedProducts,
+      ...userData,
+    });
   } catch (error) {
-    console.error("Error fetching product:", error);
+    console.error("Error fetching product details:", error);
     res.status(500).send("Server error");
   }
 };

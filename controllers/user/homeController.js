@@ -198,7 +198,6 @@ const getHome = async (req, res) => {
   }
 };
 
-//get the products by pages , this is for rendering the pages of products dynamically
 const getProductsByPages = async (req, res) => {
   try {
     const category = req.query.category || "all";
@@ -231,18 +230,57 @@ const getProductsByPages = async (req, res) => {
       sortCriteria = { soldCount: 1 };
     }
 
+    // Fetch active offers
+    const activeOffers = await OfferModel.find({
+      isActive: true,
+      expiryDate: { $gte: new Date() },
+    }).populate("categoryId", "name");
+
     const products = await ProductModel.find(query)
       .sort(sortCriteria)
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     const totalProducts = await ProductModel.countDocuments(query);
     const pages = Math.ceil(totalProducts / limit);
 
     const wishlist = await WishlistModel.findOne({ userId: req.user?._id });
 
+    // Calculate the discountedPrice for each product based on active offers
+    const updatedProducts = products.map((product) => {
+      let discountedPrice = product.price;
+      const applicableOffers = activeOffers.filter((offer) =>
+        offer.categoryId.equals(product.categoryId)
+      );
+
+      if (applicableOffers.length > 0) {
+        const highestOffer = applicableOffers.reduce((max, offer) =>
+          offer.discountValue > max.discountValue ? offer : max
+        );
+
+        if (highestOffer.discountType === "percentage") {
+          discountedPrice =
+            product.price - (product.price * highestOffer.discountValue) / 100;
+        } else if (highestOffer.discountType === "flat") {
+          discountedPrice = product.price - highestOffer.discountValue;
+        }
+
+        // Ensure discountedPrice is not negative
+        discountedPrice = Math.max(discountedPrice, 0);
+      }
+
+      return {
+        ...product,
+        discountedPrice:
+          discountedPrice < product.price ? discountedPrice : product.price,
+      };
+    });
+
+    // console.log(updatedProducts);
+
     res.json({
-      products,
+      products: updatedProducts,
       current: page,
       pages,
       wishlist,

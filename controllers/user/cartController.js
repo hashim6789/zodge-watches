@@ -2,6 +2,7 @@ const CartModel = require("../../models/Cart");
 const UserModel = require("../../models/User");
 const ProductModel = require("../../models/Product");
 const WishlistModel = require("../../models/Wishlist");
+const OfferModel = require("../../models/Offer");
 
 //for user cart page
 const getCart = async (req, res) => {
@@ -29,6 +30,7 @@ const addToCart = async (req, res) => {
     const userId = req.user?._id;
     const { quantity, productId } = req.body;
 
+    // Fetch the product
     const product = await ProductModel.findById(productId);
     if (!product) {
       return res
@@ -36,6 +38,33 @@ const addToCart = async (req, res) => {
         .json({ success: false, message: "Product not found!" });
     }
 
+    // Fetch active offers for the product's category
+    const activeOffers = await OfferModel.find({
+      isActive: true,
+      expiryDate: { $gte: new Date() },
+      categoryId: product.categoryId,
+    });
+
+    // Calculate the discounted price
+    let discountedPrice = product.price;
+    if (activeOffers.length > 0) {
+      const highestOffer = activeOffers.reduce((max, offer) =>
+        offer.discountValue > max.discountValue ? offer : max
+      );
+
+      if (highestOffer.discountType === "percentage") {
+        discountedPrice =
+          product.price - (product.price * highestOffer.discountValue) / 100;
+      } else if (highestOffer.discountType === "flat") {
+        discountedPrice = product.price - highestOffer.discountValue;
+      }
+
+      // Ensure discountedPrice is not negative
+      discountedPrice = Math.max(discountedPrice, 0);
+    }
+    console.log("discount = ", discountedPrice);
+
+    // Fetch the cart for the user
     let cart = await CartModel.findOne({ userId });
     if (!cart) {
       cart = new CartModel({
@@ -47,6 +76,7 @@ const addToCart = async (req, res) => {
       });
     }
 
+    // Update cart with the new product
     const existingProductIndex = cart.products.findIndex(
       (p) => p.productId.toString() === productId
     );
@@ -54,17 +84,28 @@ const addToCart = async (req, res) => {
     if (existingProductIndex > -1) {
       const previousQuantity = cart.products[existingProductIndex].quantity;
       cart.products[existingProductIndex].quantity = quantity;
-      cart.totalPrice += product.price * (quantity - previousQuantity);
+      if (discountedPrice !== 0) {
+        cart.totalPrice += discountedPrice * (quantity - previousQuantity);
+      } else {
+        cart.totalPrice += product.price * (quantity - previousQuantity);
+      }
     } else {
-      cart.products.push({
-        productId: productId,
-        quantity: quantity,
-        price: product.price,
-      });
-      cart.totalPrice += product.price * quantity;
+      if (discountedPrice !== 0) {
+        cart.products.push({
+          productId: productId,
+          quantity: quantity,
+          price: discountedPrice, // Save the discounted price
+        });
+        cart.totalPrice += discountedPrice * quantity;
+      } else {
+        cart.products.push({
+          productId: productId,
+          quantity: quantity,
+          price: product.price, // Save the discounted price
+        });
+        cart.totalPrice += product.price * quantity;
+      }
     }
-
-    cart.updatedAt = Date.now();
 
     await cart.save();
 
@@ -73,7 +114,7 @@ const addToCart = async (req, res) => {
       success: true,
       message: "Product added to cart!",
       cart,
-      product,
+      product: { ...product.toObject(), discountedPrice }, // Include discountedPrice in response
     });
   } catch (err) {
     console.error("Error in addToCart:", err);
