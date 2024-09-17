@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Home</title>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <%- include('partials/_header') %>
+  </head>
+  <body class="animsition">
+    <!-- Header -->
+    <%- include('partials/_navbar', {user, wishlist, cart}) %>
+
+    <!-- Wishlist -->
+    <%- include('partials/_wishlist', {wishlist}) %>
+
+    <!-- Slider -->
+    <!-- <%- include('partials/_slide') %> -->
+
+    <!-- Banner put here -->
+
+    <!-- Product -->
+    <section class="bg0 p-t-100 p-b-140">
+      <div class="container">
+        <div class="p-b-10">
+          <h3 class="ltext-103 cl5">Product Overview</h3>
+        </div>
+
+        <div class="flex-w flex-sb-m p-b-52">
+          <div class="flex-w flex-l-m filter-tope-group m-tb-10">
+            <button
+              class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1"
+              data-filter="*"
+              onclick="filterProducts('all', 1)"
+            >
+              All Products
+            </button>
+
+            <% categories.forEach(function(category) { %>
+            <button
+              class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5"
+              id="categorySearch"
+              onclick="filterProducts('<%= category._id %>', 1)"
+            >
+              <%= category.name %>
+            </button>
+            <% }); %>
+          </div>
+
+          <div class="flex-w flex-c-m m-tb-10">
+            <div
+              class="flex-c-m stext-106 cl6 size-104 bor4 pointer hov-btn3 trans-04 m-r-8 m-tb-4 js-show-filter"
+            >
+              <i
+                class="icon-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-filter-list"
+              ></i>
+              <i
+                class="icon-close-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"
+              ></i>
+              Sort
+            </div>
+
+            <div
+              class="flex-c-m stext-106 cl6 size-105 bor4 pointer hov-btn3 trans-04 m-tb-4 js-show-search"
+            >
+              <i
+                class="icon-search cl2 m-r-6 fs-15 trans-04 zmdi zmdi-search"
+              ></i>
+              <i
+                class="icon-close-search cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"
+              ></i>
+              Search
+            </div>
+          </div>
+
+          <!-- Search product -->
+          <div class="dis-none panel-search w-full p-t-10 p-b-15">
+            <div class="bor8 dis-flex p-l-15">
+              <button
+                class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04"
+                onclick="searchProducts()"
+              >
+                <i class="zmdi zmdi-search"></i>
+              </button>
+
+              <input
+                id="search-input"
+                class="mtext-107 cl2 size-114 plh2 p-r-15"
+                type="text"
+                name="search-product"
+                placeholder="Search"
+                onkeyup="searchProducts(event)"
+              />
+            </div>
+          </div>
+
+          <!-- Filter -->
+          <div class="dis-none panel-filter w-full p-t-10">
+            <div
+              class="wrap-filter flex-w bg6 w-full p-lr-40 p-t-27 p-lr-15-sm"
+            >
+              <div class="filter-col1 p-r-15 p-b-27">
+                <div class="mtext-102 cl2 p-b-15">Sort By</div>
+
+                <ul>
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="sortBy('priceLowToHigh')"
+                    >
+                      Price: Low to High
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="sortBy('priceHighToLow')"
+                    >
+                      Price: High to Low
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="sortBy('lettersAscendingOrder')"
+                    >
+                      Letters: Aa - Zz
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="sortBy('lettersDescendingOrder')"
+                    >
+                      Letters: Zz - Aa
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="sortBy('popularity')"
+                    >
+                      Popularity
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="sortBy('newArrivals')"
+                    >
+                      New Arrivals
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- <div class="filter-col2 p-r-15 p-b-27">
+                <div class="mtext-102 cl2 p-b-15">Price</div>
+
+                <ul>
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04 filter-link-active"
+                      onclick="filterByPrice('all')"
+                    >
+                      All
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="filterByPrice('0-50')"
+                    >
+                      $0.00 - $50.00
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="filterByPrice('50-100')"
+                    >
+                      $50.00 - $100.00
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="filterByPrice('100-150')"
+                    >
+                      $100.00 - $150.00
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="filterByPrice('150-200')"
+                    >
+                      $150.00 - $200.00
+                    </button>
+                  </li>
+
+                  <li class="p-b-6">
+                    <button
+                      class="filter-link stext-106 trans-04"
+                      onclick="filterByPrice('200+')"
+                    >
+                      $200.00+
+                    </button>
+                  </li>
+                </ul>
+              </div> -->
+            </div>
+          </div>
+        </div>
+
+        <div id="product-list" class="row isotope-grid">
+          <% products.forEach(function(product) { %>
+          <div
+            class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item <%= product.categoryId %>"
+          >
+            <div class="block2">
+              <div class="block2-pic hov-img0">
+                <img
+                  src="/public/uploads/<%= product.images[0] %>"
+                  alt="IMG-PRODUCT"
+                />
+
+                <!-- Quick View Button for available products -->
+                <form action="/shop/products/<%= product._id %>">
+                  <button
+                    class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04"
+                    type="submit"
+                  >
+                    Quick View
+                  </button>
+                </form>
+              </div>
+
+              <!-- Product details -->
+              <div class="block2-txt flex-w flex-t p-t-14">
+                <div class="block2-txt-child1 flex-col-l">
+                  <a
+                    href="#"
+                    class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6"
+                  >
+                    <%= product.name %>
+                  </a>
+
+                  Original and discounted prices
+                  <div class="product-pricing">
+                    <% if (product.discountedPrice !== product.price) { %>
+                    <span class="stext-105 cl3">
+                      <del>$<%= product.price.toFixed(2) %></del>
+                    </span>
+                    <span class="stext-105 cl3 text-danger">
+                      $<%= product.price.toFixed(2) %>
+                    </span>
+
+                    <% const discountPercentage = Math.round(((product.price -
+                    product.discountedPrice) / product.price) * 100); %>
+                    <span class="discount-label text-success ml-2">
+                      <%= discountPercentage %>% off
+                    </span>
+                    <% } else { %>
+                    <span class="stext-105 cl3"
+                      >$<%= product.price.toFixed(2) %></span
+                    >
+                    <% } %>
+                  </div>
+
+                  <!-- Display messages below the price -->
+                  <% if (!product.isListed) { %>
+                  <div class="product-unavailable text-danger mt-2">
+                    Currently unavailable
+                  </div>
+                  <% } else if (product.stock === 0) { %>
+                  <div class="out-of-stock text-danger mt-2">Out of Stock</div>
+                  <% } %>
+                </div>
+
+                <!-- Wishlist button -->
+                <div class="block2-txt-child2 flex-r p-t-3">
+                  <div
+                    class="btn-addwish-b2 dis-block pos-relative js-addwish-b2"
+                    data-id="<%= product._id %>"
+                  >
+                    <% const isInWishlist = wishlist?.productIds.some(item =>
+                    item._id.toString() === product._id.toString()); %>
+
+                    <!-- Conditionally display heart icons based on wishlist status -->
+                    <% if (isInWishlist) { %>
+                    <img
+                      id="heart1-<%= product._id %>"
+                      class="icon-heart1 dis-block trans-04 d-none"
+                      src="/public/user/images/icons/icon-heart-01.png"
+                      alt="Add to Wishlist"
+                      onclick="toggleWishlist('<%= product._id %>')"
+                    />
+                    <img
+                      id="heart2-<%= product._id %>"
+                      class="icon-heart2 dis-block trans-04"
+                      src="/public/user/images/icons/icon-heart-02.png"
+                      alt="Remove from Wishlist"
+                      onclick="toggleWishlist('<%= product._id %>')"
+                    />
+                    <% } else { %>
+                    <img
+                      id="heart1-<%= product._id %>"
+                      class="icon-heart1 dis-block trans-04"
+                      src="/public/user/images/icons/icon-heart-01.png"
+                      alt="Add to Wishlist"
+                      onclick="toggleWishlist('<%= product._id %>')"
+                    />
+                    <img
+                      id="heart2-<%= product._id %>"
+                      class="icon-heart2 dis-block trans-04 d-none"
+                      src="/public/user/images/icons/icon-heart-02.png"
+                      alt="Remove from Wishlist"
+                      onclick="toggleWishlist('<%= product._id %>')"
+                    />
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center">
+            <% if (current > 1) { %>
+            <li class="page-item">
+              <a
+                class="page-link"
+                data-page="<%= current - 1 %>"
+                aria-label="Previous"
+                onclick="fetchProducts('<%= currentCategory %>', '<%= current - 1 %>')"
+              >
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <% } %> <% for (let i = 1; i <= pages; i++) { %>
+            <li class="page-item <%= current == i ? 'active' : '' %>">
+              <a
+                class="page-link"
+                data-page="<%= i %>"
+                onclick="fetchProducts('<%= currentCategory %>', '<%= i %>')"
+              >
+                <%= i %>
+              </a>
+            </li>
+            <% } %> <% if (current < pages) { %>
+            <li class="page-item">
+              <a
+                class="page-link"
+                data-page="<%= current + 1 %>"
+                aria-label="Next"
+                onclick="fetchProducts('<%= currentCategory %>', '<%= current + 1 %>')"
+              >
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+            <% } %>
+          </ul>
+        </nav>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <%- include('partials/_footer') %>
+
+    <!-- Back to top -->
+    <div class="btn-back-to-top" id="myBtn">
+      <span class="symbol-btn-back-to-top">
+        <i class="zmdi zmdi-chevron-up"></i>
+      </span>
+    </div>
+    <%- include('partials/_scripts') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!--===============================================================================================-->
+    <script src="/public/user/js/home.js"></script>
+  </body>
+</html>

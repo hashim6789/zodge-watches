@@ -5,8 +5,85 @@ const UserModel = require("../../models/User");
 const AddressModel = require("../../models/Address");
 const OrderModel = require("../../models/Order");
 const WishlistModel = require("../../models/Wishlist");
+const OfferModel = require("../../models/Offer");
 
 const { v4: uuidv4 } = require("uuid");
+
+const getShop = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    let user = null;
+
+    if (userId) {
+      user = await UserModel.findById(userId);
+    }
+
+    const page = req.query.page || 1;
+    const perPage = 8;
+
+    // Fetch products
+    const products = await ProductModel.find({ isListed: true })
+      .populate("categoryId", "name")
+      .skip((page - 1) * perPage)
+      .limit(perPage);
+
+    const categories = await CategoryModel.find({ isListed: true });
+    const count = await ProductModel.countDocuments();
+
+    const activeOffers = await OfferModel.find({
+      isActive: true,
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() },
+    });
+
+    let cart = null;
+    let wishlist = null;
+    if (userId) {
+      cart = await CartModel.findOne({ userId });
+      if (!cart) {
+        cart = new CartModel({
+          userId,
+          products: [],
+          totalPrice: 0,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+        await cart.save();
+      }
+
+      wishlist = await WishlistModel.findOne({ userId }).populate(
+        "productIds",
+        "name price images"
+      );
+      if (!wishlist) {
+        wishlist = new WishlistModel({
+          userId,
+          productIds: [],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+        await wishlist.save();
+      }
+    }
+
+    // Render the home page with updated product prices
+    res.render("user/shop", {
+      products, // Send products with discounted prices
+      categories,
+      current: page,
+      user,
+      wishlist,
+      currentCategory: "all",
+      pages: Math.ceil(count / perPage),
+      cart,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      message: "The server error",
+    });
+  }
+};
 
 //for rendering the quick view (Product details page);
 const getProductDetails = async (req, res) => {
@@ -168,6 +245,7 @@ const searchProducts = async (req, res) => {
 // }
 
 module.exports = {
+  getShop,
   getProductDetails,
   getImage,
   filterCategoryProduct,

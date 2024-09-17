@@ -411,11 +411,6 @@ function initiateRazorpayPayment(
           window.location.href = "/checkout/retry";
         });
     },
-    prefill: {
-      name: "<%= user.name %>",
-      email: "<%= user.email %>",
-      contact: "<%= user.contact %>",
-    },
     theme: {
       color: "#3399cc",
     },
