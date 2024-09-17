@@ -21,6 +21,6 @@ router.use("/categories", categoryManagementRouter);
 router.use("/products", productManagementRoute);
 router.use("/offers", offerManagementRouter);
 router.use("/coupons", couponManagementRouter);
-router.use("/deals", bannerManagementRouter);
+router.use("/banners", bannerManagementRouter);
 
 module.exports = router;
