@@ -10,7 +10,7 @@ const getAccountPage = async (req, res) => {
   try {
     const userId = req.params.userId;
     const page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit) || 6; // Default to 6 orders per page
+    const limit = 3; // Default to 6 orders per page
     const skip = (page - 1) * limit;
 
     const user = await UserModel.findById(userId);
@@ -24,7 +24,9 @@ const getAccountPage = async (req, res) => {
       createdAt: -1,
     });
 
-    const [orders, totalOrders] = await Promise.all([
+    let orders = null;
+    let totalOrders = 0;
+    [orders, totalOrders] = await Promise.all([
       OrderModel.find({ userId })
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -32,8 +34,6 @@ const getAccountPage = async (req, res) => {
         .populate("products.productId", "name images"),
       OrderModel.countDocuments({ userId }),
     ]);
-
-    console.log(orders[0].products);
 
     let wallet = await WalletModel.findOne({ userId });
     if (!wallet) {
@@ -328,7 +328,7 @@ const sendReturnRequest = async (req, res) => {
 
 const getOrdersList = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 6;
+  const limit = 3;
   const skip = (page - 1) * limit;
 
   try {

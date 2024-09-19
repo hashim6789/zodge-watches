@@ -6,6 +6,8 @@ const ProductModel = require("../../models/Product");
 const OrderModel = require("../../models/Order");
 const WalletModel = require("../../models/Wallet");
 
+const { sendOrderConfirmationEmail } = require("../../utils/emailSender");
+
 const { createOrder } = require("../../config/razorpayService");
 const { v4: uuidv4 } = require("uuid");
 
@@ -138,6 +140,7 @@ const postCheckout = async (req, res) => {
       newOrder.orderStatus = "placed";
       newOrder.save();
       await finalizeStockReduction(orderProducts);
+      await sendOrderConfirmationEmail(newOrder);
       res.status(200).json({
         message: "Order placed successfully with cash on delivery!",
         order: newOrder,
@@ -169,6 +172,7 @@ const postCheckout = async (req, res) => {
       newOrder.paymentStatus = "successful";
       newOrder.save();
       await finalizeStockReduction(orderProducts);
+      await sendOrderConfirmationEmail(newOrder);
 
       return res.status(200).json({
         success: true,

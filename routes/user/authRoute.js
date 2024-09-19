@@ -25,7 +25,7 @@ const {
   googleSignupCallback,
   googleLoginCallback,
   redirectToProfile,
-  resetPassword,
+  forgotPassword,
   changePassword,
   getResetPasswordPage,
   validateCurrentPassword,
@@ -81,8 +81,8 @@ router.get(
   redirectToProfile
 );
 
-//post - /auth/reset-password
-router.post("/reset-password", resetPassword);
+//post - /auth/forgot-password
+router.post("/forgot-password", forgotPassword);
 
 //post - /auth/reset-password
 router.get("/reset-password/:token", getResetPasswordPage);

@@ -25,9 +25,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 500); // Increase debounce time (500ms or more based on UX feedback)
       }
     });
-  // document
-  //   .getElementById("search-button")
-  //   .addEventListener("click", searchProducts);
+  // Reinitialize Slick carousel in the modal
+  $(".slick3").slick({
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    fade: true,
+    arrows: false,
+    dots: true,
+  });
 });
 
 // Fetch products based on category, page, sorting, and search query
@@ -228,17 +233,6 @@ function toggleHeartIcon(productId, isAdded) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  // Reinitialize Slick carousel in the modal
-  $(".slick3").slick({
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    fade: true,
-    arrows: false,
-    dots: true,
-  });
-});
-
 /*---------------------------------------------*/
 $(".js-select2").each(function () {
   $(this).select2({
@@ -262,61 +256,6 @@ $(".gallery-lb").each(function () {
     mainClass: "mfp-fade",
   });
 });
-
-/*---------------------------------------------*/
-// function toggleWishlist(productId, isRemoving) {
-//   var nameProduct = $("#heart1-" + productId)
-//     .closest(".block2-txt-child2")
-//     .find(".js-name-b2, .js-name-detail")
-//     .html();
-
-//   if (isRemoving) {
-//     // Show the remove from wishlist notification
-//     Swal.fire({
-//       title: nameProduct,
-//       text: "is removed from wishlist!",
-//       icon: "warning",
-//     });
-
-//     // Toggle icons for removal
-//     $("#heart1-" + productId).removeClass("d-none");
-//     $("#heart2-" + productId).addClass("d-none");
-
-//     // Make an AJAX request to remove from wishlist (if needed)
-//     removeFromWishlist(productId);
-//   } else {
-//     // Show the add to wishlist notification
-//     Swal.fire({
-//       title: nameProduct,
-//       text: "is added to wishlist!",
-//       icon: "success",
-//     });
-
-//     // Toggle icons for addition
-//     $("#heart1-" + productId).addClass("d-none");
-//     $("#heart2-" + productId).removeClass("d-none");
-
-//     // Make an AJAX request to add to wishlist (if needed)
-//     addToWishlist(productId);
-//   }
-// }
-
-/*---------------------------------------------*/
-
-// $(".js-addcart-detail").each(function () {
-//   var nameProduct = $(this)
-//     .parent()
-//     .parent()
-//     .parent()
-//     .parent()
-//     .find(".js-name-detail")
-//     .html();
-//   $(this).on("click", function () {
-//     swal(nameProduct, "is added to cart!", "success");
-//   });
-// });
-
-/*---------------------------------------------*/
 
 $(".js-pscroll").each(function () {
   $(this).css("position", "relative");

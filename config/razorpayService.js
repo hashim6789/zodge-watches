@@ -4,6 +4,8 @@ const crypto = require("crypto");
 const OrderModel = require("../models/Order");
 const ProductModel = require("../models/Product");
 
+const { sendOrderConfirmationEmail } = require("../utils/emailSender");
+
 // Initialize Razorpay instance
 const razorpayInstance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -38,6 +40,7 @@ const verifyPayment = async (req, res) => {
     await order.save();
 
     await finalizeStockReduction(order.products);
+    await sendOrderConfirmationEmail(order);
 
     res
       .status(200)

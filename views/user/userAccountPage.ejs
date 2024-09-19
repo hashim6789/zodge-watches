@@ -730,11 +730,10 @@
     <script>
       let currentPage = 1;
       let totalPages = 1;
-      const limit = 6;
 
       function fetchOrders(page) {
         axios
-          .get(`/profile/api/orders?page=${page}&limit=${limit}`)
+          .get(`/profile/api/orders?page=${page} `)
           .then((response) => {
             const orders = response.data.orders;
             totalPages = response.data.totalPages;

@@ -1,74 +1,14 @@
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
-const crypto = require("crypto");
 const UserModel = require("../../models/User");
 
+const {
+  sendVerificationMail,
+  sendForgotPasswordMail,
+} = require("../../utils/emailSender");
+
 require("dotenv").config();
-
-/**--------------------for mail activities------------------ */
-
-//for creating a nodemail transporter
-const transporter = nodemailer.createTransport({
-  service: "Gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
-
-//for sending the verification mail or otp
-const sendVerificationMail = async ({ _id, email }, res) => {
-  try {
-    console.log(_id, email);
-    // Generate a 4-digit OTP
-    const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Verify your Email",
-      html: `<p>Enter <b>${otp}</b> in the app to verify your email and complete the signup process. This code <b>expires in 1 hour</b>.</p>`,
-    };
-
-    // Hash the OTP
-    const hashedOtp = await bcrypt.hash(otp, 10);
-
-    // Update the user's OTP fields directly in the Users collection
-    await UserModel.findByIdAndUpdate(_id, {
-      otp: hashedOtp,
-      otpExpires: Date.now() + 1000 * 60 * 10, // OTP expires in 10 minutes
-      updatedAt: Date.now(),
-    });
-
-    // Send the email
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-        return res.status(500).json({
-          status: "Failed",
-          message: "Error sending email. Please try again later.",
-        });
-      } else {
-        console.log("Email sent: " + info.response);
-        return res.status(200).json({
-          status: "Pending",
-          message: "Verification OTP email sent",
-          data: { userId: _id, email },
-        });
-      }
-    });
-  } catch (error) {
-    console.error("Error in sendVerificationMail:", error);
-    res.status(500).json({
-      status: "Failed",
-      message: "An error occurred while sending verification mail.",
-    });
-  }
-};
 
 /**-------------for traditional signup and login-------------------- */
 
@@ -437,42 +377,20 @@ const redirectToProfile = (req, res) => {
 /**The user can reset the password */
 
 //reset password
-const resetPassword = async (req, res) => {
+const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await UserModel.findOne({ email });
     if (user) {
-      const token = crypto.randomBytes(20).toString("hex");
-      console.log(token);
-      user.resetPasswordToken = token;
-      user.resetPasswordExpires = Date.now() + 60 * 10 * 1000;
-
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "Password Reset",
-        text: `Click the following link to reset your password: http://localhost:3000/auth/reset-password/${token}`,
-      };
-      user.save();
-
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log(error);
-          res.status(500).send("Error sending email");
-        } else {
-          console.log(`Email sent: ${info.response}`);
-          res.status(200).json({
-            status: "Success",
-            message:
-              "Check your email for instructions on resetting your password",
-          });
-        }
-      });
+      await sendForgotPasswordMail(user, email);
+      return res
+        .status(200)
+        .json({ success: true, message: "The mail is sent successfully" });
     } else {
-      res.status(404).send("Email not found");
+      res.status(404).json({ success: false, message: "Email not found" });
     }
   } catch (err) {
-    res.status(500).json({ status: "Error", message: "Server error !!!" });
+    res.status(500).json({ success: false, message: "Server error !!!" });
   }
 };
 
@@ -618,7 +536,7 @@ module.exports = {
   googleSignupCallback,
   googleLoginCallback,
   redirectToProfile,
-  resetPassword,
+  forgotPassword,
   changePassword,
   getResetPasswordPage,
   validateCurrentPassword,
