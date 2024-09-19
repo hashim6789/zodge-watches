@@ -353,7 +353,7 @@
             </div>
             <div class="col-md-6 bg-white p-5">
               <h3 class="mb-4">Login</h3>
-              <form id="loginForm" action="/auth/login" method="POST">
+              <form id="loginForm">
                 <div class="form-group">
                   <input
                     type="email"
@@ -383,14 +383,13 @@
                   href="#"
                   id="forgotPasswordLink"
                   class="d-block text-center mt-3"
+                  >Forgot Password?</a
                 >
-                  Forgot Password?
-                </a>
               </form>
               <hr />
-              <a href="/auth/google/login" class="btn btn-danger btn-block">
-                <i class="fab fa-google"></i> Login with Google
-              </a>
+              <a href="/auth/google/login" class="btn btn-danger btn-block"
+                ><i class="fab fa-google"></i> Login with Google</a
+              >
             </div>
           </div>
         </div>
@@ -427,7 +426,7 @@
             </div>
             <div class="col-md-6 bg-white p-5">
               <h3 class="mb-4">Sign Up</h3>
-              <form id="signUpForm" action="/auth/signup" method="POST">
+              <form id="signUpForm">
                 <div class="form-group">
                   <input
                     type="text"
@@ -488,9 +487,9 @@
                 </button>
               </form>
               <hr />
-              <a href="/auth/google/signup" class="btn btn-danger btn-block">
-                <i class="fab fa-google"></i> Sign Up with Google
-              </a>
+              <a href="/auth/google/signup" class="btn btn-danger btn-block"
+                ><i class="fab fa-google"></i> Sign Up with Google</a
+              >
             </div>
           </div>
         </div>
@@ -507,48 +506,134 @@
     aria-labelledby="forgotPasswordModalLabel"
     aria-hidden="true"
   >
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-sm" role="document">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="forgotPasswordModalLabel">
-            Forgot Password
-          </h5>
-          <button
-            type="button"
-            class="close"
-            data-dismiss="modal"
-            aria-label="Close"
-          >
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
+        <div class="modal-body p-4">
+          <h4>Forgot Password</h4>
           <form id="forgotPasswordForm">
             <div class="form-group">
-              <label for="forgotEmail"
-                >Enter your registered email address</label
-              >
               <input
                 type="email"
                 class="form-control"
-                id="forgotEmail"
-                placeholder="Email"
+                name="email"
+                id="forgotPasswordEmail"
+                placeholder="Enter your registered email"
                 required
               />
-              <div id="forgotEmailFeedback" class="feedback"></div>
+              <div id="forgotPasswordFeedback" class="feedback"></div>
             </div>
             <button type="submit" class="btn btn-primary btn-block">
-              Send Reset Link
+              Submit
             </button>
           </form>
         </div>
       </div>
     </div>
   </div>
-
   <!-- Include SweetAlert2 library -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      //error message like login failed
+      const urlParams = new URLSearchParams(window.location.search);
+      const error = urlParams.get("error");
+      const message = urlParams.get("message");
+      console.log(error, message);
+
+      if (error !== null) {
+        Swal.fire({
+          toast: true,
+          icon: "error",
+          title: decodeURIComponent(error),
+          position: "top",
+          showConfirmButton: false,
+          timer: 3000,
+        });
+      } else if (message !== null) {
+        Swal.fire({
+          toast: true,
+          icon: "success",
+          title: decodeURIComponent(message),
+          position: "top",
+          showConfirmButton: false,
+          timer: 3000,
+        });
+      }
+
+      const loginForm = document.getElementById("loginForm");
+      const signUpForm = document.getElementById("signUpForm");
+      const forgotPasswordLink = document.getElementById("forgotPasswordLink");
+      const forgotPasswordForm = document.getElementById("forgotPasswordForm");
+
+      // Handle Login Form Submission
+      loginForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const email = document.getElementById("loginEmail").value;
+        const password = document.getElementById("loginPassword").value;
+
+        try {
+          const response = await axios.post("/auth/login", { email, password });
+          Swal.fire({
+            icon: "success",
+            title: "Login Successful",
+            text: response.data.message,
+            showConfirmButton: true,
+          }).then(() => {
+            window.location.href = "/"; // Redirect on success
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: error.response.data.message,
+            text:
+              error.response.data.message ||
+              "An unexpected error occurred. Please try again later.",
+            showConfirmButton: true,
+          });
+        }
+      });
+
+      // Handle Signup Form Submission
+      signUpForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const firstName = document.getElementById("firstName").value;
+        const lastName = document.getElementById("lastName").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
+
+        try {
+          const response = await axios.post("/auth/signup", {
+            firstName,
+            lastName,
+            email,
+            password,
+            confirmPassword,
+          });
+
+          Swal.fire({
+            icon: "success",
+            title: "Sign Up Successful",
+            text: response.data.message,
+            showConfirmButton: true,
+          }).then(() => {
+            window.location.href = "/"; // Redirect on success
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Sign Up Failed",
+            text:
+              error.response.data.message ||
+              "An unexpected error occurred. Please try again later.",
+            showConfirmButton: true,
+          });
+        }
+      });
+    });
+  </script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const loginForm = document.getElementById("loginForm");

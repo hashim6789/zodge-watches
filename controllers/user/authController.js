@@ -18,7 +18,8 @@ const postLocalLogin = async (req, res, next) => {
       return next(err);
     }
     if (!user) {
-      return res.redirect("/auth/login?error=" + info.message);
+      return res.status(404).json({ success: false, message: info.message });
+      // return res.redirect("/auth/login?error=" + info.message);
     }
 
     req.logIn(user, (err) => {
@@ -39,7 +40,9 @@ const postLocalSignup = async (req, res, next) => {
       return next(err);
     }
     if (!user) {
-      return res.redirect("/auth/signup?error=" + info.message);
+      return res.status(404).json({ success: false, message: info.message });
+
+      // return res.redirect("/auth/signup?error=" + info.message);
     }
     console.log(req.user);
     req.logIn(user, (err) => {
@@ -285,14 +288,14 @@ const googleLogin = passport.authenticate("google-login", {
 //googleSignupCallback
 const googleSignupCallback = (req, res, next) => {
   passport.authenticate("google-signup", {
-    failureRedirect: "/auth/login?error=The user is already exist",
+    failureRedirect: "/?error=The user is already exist",
   })(req, res, next);
 };
 
 //googleLoginCallback
 const googleLoginCallback = (req, res, next) => {
   passport.authenticate("google-login", {
-    failureRedirect: `/auth/signup?error=The user is not exist or blocked!!!`,
+    failureRedirect: `/?error=The useris not exist or blocked!!!`,
   })(req, res, next);
 };
 
@@ -300,7 +303,7 @@ const googleLoginCallback = (req, res, next) => {
 const redirectToProfile = (req, res) => {
   try {
     console.log("HI", req.session.returnTo);
-    res.redirect("/");
+    res.redirect("/?message=The user login successfully");
   } catch (err) {
     res.status(500).json({
       status: "Error",
