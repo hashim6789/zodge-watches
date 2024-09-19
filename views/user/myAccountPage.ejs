@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>My Account</title>
+    <%- include('partials/_header') %>
+    <style>
+      .account-sidebar {
+        background-color: #f8f9fa;
+        padding: 20px;
+      }
+      .account-content {
+        padding: 20px;
+      }
+      .account-section {
+        display: none;
+      }
+      .account-section.active {
+        display: block;
+      }
+      .nav-link {
+        color: #333;
+      }
+      .nav-link.active {
+        font-weight: bold;
+        color: #007bff;
+      }
+    </style>
+    <style>
+      #orders-list {
+        margin-top: 20px;
+      }
+      .order-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+      }
+      .product-image {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        margin-right: 20px;
+      }
+      .product-info {
+        flex-grow: 1;
+      }
+      .product-name {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      .product-details {
+        color: #666;
+        font-size: 0.9em;
+      }
+      .product-price {
+        font-weight: bold;
+        margin-right: 20px;
+      }
+      .delivery-status {
+        text-align: right;
+      }
+      .delivered {
+        color: #007600;
+        font-weight: bold;
+      }
+      .status-processing {
+        color: #ff9900;
+      }
+      .status-shipped {
+        color: #1e90ff;
+      }
+      .status-cancelled {
+        color: #dc3545;
+      }
+      .review-link {
+        color: #007bff;
+        text-decoration: none;
+      }
+      .review-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="animsition">
+    <!-- Header -->
+    <%- include('partials/_navbar', {user, wishlist, cart}) %>
+
+    <!-- Wishlist -->
+    <%- include('partials/_wishlist', {wishlist}) %>
+
+    <!-- My Account Content -->
+    <div class="container mt-5 mb-5">
+      <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+        <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+          Home
+          <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+        <span class="stext-109 cl4">My Account</span>
+      </div>
+
+      <div class="row mt-4">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+          <div class="account-sidebar">
+            <div class="text-center mb-4">
+              <img
+                src="<%= user.thumbnail %>"
+                alt="Profile Picture"
+                class="rounded-circle"
+                style="width: 100px; height: 100px"
+              />
+              <h4 class="mt-2"><%= user.firstName %> <%= user.lastName %></h4>
+              <p class="text-muted"><%= user.email %></p>
+            </div>
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a
+                  class="nav-link active"
+                  href="#"
+                  data-section="personal-details"
+                  >Personal Details</a
+                >
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#" data-section="addresses"
+                  >Addresses</a
+                >
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#" data-section="orders">Orders</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#" data-section="wallet">My Wallet</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#" data-section="change-password"
+                  >Change Password</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+          <div class="account-content">
+            <!-- Personal Details Section -->
+            <div id="personal-details" class="account-section active">
+              <h3 class="mb-4">Personal Information</h3>
+              <div class="card shadow-sm">
+                <!-- Add shadow for better visuals -->
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">First Name</label>
+                      <!-- Use fw-bold for better visual emphasis -->
+                      <input
+                        type="text"
+                        class="form-control border-0 bg-light"
+                        value="<%= user.firstName %>"
+                        readonly
+                      />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">Last Name</label>
+                      <input
+                        type="text"
+                        class="form-control border-0 bg-light"
+                        value="<%= user.lastName %>"
+                        readonly
+                      />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">Email</label>
+                      <input
+                        type="email"
+                        class="form-control border-0 bg-light"
+                        value="<%= user.email %>"
+                        readonly
+                      />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">Account Status</label>
+                      <input
+                        type="text"
+                        class="form-control border-0 bg-light"
+                        value="<%= user.isVerified ? 'Verified' : 'Not Verified' %>"
+                        readonly
+                      />
+                    </div>
+                  </div>
+                  <!-- Edit Button -->
+                  <button
+                    class="btn btn-primary mt-3"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editPersonalDetailsModal"
+                    data-user-id="<%= user._id %>"
+                    data-user-first-name="<%= user.firstName %>"
+                    data-user-last-name="<%= user.lastName %>"
+                  >
+                    Edit Details
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Addresses Section -->
+            <div id="addresses" class="account-section">
+              <h3 class="mb-4">My Addresses</h3>
+              <div class="card">
+                <div class="card-body">
+                  <% if (addresses.length === 0) { %>
+                  <p>No addresses found.</p>
+                  <% } else { %> <% addresses.forEach(function (address) { %>
+                  <div class="address-item mb-3 p-3 border rounded">
+                    <h5><%= address.firstName %> <%= address.lastName %></h5>
+                    <p>
+                      <%= address.addressLine %><br />
+                      <%= address.city %>, <%= address.state %>, <%=
+                      address.pincode %>, <%= address.flatNo %><br />
+                      <%= address.country %><br />
+                      <small>
+                        <%= address.phoneNo %> <br /><%= address.email %>
+                      </small>
+                    </p>
+                    <div>
+                      <button
+                        class="btn btn-sm btn-outline-primary me-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editAddressModal"
+                        data-address-id="<%= address._id %>"
+                        data-first-name="<%= address.firstName %>"
+                        data-last-name="<%= address.lastName %>"
+                        data-phone-no="<%= address.phoneNo %>"
+                        data-email="<%= address.email %>"
+                        data-address-line="<%= address.addressLine %>"
+                        data-pincode="<%= address.pincode %>"
+                        data-state="<%= address.state %>"
+                        data-country="<%= address.country %>"
+                        data-city="<%= address.city %>"
+                        data-flat-no="<%= address.flatNo %>"
+                        onclick="populateEditAddressForm(this)"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        class="btn btn-sm btn-outline-danger"
+                        onclick="deleteAddress('<%= address._id %>')"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                  <% }) %> <% } %>
+                  <button
+                    class="btn btn-primary mt-3"
+                    data-bs-toggle="modal"
+                    data-bs-target="#createAddressModal"
+                  >
+                    Add New Address
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Orders Section -->
+            <div id="orders" class="account-section">
+              <h3 class="mb-4">My Orders</h3>
+              <div class="card">
+                <div class="card-body">
+                  <!-- Orders list will be populated dynamically -->
+                  <div id="orders-list">
+                    <!-- JavaScript will inject the order items here -->
+                  </div>
+                  <!-- Pagination Controls -->
+                  <nav aria-label="Order pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                      <!-- Pagination items will be injected dynamically -->
+                    </ul>
+                  </nav>
+                </div>
+              </div>
+            </div>
+
+            <!-- Wallet Section -->
+            <div id="wallet" class="account-section">
+              <h3 class="mb-4">My Wallet</h3>
+              <div class="card">
+                <div class="card-body">
+                  <h5>Wallet Balance: $<%= wallet.balance.toFixed(2) %></h5>
+                  <div class="mt-4">
+                    <h6>Transaction History</h6>
+                    <% if (wallet.transactions.length === 0) { %>
+                    <p>No transactions found.</p>
+                    <% } else { %>
+                    <table class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Description</th>
+                          <th>Amount</th>
+                          <th>Type</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% wallet.transactions.forEach(transaction => { %>
+                        <tr>
+                          <td>
+                            <%= new Date(transaction.date).toLocaleDateString()
+                            %>
+                          </td>
+                          <td><%= transaction.description %></td>
+                          <td>$<%= transaction.amount.toFixed(2) %></td>
+                          <td>
+                            <%= transaction.type === 'credit' ? 'Credit' :
+                            'Debit' %>
+                          </td>
+                        </tr>
+                        <% }) %>
+                      </tbody>
+                    </table>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Change Password Section -->
+            <!-- Change Password Section -->
+            <div id="change-password" class="account-section">
+              <h3 class="mb-4">Change Password</h3>
+              <div class="card">
+                <div class="card-body">
+                  <form id="changePasswordForm">
+                    <!-- Current Password -->
+                    <div class="mb-3">
+                      <label for="currentPassword" class="form-label"
+                        >Current Password</label
+                      >
+                      <div class="input-group">
+                        <input
+                          type="password"
+                          class="form-control"
+                          id="currentPassword"
+                          required
+                        />
+                        <button
+                          class="btn btn-outline-secondary"
+                          type="button"
+                          id="checkPasswordButton"
+                        >
+                          Check
+                        </button>
+                      </div>
+                      <div class="invalid-feedback">
+                        Invalid current password
+                      </div>
+                    </div>
+
+                    <!-- New Password (Initially Disabled) -->
+                    <div class="mb-3">
+                      <label for="newPassword" class="form-label"
+                        >New Password</label
+                      >
+                      <input
+                        type="password"
+                        class="form-control"
+                        id="newPassword"
+                        required
+                        disabled
+                      />
+                      <div class="invalid-feedback">
+                        Password must be at least 8 characters long
+                      </div>
+                    </div>
+
+                    <!-- Confirm New Password (Initially Disabled) -->
+                    <div class="mb-3">
+                      <label for="confirmPassword" class="form-label"
+                        >Confirm New Password</label
+                      >
+                      <input
+                        type="password"
+                        class="form-control"
+                        id="confirmPassword"
+                        required
+                        disabled
+                      />
+                      <div class="invalid-feedback">Passwords do not match</div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                      <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="changePasswordButton"
+                        disabled
+                      >
+                        Change Password
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <%- include('partials/_footer') %>
+
+    <!-- Back to top -->
+    <div class="btn-back-to-top" id="myBtn">
+      <span class="symbol-btn-back-to-top">
+        <i class="zmdi zmdi-chevron-up"></i>
+      </span>
+    </div>
+
+    <!-- Edit Personal Details Modal (same as previous provided code) -->
+    <div
+      class="modal fade"
+      id="editPersonalDetailsModal"
+      tabindex="-1"
+      aria-labelledby="editPersonalDetailsModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editPersonalDetailsModalLabel">
+              Edit Personal Information
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <form id="editProfileForm">
+              <input
+                type="hidden"
+                id="editUserId"
+                value="<%= user._id %>"
+                name="userId"
+              />
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="profileFirstName" class="form-label"
+                    >First Name</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="profileFirstName"
+                    name="firstName"
+                    required
+                    placeholder="Enter First Name"
+                  />
+                </div>
+
+                <div class="col-md-6">
+                  <label for="profileLastName" class="form-label"
+                    >Last Name</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="profileLastName"
+                    name="lastName"
+                    placeholder="Enter Last Name"
+                  />
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button
+                  type="button"
+                  class="btn btn-secondary me-2"
+                  data-bs-dismiss="modal"
+                >
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create New Address Modal -->
+    <div
+      class="modal fade"
+      id="createAddressModal"
+      tabindex="-1"
+      aria-labelledby="createAddressModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 rounded-3 shadow-lg">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title fw-bold" id="createAddressModalLabel">
+              Create New Address
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body px-4 py-3">
+            <form id="createAddress">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="firstName" class="form-label">First Name</label>
+                  <input
+                    type="text"
+                    class="form-control rounded-pill"
+                    id="firstName"
+                    name="firstName"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="lastName" class="form-label">Last Name</label>
+                  <input
+                    type="text"
+                    class="form-control rounded-pill"
+                    id="lastName"
+                    name="lastName"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="phoneNo" class="form-label">Phone Number</label>
+                  <input
+                    type="number"
+                    class="form-control rounded-pill"
+                    id="phoneNo"
+                    name="phoneNo"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="addressEmail" class="form-label">Email</label>
+                  <input
+                    type="email"
+                    class="form-control rounded-pill"
+                    id="addressEmail"
+                    name="addressEmail"
+                    required
+                  />
+                </div>
+                <div class="col-12">
+                  <label for="addressLine" class="form-label"
+                    >Address Line</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control rounded-pill"
+                    id="addressLine"
+                    name="addressLine"
+                    required
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label for="city" class="form-label">City</label>
+                  <input
+                    type="text"
+                    class="form-control rounded-pill"
+                    id="city"
+                    name="city"
+                    required
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label for="state" class="form-label">State</label>
+                  <input
+                    type="text"
+                    class="form-control rounded-pill"
+                    id="state"
+                    name="state"
+                    required
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label for="pincode" class="form-label">Pincode</label>
+                  <input
+                    type="number"
+                    class="form-control rounded-pill"
+                    id="pincode"
+                    name="pincode"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="country" class="form-label">Country</label>
+                  <input
+                    type="text"
+                    class="form-control rounded-pill"
+                    id="country"
+                    name="country"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="flatNo" class="form-label">Flat No</label>
+                  <input
+                    type="text"
+                    class="form-control rounded-pill"
+                    id="flatNo"
+                    name="flatNo"
+                  />
+                </div>
+              </div>
+              <div class="modal-footer mt-4">
+                <button
+                  type="button"
+                  class="btn btn-secondary rounded-pill"
+                  data-bs-dismiss="modal"
+                >
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary rounded-pill px-5">
+                  Save Address
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Address Modal -->
+    <div
+      class="modal fade"
+      id="editAddressModal"
+      tabindex="-1"
+      aria-labelledby="editAddressModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header border-bottom-0">
+            <h5 class="modal-title fw-bold" id="editAddressModalLabel">
+              Edit Address
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="editAddress" class="row g-3">
+              <input type="hidden" id="addressId" name="addressId" />
+
+              <!-- First Name -->
+              <div class="col-md-6">
+                <label for="editFirstName" class="form-label">First Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editFirstName"
+                  name="firstName"
+                  required
+                />
+              </div>
+
+              <!-- Last Name -->
+              <div class="col-md-6">
+                <label for="editLastName" class="form-label">Last Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editLastName"
+                  name="lastName"
+                />
+              </div>
+
+              <!-- Phone Number -->
+              <div class="col-md-6">
+                <label for="editPhoneNo" class="form-label">Phone Number</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="editPhoneNo"
+                  name="phoneNo"
+                  required
+                />
+              </div>
+
+              <!-- Email -->
+              <div class="col-md-6">
+                <label for="editAddressEmail" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="editAddressEmail"
+                  name="addressEmail"
+                  required
+                />
+              </div>
+
+              <!-- Address Line -->
+              <div class="col-md-12">
+                <label for="editAddressLine" class="form-label"
+                  >Address Line</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editAddressLine"
+                  name="addressLine"
+                  required
+                />
+              </div>
+
+              <!-- Pincode -->
+              <div class="col-md-4">
+                <label for="editPincode" class="form-label">Pincode</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="editPincode"
+                  name="pincode"
+                  required
+                />
+              </div>
+
+              <!-- State -->
+              <div class="col-md-4">
+                <label for="editState" class="form-label">State</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editState"
+                  name="state"
+                  required
+                />
+              </div>
+
+              <!-- Country -->
+              <div class="col-md-4">
+                <label for="editCountry" class="form-label">Country</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editCountry"
+                  name="country"
+                  required
+                />
+              </div>
+
+              <!-- City -->
+              <div class="col-md-6">
+                <label for="editCity" class="form-label">City</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editCity"
+                  name="city"
+                  required
+                />
+              </div>
+
+              <!-- Flat No -->
+              <div class="col-md-6">
+                <label for="editFlatNo" class="form-label">Flat No</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editFlatNo"
+                  name="flatNo"
+                />
+              </div>
+
+              <!-- Save Button -->
+              <div class="modal-footer border-top-0 d-flex justify-content-end">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  id="saveEditAddressBtn"
+                >
+                  Save changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%- include('partials/_scripts') %>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <!-- JavaScript for handling Edit Address form submission -->
+    <script>
+      document
+        .getElementById("editAddress")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const addressId = document.getElementById("addressId").value;
+          const userId = document.getElementById("editUserId").value;
+          const firstName = document.getElementById("editFirstName").value;
+          const lastName = document.getElementById("editLastName").value;
+          const phoneNo = document.getElementById("editPhoneNo").value;
+          const email = document.getElementById("editAddressEmail").value;
+          const addressLine = document.getElementById("editAddressLine").value;
+          const pincode = document.getElementById("editPincode").value;
+          const state = document.getElementById("editState").value;
+          const country = document.getElementById("editCountry").value;
+          const city = document.getElementById("editCity").value;
+          const flatNo = document.getElementById("editFlatNo").value;
+
+          const addressData = {
+            userId,
+            firstName,
+            lastName,
+            phoneNo,
+            email,
+            addressLine,
+            pincode,
+            state,
+            country,
+            city,
+            flatNo,
+          };
+
+          try {
+            const response = await axios.put(
+              `/profile/address/${addressId}`,
+              addressData
+            );
+            if (response.status === 200) {
+              Swal.fire(
+                "Success",
+                "Address updated successfully!",
+                "success"
+              ).then(() => {
+                location.reload();
+              });
+            } else {
+              Swal.fire("Error", "Failed to update address", "error");
+            }
+          } catch (error) {
+            Swal.fire("Error", "Address update failed", "error");
+          }
+        });
+    </script>
+    <script>
+      document
+        .getElementById("editProfileForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+          const userId = document.getElementById("editUserId").value;
+
+          const data = {
+            firstName: document.getElementById("profileFirstName").value,
+            lastName: document.getElementById("profileLastName").value,
+          };
+
+          try {
+            const response = await axios.patch(
+              `/profile/personal/${userId}`,
+              data
+            );
+            if (response.status === 200) {
+              Swal.fire(
+                "Success",
+                "Profile updated successfully!",
+                "success"
+              ).then(() => {
+                window.location.reload();
+              });
+            } else {
+              Swal.fire("Error", "Failed to update profile", "error");
+            }
+          } catch (error) {
+            Swal.fire("Error", "Profile update failed", "error");
+          }
+        });
+
+      // Function to handle address creation
+      document
+        .getElementById("createAddress")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const userId = document.getElementById("editUserId").value;
+          const firstName = document.getElementById("firstName").value;
+          const lastName = document.getElementById("lastName").value;
+          const phoneNo = document.getElementById("phoneNo").value;
+          const email = document.getElementById("addressEmail").value;
+          const addressLine = document.getElementById("addressLine").value;
+          const pincode = document.getElementById("pincode").value;
+          const state = document.getElementById("state").value;
+          const country = document.getElementById("country").value;
+          const city = document.getElementById("city").value;
+          const flatNo = document.getElementById("flatNo").value;
+
+          const data = {
+            userId,
+            firstName,
+            lastName,
+            phoneNo,
+            email,
+            addressLine,
+            pincode,
+            state,
+            country,
+            city,
+            flatNo,
+          };
+
+          axios
+            .post("/profile/address", data)
+            .then((response) => {
+              if (response.status === 201) {
+                Swal.fire(
+                  "Success",
+                  "Address created successfully!",
+                  "success"
+                ).then(() => {
+                  location.reload();
+                });
+              } else {
+                Swal.fire("Error", "Failed to create address", "error");
+              }
+            })
+            .catch((error) => {
+              Swal.fire("Error", "Address creation failed", "error");
+            });
+        });
+
+      // // Function to handle address editing
+      // document
+      //   .getElementById("editAddress")
+      //   .addEventListener("submit", async function (e) {
+      //     e.preventDefault();
+
+      //     const addressId = document.getElementById("addressId").value;
+      //     const userId = document.getElementById("editUserId").value;
+      //     const firstName = document.getElementById("editFirstName").value;
+      //     const lastName = document.getElementById("editLastName").value;
+      //     const phoneNo = document.getElementById("editPhoneNo").value;
+      //     const email = document.getElementById("editAddressEmail").value;
+      //     const addressLine = document.getElementById("editAddressLine").value;
+      //     const pincode = document.getElementById("editPincode").value;
+      //     const state = document.getElementById("editState").value;
+      //     const country = document.getElementById("editCountry").value;
+      //     const city = document.getElementById("editCity").value;
+      //     const flatNo = document.getElementById("editFlatNo").value;
+
+      //     const addressData = {
+      //       userId,
+      //       firstName,
+      //       lastName,
+      //       phoneNo,
+      //       email,
+      //       addressLine,
+      //       pincode,
+      //       state,
+      //       country,
+      //       city,
+      //       flatNo,
+      //     };
+
+      //     try {
+      //       const response = await axios.put(
+      //         `/profile/address/${addressId}`,
+      //         addressData
+      //       );
+      //       if (response.status === 200) {
+      //         Swal.fire(
+      //           "Success",
+      //           "Address updated successfully!",
+      //           "success"
+      //         ).then(() => {
+      //           location.reload();
+      //         });
+      //       } else {
+      //         Swal.fire("Error", "Failed to update address", "error");
+      //       }
+      //     } catch (error) {
+      //       Swal.fire("Error", "Address update failed", "error");
+      //     }
+      //   });
+
+      // Function to delete the address with confirmation
+      function deleteAddress(addressId) {
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You will not be able to recover this address!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, delete it!",
+          cancelButtonText: "No, cancel",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            axios
+              .delete(`/profile/address/${addressId}`)
+              .then((response) => {
+                console.log(response.data.success);
+                if (response.data.success) {
+                  Swal.fire(
+                    "Deleted!",
+                    "Your address has been deleted.",
+                    "success"
+                  ).then(() => {
+                    location.reload();
+                  });
+                } else {
+                  Swal.fire("Error", "Failed to delete the address", "error");
+                }
+              })
+              .catch((error) => {
+                Swal.fire("Error", "Address deletion failed", "error");
+              });
+          }
+        });
+      }
+
+      function populateEditAddressForm(button) {
+        // Get data from the button's data-* attributes
+        const addressId = button.getAttribute("data-address-id");
+        const firstName = button.getAttribute("data-first-name");
+        const lastName = button.getAttribute("data-last-name");
+        const phoneNo = button.getAttribute("data-phone-no");
+        const email = button.getAttribute("data-email");
+        const addressLine = button.getAttribute("data-address-line");
+        const pincode = button.getAttribute("data-pincode");
+        const state = button.getAttribute("data-state");
+        const country = button.getAttribute("data-country");
+        const city = button.getAttribute("data-city");
+        const flatNo = button.getAttribute("data-flat-no");
+
+        // Populate form fields with the data
+        document.getElementById("addressId").value = addressId;
+        document.getElementById("editFirstName").value = firstName;
+        document.getElementById("editLastName").value = lastName;
+        document.getElementById("editPhoneNo").value = phoneNo;
+        document.getElementById("editAddressEmail").value = email;
+        document.getElementById("editAddressLine").value = addressLine;
+        document.getElementById("editPincode").value = pincode;
+        document.getElementById("editState").value = state;
+        document.getElementById("editCountry").value = country;
+        document.getElementById("editCity").value = city;
+        document.getElementById("editFlatNo").value = flatNo || "";
+      }
+    </script>
+
+    <script>
+      // This script will populate the orders section dynamically using the fetchOrders function.
+      let currentPage = 1;
+      let totalPages = 1;
+      const limit = 6;
+
+      function fetchOrders(page) {
+        axios
+          .get(`/profile/api/orders?page=${page}&limit=${limit}`)
+          .then((response) => {
+            const orders = response.data.orders;
+            totalPages = response.data.totalPages;
+
+            // Update order list
+            const ordersList = document.getElementById("orders-list");
+            ordersList.innerHTML = ""; // Clear previous order items
+
+            if (orders.length === 0) {
+              ordersList.innerHTML = `<p class="no-orders">You haven't placed any orders yet.</p>`;
+            } else {
+              orders.forEach((order) => {
+                order.products.forEach((product) => {
+                  ordersList.innerHTML += `
+                <div class="order-item mb-3 p-3 border rounded" data-order-id="${
+                  order._id
+                }">
+                  <a href="/profile/orders/${order._id}/view">
+                    <img
+                      src="/public/uploads/${product.productId.images[0]}"
+                      alt="${product.productId.name}"
+                      class="product-image"
+                    />
+                  </a>
+                  <div class="product-info">
+                    <div class="product-name">${product.productId.name}</div>
+                  </div>
+                  <div class="product-price">
+                    ₹${product.price.toFixed(2)}
+                  </div>
+                  <div class="delivery-status">
+                    ${
+                      order.orderStatus === "delivered"
+                        ? `
+                        <div class="delivered">
+                          Delivered on ${new Date(
+                            order.createdAt
+                          ).toLocaleDateString("en-IN", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </div>
+                        <div>Your item has been delivered</div>
+                      `
+                        : order.orderStatus === "pending"
+                        ? `
+                        <div class="status-pending">Pending Payment</div>
+                        <button id="payNow-${order._id}" onclick="payNow('${order._id}')" class="pay-now-btn">
+                          Pay Now
+                        </button>
+                      `
+                        : `
+                        <div class="status-${order.orderStatus.toLowerCase()}">
+                          ${order.orderStatus}
+                        </div>
+                        <div>
+                          Estimated delivery: ${new Date(
+                            order.createdAt
+                          ).toLocaleDateString("en-IN", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </div>
+                      `
+                    }
+                  </div>
+                </div>
+              `;
+                });
+              });
+            }
+
+            // Update pagination
+            const pagination = document.querySelector(".pagination");
+            pagination.innerHTML = `
+          <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+            <a class="page-link" href="#" onclick="changePage(${
+              currentPage - 1
+            })" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          ${Array.from({ length: totalPages }, (_, i) => i + 1)
+            .map(
+              (i) => `
+            <li class="page-item ${currentPage === i ? "active" : ""}">
+              <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+            </li>
+          `
+            )
+            .join("")}
+          <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
+            <a class="page-link" href="#" onclick="changePage(${
+              currentPage + 1
+            })" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        `;
+          })
+          .catch((error) => {
+            console.error("Error fetching orders:", error);
+          });
+      }
+
+      function changePage(page) {
+        event.preventDefault();
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        fetchOrders(currentPage);
+      }
+
+      // Trigger the initial order fetch
+      fetchOrders(currentPage);
+
+      // Payment function
+      function payNow(orderId) {
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You want to pay now!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, pay now!",
+          cancelButtonText: "No, do it later",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            axios
+              .post("/checkout/retry", { orderId })
+              .then((response) => {
+                const data = response.data;
+                if (data.success) {
+                  console.log(data);
+                  initiateRazorpayPayment(
+                    data.orderId,
+                    data.razorpayOrderId,
+                    data.amount,
+                    data.currency,
+                    data.key_id
+                  );
+                } else {
+                  Swal.fire("Error", data.message, "error");
+                }
+              })
+              .catch((error) => {
+                Swal.fire("Error", "A server error occurred.", "error");
+              });
+          }
+        });
+      }
+
+      function initiateRazorpayPayment(
+        orderId,
+        razorpayOrderId,
+        amount,
+        currency,
+        key_id
+      ) {
+        var options = {
+          key: key_id,
+          amount: amount,
+          currency: currency,
+          name: "Zodge Premium Watches",
+          description: "Order Payment Retry",
+          order_id: razorpayOrderId,
+          handler: function (response) {
+            axios
+              .post("/checkout/verify-payment", {
+                orderId: orderId,
+                razorpayOrderId: razorpayOrderId,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+              })
+              .then((response) => {
+                console.log("verify");
+                const data = response.data;
+                if (data.message === "Payment verified successfully.") {
+                  Swal.fire("Success", "Payment successful!", "success").then(
+                    () => {
+                      localStorage.removeItem("cart");
+                      window.location.href = "/checkout/confirmation";
+                    }
+                  );
+                } else {
+                  Swal.fire(
+                    "Error",
+                    "Payment verification failed.",
+                    "error"
+                  ).then(() => {
+                    localStorage.setItem(
+                      "failedOrder",
+                      JSON.stringify({
+                        orderId,
+                        amount,
+                        products: cart.products,
+                      })
+                    );
+                    window.location.href = "/checkout/retry";
+                  });
+                }
+              })
+              .catch(() => {
+                Swal.fire(
+                  "Error",
+                  "Server error during payment verification.",
+                  "error"
+                );
+              });
+          },
+          prefill: {
+            name: "<%= user.name %>",
+            email: "<%= user.email %>",
+            contact: "<%= user.contact %>",
+          },
+          theme: {
+            color: "#3399cc",
+          },
+        };
+        var paymentObject = new Razorpay(options);
+        paymentObject.open();
+      }
+    </script>
+
+    <script>
+      // JavaScript to handle tab switching
+      document.querySelectorAll(".nav-link").forEach((link) => {
+        link.addEventListener("click", function (e) {
+          e.preventDefault();
+          document.querySelectorAll(".account-section").forEach((section) => {
+            section.classList.remove("active");
+          });
+          document.querySelectorAll(".nav-link").forEach((navLink) => {
+            navLink.classList.remove("active");
+          });
+          this.classList.add("active");
+          document
+            .getElementById(this.getAttribute("data-section"))
+            .classList.add("active");
+        });
+      });
+
+      // // Function to load orders (you'll need to implement this)
+      // function loadOrders(page) {
+      //   // Fetch orders from your backend and update the orders-list
+      // }
+
+      // // Function to change page (you'll need to implement this)
+      // function changePage(page) {
+      //   loadOrders(page);
+      // }
+
+      // // Load initial orders
+      // loadOrders(1);
+    </script>
+
+    <script>
+      $("#editPersonalDetailsModal").on("show.bs.modal", function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var userId = button.data("user-id"); // Extract info from data-* attributes
+        var firstName = button.data("user-first-name");
+        var lastName = button.data("user-last-name");
+
+        // Update modal's form inputs
+        var modal = $(this);
+        modal.find("#editUserId").val(userId);
+        modal.find("#profileFirstName").val(firstName);
+        modal.find("#profileLastName").val(lastName);
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const changePasswordForm =
+          document.getElementById("changePasswordForm");
+        const currentPasswordInput = document.getElementById("currentPassword");
+        const newPasswordInput = document.getElementById("newPassword");
+        const confirmPasswordInput = document.getElementById("confirmPassword");
+        const changePasswordButton = document.getElementById(
+          "changePasswordButton"
+        );
+        const togglePasswordButtons =
+          document.querySelectorAll(".toggle-password");
+
+        const userId = "<%= user._id %>"; // User's ID
+
+        // Toggle password visibility
+        togglePasswordButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const targetId = this.getAttribute("data-target");
+            const targetInput = document.getElementById(targetId);
+            const icon = this.querySelector("i");
+
+            if (targetInput.type === "password") {
+              targetInput.type = "text";
+              icon.classList.remove("bi-eye");
+              icon.classList.add("bi-eye-slash");
+            } else {
+              targetInput.type = "password";
+              icon.classList.remove("bi-eye-slash");
+              icon.classList.add("bi-eye");
+            }
+          });
+        });
+
+        // Enable or disable new password fields
+        function enableNewPasswordFields(enable) {
+          newPasswordInput.disabled = !enable;
+          confirmPasswordInput.disabled = !enable;
+          changePasswordButton.disabled = !enable;
+        }
+
+        // Validate Current Password
+        function validateCurrentPassword() {
+          return new Promise((resolve, reject) => {
+            const currentPassword = currentPasswordInput.value;
+
+            axios
+              .post("/auth/validate-password", { userId, currentPassword })
+              .then((response) => {
+                if (response.data.success) {
+                  currentPasswordInput.classList.remove("is-invalid");
+                  currentPasswordInput.classList.add("is-valid");
+                  enableNewPasswordFields(true); // Enable new password fields
+                  resolve(true);
+                } else {
+                  throw new Error("Invalid password");
+                }
+              })
+              .catch((error) => {
+                currentPasswordInput.classList.remove("is-valid");
+                currentPasswordInput.classList.add("is-invalid");
+                enableNewPasswordFields(false); // Keep new password fields disabled
+                reject(false);
+              });
+          });
+        }
+
+        // Validate New Password
+        function validateNewPassword() {
+          const newPassword = newPasswordInput.value;
+          const isValid = newPassword.length >= 8; // Example validation: password should be 8 chars or longer
+          updateValidationUI(newPasswordInput, isValid);
+          return isValid;
+        }
+
+        // Validate Confirm Password
+        function validateConfirmPassword() {
+          const confirmPassword = confirmPasswordInput.value;
+          const newPassword = newPasswordInput.value;
+          const isValid = confirmPassword === newPassword;
+          updateValidationUI(confirmPasswordInput, isValid);
+          return isValid;
+        }
+
+        // Update validation UI
+        function updateValidationUI(input, isValid) {
+          if (isValid) {
+            input.classList.remove("is-invalid");
+            input.classList.add("is-valid");
+          } else {
+            input.classList.remove("is-valid");
+            input.classList.add("is-invalid");
+          }
+        }
+
+        // Reset form to initial state
+        function resetForm() {
+          changePasswordForm.reset();
+          enableNewPasswordFields(false);
+          [
+            currentPasswordInput,
+            newPasswordInput,
+            confirmPasswordInput,
+          ].forEach((input) => {
+            input.classList.remove("is-valid", "is-invalid");
+          });
+        }
+
+        // Attach event listeners
+        currentPasswordInput.addEventListener("blur", validateCurrentPassword);
+        newPasswordInput.addEventListener("input", validateNewPassword);
+        confirmPasswordInput.addEventListener("input", validateConfirmPassword);
+
+        // Initially disable new password fields
+        enableNewPasswordFields(false);
+
+        // Submit New Password
+        changePasswordForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          validateCurrentPassword()
+            .then(() => {
+              if (validateNewPassword() && validateConfirmPassword()) {
+                const newPassword = newPasswordInput.value;
+                return axios.post("/auth/change-user-password", {
+                  userId,
+                  newPassword,
+                });
+              } else {
+                throw new Error("Invalid new password or confirmation");
+              }
+            })
+            .then((response) => {
+              Swal.fire({
+                title: "Success!",
+                text: "Your password has been changed successfully",
+                icon: "success",
+                confirmButtonText: "OK",
+              });
+              resetForm();
+            })
+            .catch((error) => {
+              Swal.fire({
+                title: "Error!",
+                text:
+                  error.response?.data?.message ||
+                  "There was an error changing your password",
+                icon: "error",
+                confirmButtonText: "OK",
+              });
+            });
+        });
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </body>
+</html>

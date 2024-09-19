@@ -524,6 +524,61 @@ const changePassword = async (req, res) => {
   }
 };
 
+// POST route to validate current password
+const validateCurrentPassword = async (req, res) => {
+  try {
+    const { userId, currentPassword } = req.body;
+
+    // Find user by email
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Compare entered current password with the stored hashed password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+    if (isMatch) {
+      return res
+        .status(200)
+        .json({ success: true, message: "Password is correct" });
+    } else {
+      return res
+        .status(400)
+        .json({ success: false, message: "Incorrect current password" });
+    }
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+const changeUserPassword = async (req, res) => {
+  try {
+    const { userId, newPassword } = req.body;
+
+    // Find the user by email
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the password in the database
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 /**------------------logout the user----------------- */
 
 const logout = (req, res) => {
@@ -566,5 +621,7 @@ module.exports = {
   resetPassword,
   changePassword,
   getResetPasswordPage,
+  validateCurrentPassword,
+  changeUserPassword,
   logout,
 };

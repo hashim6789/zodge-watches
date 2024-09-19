@@ -40,12 +40,40 @@ const getAccountPage = async (req, res) => {
       wallet = { balance: 0, transactions: [] };
     }
 
+    let cart = await CartModel.findOne({ userId });
+    if (!cart) {
+      cart = new CartModel({
+        userId,
+        products: [],
+        totalPrice: 0,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      await cart.save();
+    }
+
+    let wishlist = await WishlistModel.findOne({ userId }).populate(
+      "productIds",
+      "name price images"
+    );
+    if (!wishlist) {
+      wishlist = new WishlistModel({
+        userId,
+        productIds: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      await wishlist.save();
+    }
+
     const totalPages = Math.ceil(totalOrders / limit);
 
-    res.render("user/userAccountPage", {
+    res.render("user/myAccountPage", {
       user,
       addresses,
       orders,
+      wishlist,
+      cart,
       wallet,
       totalPages,
       currentPage: page,

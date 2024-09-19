@@ -28,7 +28,9 @@ const verifyPayment = async (req, res) => {
       .digest("hex");
 
     if (generatedSignature !== signature) {
-      return res.status(400).json({ message: "Payment verification failed." });
+      return res
+        .status(400)
+        .json({ success: false, message: "Payment verification failed." });
     }
 
     order.paymentStatus = "successful";
@@ -37,10 +39,12 @@ const verifyPayment = async (req, res) => {
 
     await finalizeStockReduction(order.products);
 
-    res.status(200).json({ message: "Payment verified successfully." });
+    res
+      .status(200)
+      .json({ success: true, message: "Payment verified successfully." });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+    res.status(500).json({ success: false, message: "Server Error!!!" });
   }
 };
 

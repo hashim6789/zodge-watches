@@ -43,11 +43,11 @@ const getBanners = async (req, res) => {
 //for create a new banner
 const createBanner = async (req, res) => {
   try {
-    const { bannerTitle } = req.body;
+    const { bannerTitle, bannerSubTitle } = req.body;
     const bannerImage = req.file.filename; // Get the uploaded banner image filename
     bannerTitle.toUpperCase();
 
-    console.log(bannerTitle, bannerImage);
+    console.log(bannerTitle, bannerSubTitle, bannerImage);
     // Save the banner data (title and image) to the database
     // Assuming you have a Banner model, replace with your logic
 
@@ -60,6 +60,7 @@ const createBanner = async (req, res) => {
 
     banner = new BannerModel({
       title: bannerTitle,
+      subTitle: bannerSubTitle,
       imageUrl: bannerImage,
     });
     banner.save();
@@ -81,8 +82,8 @@ const createBanner = async (req, res) => {
 const editBanner = async (req, res) => {
   try {
     const bannerId = req.params.bannerId;
-    const { bannerTitle } = req.body;
-    let updatedBanner = { title: bannerTitle };
+    const { bannerTitle, bannerSubTitle } = req.body;
+    let updatedBanner = { title: bannerTitle, subTitle: bannerSubTitle };
 
     // If a new image is uploaded, add it to the update
     if (req.file) {
@@ -130,21 +131,21 @@ const toggleBanner = async (req, res) => {
   }
 };
 
-//search banners
-const searchCategories = (req, res) => {
-  const query = req.query.query;
-  console.log(query);
-  res.redirect(`/admin/banners?query=${query}`);
-};
+// //search banners
+// const searchCategories = (req, res) => {
+//   const query = req.query.query;
+//   console.log(query);
+//   res.redirect(`/admin/banners?query=${query}`);
+// };
 
-const getAllCategoriesAPI = async (req, res) => {
-  try {
-    const banners = await BannerModel.find({ isListed: true }); // Fetch all banners from the database
-    res.json(banners);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching banners", error });
-  }
-};
+// const getAllCategoriesAPI = async (req, res) => {
+//   try {
+//     const banners = await BannerModel.find({ isListed: true }); // Fetch all banners from the database
+//     res.json(banners);
+//   } catch (error) {
+//     res.status(500).json({ message: "Error fetching banners", error });
+//   }
+// };
 
 module.exports = {
   getBanners,

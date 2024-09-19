@@ -28,6 +28,8 @@ const {
   resetPassword,
   changePassword,
   getResetPasswordPage,
+  validateCurrentPassword,
+  changeUserPassword,
   logout,
 } = require("../../controllers/user/authController");
 
@@ -87,6 +89,10 @@ router.get("/reset-password/:token", getResetPasswordPage);
 
 //post - /auth/verify-password
 router.post("/change-password", changePassword);
+
+router.post("/validate-password", validateCurrentPassword);
+
+router.post("/change-user-password", changeUserPassword);
 
 // Auth logout
 router.get("/logout", isAuthenticatedUser, authorizeUser, logout);

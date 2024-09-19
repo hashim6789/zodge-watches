@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Confirmation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .confirmation {
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .order-details,
+      .address,
+      .payment-details {
+        margin-bottom: 20px;
+      }
+      .product {
+        display: flex;
+        margin-bottom: 10px;
+      }
+      .product img {
+        width: 50px;
+        height: 50px;
+        margin-right: 10px;
+      }
+      .total {
+        display: flex;
+        justify-content: space-between;
+      }
+      .button {
+        background-color: #f0c14b;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="logo">Your Store</div>
+    </div>
+
+    <div class="confirmation">
+      <h2>
+        Hello <%= order.address.firstName %> <%= order.address.lastName %>,
+      </h2>
+      <p>✓ Your order is confirmed!</p>
+      <p>
+        Thanks for shopping! Your order #<%= order.orderId %> has been <%=
+        order.orderStatus %>. We'll send you an email when it ships.
+      </p>
+    </div>
+
+    <div class="order-details">
+      <h3>Order Details</h3>
+      <p>Order ID: <%= order.orderId %></p>
+      <p>Order Status: <%= order.orderStatus %></p>
+      <p>Payment Method: <%= order.paymentMethod %></p>
+      <p>Payment Status: <%= order.paymentStatus %></p>
+      <a href="#" class="button">View or Manage Order</a>
+    </div>
+
+    <div class="products">
+      <h3>Products</h3>
+      <% order.products.forEach(function(product) { %>
+      <div class="product">
+        <img
+          src="/public/uploads/<%= product.images[0]%>"
+          alt="Product Image"
+        />
+        <div>
+          <p><strong><%= product.productId.name %></strong></p>
+          <p>Quantity: <%= product.quantity %></p>
+          <p>Price: $<%= product.price.toFixed(2) %></p>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+
+    <div class="total">
+      <div>
+        <p>Sub-total</p>
+        <p>Delivery Charge</p>
+        <% if (order.couponDiscount > 0) { %>
+        <p>Coupon Discount</p>
+        <% } %>
+        <p><strong>Total</strong></p>
+      </div>
+      <div>
+        <p>
+          $<%= (order.totalPrice - order.deliveryCharge +
+          order.couponDiscount).toFixed(2) %>
+        </p>
+        <p>$<%= order.deliveryCharge.toFixed(2) %></p>
+        <% if (order.couponDiscount > 0) { %>
+        <p>-$<%= order.couponDiscount.toFixed(2) %></p>
+        <% } %>
+        <p><strong>$<%= order.totalPrice.toFixed(2) %></strong></p>
+      </div>
+    </div>
+
+    <div class="address">
+      <h3>Shipping Address</h3>
+      <p><%= order.address.firstName %> <%= order.address.lastName %></p>
+      <p><%= order.address.addressLine %></p>
+      <% if (order.address.flatNo) { %>
+      <p><%= order.address.flatNo %></p>
+      <% } %>
+      <p>
+        <%= order.address.city %>, <%= order.address.state %> <%=
+        order.address.pincode %>
+      </p>
+      <p><%= order.address.country %></p>
+      <p>Phone: <%= order.address.phoneNo %></p>
+      <p>Email: <%= order.address.email %></p>
+    </div>
+
+    <% if (order.returnDetails.isReturnable) { %>
+    <div class="return-details">
+      <h3>Return Details</h3>
+      <p>Return Status: <%= order.returnDetails.returnStatus %></p>
+      <% if (order.returnDetails.returnReason) { %>
+      <p>Return Reason: <%= order.returnDetails.returnReason %></p>
+      <% } %> <% if (order.returnDetails.refundAmount) { %>
+      <p>Refund Amount: $<%= order.returnDetails.refundAmount.toFixed(2) %></p>
+      <% } %> <% if (order.returnDetails.refundMethod) { %>
+      <p>Refund Method: <%= order.returnDetails.refundMethod %></p>
+      <% } %>
+    </div>
+    <% } %>
+  </body>
+</html>

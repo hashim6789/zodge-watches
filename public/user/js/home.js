@@ -8,11 +8,21 @@ document.addEventListener("DOMContentLoaded", function () {
   fetchProducts(selectedCategory, currentPage, selectedSort, searchQuery);
 
   // Attach event listeners for search functionality
+  let debounceTimer;
+  let lastQuery = ""; // To store the last query
+
   document
     .getElementById("search-input")
-    .addEventListener("keypress", function (event) {
-      if (event.key === "Enter") {
-        searchProducts();
+    .addEventListener("input", function () {
+      const query = document.getElementById("search-input").value.trim();
+
+      if (query !== lastQuery) {
+        // Only search if the query has changed
+        clearTimeout(debounceTimer); // Clear previous debounce timer
+        debounceTimer = setTimeout(() => {
+          searchProducts(query);
+          lastQuery = query; // Update last query
+        }, 500); // Increase debounce time (500ms or more based on UX feedback)
       }
     });
   // document
@@ -94,14 +104,23 @@ function renderProducts(products, wishlist = { productIds: [] }) {
           </div>
           <div class="block2-txt flex-w flex-t p-t-14">
             <div class="block2-txt-child1 flex-col-l">
-              <a href="#" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">${
-                product.name
-              }</a>
+              <a href="/shop/products/${
+                product._id
+              }" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">${
+        product.name
+      }</a>
 
               <!-- Price Section -->
               ${
                 hasDiscount
-                  ? `<span class="stext-105 cl3"><del>₹${originalPrice}</del> ₹${discountedPrice}</span>`
+                  ? product.discountType === "percentage"
+                    ? `<span class="stext-105 cl3"><del>₹${originalPrice}</del> ₹${discountedPrice}   off ${
+                        ((originalPrice - discountedPrice) * 100) /
+                        originalPrice
+                      }% </span>`
+                    : `<span class="stext-105 cl3"><del>₹${originalPrice}</del> ₹${discountedPrice}   off ₹${
+                        originalPrice - discountedPrice
+                      } </span>`
                   : `<span class="stext-105 cl3">₹${originalPrice}</span>`
               }
               
@@ -184,9 +203,10 @@ function updatePagination(current, pages, currentCategory) {
   `;
 }
 
-function searchProducts() {
-  const query = document.getElementById("search-input").value.trim();
-  fetchProducts(selectedCategory, 1, selectedSort, query); // Fetch products with the current search query
+function searchProducts(query) {
+  // Prevent searching for empty queries
+  console.log("query = ", query);
+  fetchProducts(selectedCategory, 1, selectedSort, query); // Fetch products with search query
 }
 
 // Handle sorting method selection and fetch products accordingly

@@ -4,6 +4,7 @@ const UserModel = require("../../models/User");
 const WishlistModel = require("../../models/Wishlist");
 const CartModel = require("../../models/Cart");
 const OfferModel = require("../../models/Offer");
+const BannerModel = require("../../models/Banner");
 
 // const dummy = async (req, res) => {
 //   // const products = await ProductModel.find({ isListed: true });
@@ -179,12 +180,15 @@ const getHome = async (req, res) => {
     });
     console.log(productsWithDiscount);
 
+    const banners = await BannerModel.find({ isActive: true });
+
     // Render the home page with updated product prices
     res.render("user/home", {
       products: productsWithDiscount, // Send products with discounted prices
       categories,
       current: page,
       user,
+      banners,
       wishlist,
       currentCategory: "all",
       pages: Math.ceil(count / perPage),
@@ -250,6 +254,7 @@ const getProductsByPages = async (req, res) => {
     // Calculate the discountedPrice for each product based on active offers
     const updatedProducts = products.map((product) => {
       let discountedPrice = product.price;
+      let discountType;
       const applicableOffers = activeOffers.filter((offer) =>
         offer.categoryId.equals(product.categoryId)
       );
@@ -258,11 +263,12 @@ const getProductsByPages = async (req, res) => {
         const highestOffer = applicableOffers.reduce((max, offer) =>
           offer.discountValue > max.discountValue ? offer : max
         );
+        discountType = highestOffer.discountType;
 
-        if (highestOffer.discountType === "percentage") {
+        if (discountType === "percentage") {
           discountedPrice =
             product.price - (product.price * highestOffer.discountValue) / 100;
-        } else if (highestOffer.discountType === "flat") {
+        } else if (discountType === "flat") {
           discountedPrice = product.price - highestOffer.discountValue;
         }
 
@@ -272,6 +278,7 @@ const getProductsByPages = async (req, res) => {
 
       return {
         ...product,
+        discountType,
         discountedPrice:
           discountedPrice < product.price ? discountedPrice : product.price,
       };

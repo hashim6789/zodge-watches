@@ -272,7 +272,13 @@ const getOrderConfirmation = async (req, res) => {
       return res.status(404).send("Order not found");
     }
 
-    res.render("user/orderConfirmation", { order, user, wishlist, cart });
+    res.render("user/orderSuccessPage", {
+      user,
+      wishlist,
+      cart,
+      orderId: order.orderId,
+    });
+    // res.render("user/orderConfirmation", { order, user, wishlist, cart });
     req.session.cart = null;
     req.session.order = null;
   } catch (error) {
