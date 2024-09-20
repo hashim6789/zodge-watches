@@ -45,13 +45,13 @@ router.get("/signup", redirectIfAuthenticated, getSignup);
 router.post("/signup", redirectIfAuthenticated, postLocalSignup);
 
 //get otp entering page
-router.get("/otp", getOtpPage);
+// router.get("/otp", getOtpPage);
 
 //post otp generator and verify the otp
-router.post("/otp", verifyOtp);
+router.post("/api/verify-otp", verifyOtp);
 
 //post otp resend
-router.post("/otp/resend", resendOtp);
+router.post("/api/resend-otp", resendOtp);
 
 //get the login page
 router.get("/login", redirectIfAuthenticated, getLogin);

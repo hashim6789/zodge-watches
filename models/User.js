@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 const UsersSchema = new Schema(
   {
     googleId: { type: String, default: null },
-    thumbnail: { type: String },
+    thumbnail: { type: String, default: null },
     firstName: { type: String, required: true },
     lastName: { type: String },
     email: { type: String, required: true },

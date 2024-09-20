@@ -15,6 +15,7 @@ document
     const country = document.getElementById("country").value;
     const city = document.getElementById("city").value;
     const flatNo = document.getElementById("flatNo").value;
+    console.log("name = ", firstName);
     const data = {
       userId,
       firstName,

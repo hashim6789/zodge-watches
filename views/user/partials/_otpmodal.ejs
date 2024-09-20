@@ -1,0 +1,154 @@
+<!-- OTP Verification Modal -->
+<div id="otpModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="logo"></div>
+    </div>
+    <h3>Enter the 6 digit code sent to</h3>
+    <p>+1 (302) 678-2810</p>
+    <div class="timer" id="timer">Time remaining: 60s</div>
+    <form id="otpForm">
+      <div class="otp-inputs">
+        <% for(let i = 0; i < 6; i++) { %>
+        <input type="text" maxlength="1" name="otp<%= i %>" required />
+        <% } %>
+      </div>
+      <button type="submit" class="next-button">Next →</button>
+    </form>
+    <p class="resend">
+      Didn't receive OTP? <a href="#" id="resendLink">Resend OTP</a>
+    </p>
+  </div>
+</div>
+
+<style>
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+  .modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .logo {
+    width: 60px;
+    height: 60px;
+    background-color: #2563eb;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+  }
+  .otp-inputs {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  .otp-inputs input {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    font-size: 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+  }
+  .next-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  .resend {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #6b7280;
+  }
+  .timer {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2563eb;
+    margin-top: 10px;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.getElementById("otpModal");
+    const inputs = document.querySelectorAll(".otp-inputs input");
+    const timerElement = document.getElementById("timer");
+    const resendLink = document.getElementById("resendLink");
+    const otpForm = document.getElementById("otpForm");
+    let timeLeft = 60;
+
+    function startTimer() {
+      timeLeft = 60;
+      resendLink.style.pointerEvents = "none";
+      resendLink.style.color = "#a0aec0";
+
+      const timerInterval = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = `Time remaining: ${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timerElement.textContent = "Time expired!";
+          resendLink.style.pointerEvents = "auto";
+          resendLink.style.color = "#2563eb";
+        }
+      }, 1000);
+    }
+
+    inputs.forEach((input, index) => {
+      input.addEventListener("input", function () {
+        if (this.value.length === this.maxLength) {
+          if (index < inputs.length - 1) {
+            inputs[index + 1].focus();
+          }
+        }
+      });
+    });
+
+    resendLink.addEventListener("click", function (e) {
+      e.preventDefault();
+      startTimer();
+      // Here you would typically call your backend to resend the OTP
+      console.log("Resending OTP...");
+    });
+
+    otpForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const otp = Array.from(inputs)
+        .map((input) => input.value)
+        .join("");
+      console.log("Submitting OTP:", otp);
+      // Here you would typically call your backend to verify the OTP
+    });
+
+    // Function to show the modal
+    window.showOTPModal = function () {
+      modal.style.display = "block";
+      startTimer();
+    };
+
+    // Function to hide the modal
+    window.hideOTPModal = function () {
+      modal.style.display = "none";
+    };
+
+    // You can call showOTPModal() when you need to display the modal
+  });
+</script>

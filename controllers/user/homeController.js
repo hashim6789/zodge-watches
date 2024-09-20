@@ -178,7 +178,7 @@ const getHome = async (req, res) => {
         discountedPrice, // Add discounted price to product object
       };
     });
-    console.log(productsWithDiscount);
+    // console.log(productsWithDiscount);
 
     const banners = await BannerModel.find({ isActive: true });
 

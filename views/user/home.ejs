@@ -8,7 +8,8 @@
   </head>
   <body class="animsition">
     <!-- Header -->
-    <%- include('partials/_navbar', {user, wishlist, cart}) %>
+    <%- include('partials/_navbar', {user, wishlist, cart}) %> <%-
+    include('partials/_authModals') %>
 
     <!-- Wishlist -->
     <%- include('partials/_wishlist', {wishlist}) %>

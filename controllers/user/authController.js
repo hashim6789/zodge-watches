@@ -27,9 +27,13 @@ const postLocalLogin = async (req, res, next) => {
         return next(err);
       }
 
-      const returnTo = req.session.returnTo || "/";
-      delete req.session.returnTo;
-      return res.redirect(returnTo);
+      return res
+        .status(200)
+        .json({ success: true, message: "user login successfully" });
+
+      // const returnTo = req.session.returnTo || "/";
+      // delete req.session.returnTo;
+      // return res.redirect(`${returnTo}?message=The user login successfully.`);
     });
   })(req, res, next);
 };
@@ -45,33 +49,41 @@ const postLocalSignup = async (req, res, next) => {
       // return res.redirect("/auth/signup?error=" + info.message);
     }
     console.log(req.user);
-    req.logIn(user, (err) => {
+    req.logIn(user, async (err) => {
       if (err) {
         return next(err);
       }
       console.log(user);
 
       // Optionally, send verification email
-      sendVerificationMail(user, res);
-
-      return res.redirect(`/auth/otp`);
+      await sendVerificationMail(user, res);
     });
   })(req, res, next);
+
+  // return res.redirect(`/auth/otp`);
 };
 
 const verifyOtp = async (req, res) => {
   try {
-    const { otp1, otp2, otp3, otp4, userId, email } = req.body;
-    const otp = `${otp1}${otp2}${otp3}${otp4}`;
+    const userId = req.user?._id;
+    const email = req.user?.email;
+    const { otp } = req.body;
+    console.log(otp);
+    // const otp = `${otp1}${otp2}${otp3}${otp4}`;
     // Find the user by ID
     const user = await UserModel.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      return res
+        .status(404)
+        .json({ succes: false, message: "User not found." });
     }
 
     // Check if OTP is expired
     if (user.otpExpires < Date.now()) {
-      return res.redirect("/auth/otp?message=OTP has expired.");
+      return res
+        .status(400)
+        .json({ success: false, message: "OTP has expired." });
+      // return res.redirect("/auth/otp?message=OTP has expired.");
       // return res
       //   .status(400)
       //   .json({ message: "OTP has expired. Please request a new one." });
@@ -80,7 +92,8 @@ const verifyOtp = async (req, res) => {
     // Verify the OTP
     const isOtpValid = await bcrypt.compare(otp, user.otp);
     if (!isOtpValid) {
-      return res.status(400).redirect("/auth/otp?message=Invalid OTP");
+      return res.status(400).json({ success: false, message: "Invalid OTP" });
+      // return res.status(400).redirect("/auth/otp?message=Invalid OTP");
       // return res
       //   .status(400)
       //   .json({ message: "Invalid OTP. Please try again." });
@@ -90,10 +103,12 @@ const verifyOtp = async (req, res) => {
     user.isVerified = true;
     user.otp = undefined; // Clear OTP after verification
     user.otpExpires = undefined; // Clear OTP expiration
-    user.updatedAt = Date.now();
     await user.save();
 
-    res.status(200).redirect("/");
+    res
+      .status(200)
+      .json({ success: true, message: "the user verified successful" });
+    // res.status(200).redirect("/");
     // res.status(200).json({ message: "User verified successfully." });
   } catch (error) {
     console.error("Error in verifyOtp:", error);
@@ -217,11 +232,12 @@ const getOtpPage = (req, res) => {
 //for resend otp
 const resendOtp = async (req, res) => {
   try {
-    const { _id, email } = req.body;
+    const _id = req.user?._id;
+    const email = req.user?.email;
     await sendVerificationMail({ _id, email }, res);
 
     return res.status(200).json({
-      status: "Success",
+      success: true,
       message: "OTP resend successfully",
       data: { userId: _id, email: email },
     });
@@ -288,14 +304,14 @@ const googleLogin = passport.authenticate("google-login", {
 //googleSignupCallback
 const googleSignupCallback = (req, res, next) => {
   passport.authenticate("google-signup", {
-    failureRedirect: "/?error=The user is already exist",
+    failureRedirect: "/?error=The user is already exist login please",
   })(req, res, next);
 };
 
 //googleLoginCallback
 const googleLoginCallback = (req, res, next) => {
   passport.authenticate("google-login", {
-    failureRedirect: `/?error=The useris not exist or blocked!!!`,
+    failureRedirect: `/?error=The user is not exist or blocked!!!`,
   })(req, res, next);
 };
 

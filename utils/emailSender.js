@@ -64,7 +64,7 @@ const sendVerificationMail = async ({ _id, email }, res) => {
   try {
     console.log(_id, email);
     // Generate a 4-digit OTP
-    const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+    const otp = `${Math.floor(100000 + Math.random() * 900000)}`;
 
     const mailOptions = {
       from: process.env.EMAIL_USER,

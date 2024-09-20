@@ -1,0 +1,275 @@
+<!-- Login Modal -->
+<div
+  class="modal fade"
+  id="loginModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="loginModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body p-0">
+        <div class="row no-gutters">
+          <div class="col-md-6 bg-image">
+            <div class="overlay">
+              <h2>HELLO WORLD.</h2>
+              <p>Lorem ipsum dolor sit amet consectetur adipiscing elit.</p>
+              <button
+                class="btn btn-outline-light"
+                data-dismiss="modal"
+                data-toggle="modal"
+                data-target="#signupModal"
+              >
+                Sign Up
+              </button>
+            </div>
+          </div>
+          <div class="col-md-6 bg-white p-5">
+            <h3 class="mb-4">Login</h3>
+            <form id="loginForm">
+              <div class="form-group">
+                <input
+                  type="email"
+                  class="form-control"
+                  name="email"
+                  id="loginEmail"
+                  placeholder="Email"
+                  required
+                />
+                <div id="loginEmailFeedback" class="feedback"></div>
+              </div>
+              <div class="form-group">
+                <input
+                  type="password"
+                  class="form-control"
+                  name="password"
+                  id="loginPassword"
+                  placeholder="Password"
+                  required
+                />
+                <div id="loginPasswordFeedback" class="feedback"></div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">
+                Login
+              </button>
+              <a
+                href="#"
+                id="forgotPasswordLink"
+                class="d-block text-center mt-3"
+                >Forgot Password?</a
+              >
+            </form>
+            <hr />
+            <a href="/auth/google/login" class="btn btn-danger btn-block">
+              <i class="fab fa-google"></i> Login with Google
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Signup Modal -->
+<div
+  class="modal fade"
+  id="signupModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="signupModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body p-0">
+        <div class="row no-gutters">
+          <div class="col-md-6 bg-image">
+            <div class="overlay">
+              <h2>HELLO WORLD.</h2>
+              <p>Lorem ipsum dolor sit amet consectetur adipiscing elit.</p>
+              <button
+                class="btn btn-outline-light"
+                data-dismiss="modal"
+                data-toggle="modal"
+                data-target="#loginModal"
+              >
+                Login
+              </button>
+            </div>
+          </div>
+          <div class="col-md-6 bg-white p-5">
+            <h3 class="mb-4">Sign Up</h3>
+            <form id="signUpForm">
+              <div class="form-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  name="firstName"
+                  id="firstName"
+                  placeholder="First Name"
+                  required
+                />
+                <div id="firstNameFeedback" class="feedback"></div>
+              </div>
+              <div class="form-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  name="lastName"
+                  id="lastName"
+                  placeholder="Last Name"
+                  required
+                />
+                <div id="lastNameFeedback" class="feedback"></div>
+              </div>
+              <div class="form-group">
+                <input
+                  type="email"
+                  class="form-control"
+                  name="email"
+                  id="email"
+                  placeholder="Email"
+                  required
+                />
+                <div id="emailFeedback" class="feedback"></div>
+              </div>
+              <div class="form-group">
+                <input
+                  type="password"
+                  class="form-control"
+                  name="password"
+                  id="password"
+                  placeholder="Password"
+                  required
+                />
+                <div id="passwordFeedback" class="feedback"></div>
+              </div>
+              <div class="form-group">
+                <input
+                  type="password"
+                  class="form-control"
+                  name="confirmPassword"
+                  id="confirmPassword"
+                  placeholder="Confirm Password"
+                  required
+                />
+                <div id="confirmPasswordFeedback" class="feedback"></div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">
+                Sign Up
+              </button>
+            </form>
+            <hr />
+            <a href="/auth/google/signup" class="btn btn-danger btn-block">
+              <i class="fab fa-google"></i> Sign Up with Google
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div
+  class="modal fade"
+  id="forgotPasswordModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="forgotPasswordModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-body p-4">
+        <h4>Forgot Password</h4>
+        <form id="forgotPasswordForm">
+          <div class="form-group">
+            <input
+              type="email"
+              class="form-control"
+              name="email"
+              id="forgotPasswordEmail"
+              placeholder="Enter your registered email"
+              required
+            />
+            <div id="forgotPasswordFeedback" class="feedback"></div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            Submit
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OTP Verification Modal -->
+<div id="otpModal" class="otp-modal">
+  <div class="otp-modal-content">
+    <div class="modal-header">
+      <h2>Phone Verification</h2>
+      <button class="close-button" id="closeModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="instruction">Enter the 6-digit code sent to</p>
+      <p class="phone-number">+1 (302) 678-2810</p>
+      <form id="otpForm">
+        <div class="otp-inputs">
+          <input
+            type="text"
+            maxlength="1"
+            class="otp-input"
+            id="otp1"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+          />
+          <input
+            type="text"
+            maxlength="1"
+            class="otp-input"
+            id="otp2"
+            inputmode="numeric"
+          />
+          <input
+            type="text"
+            maxlength="1"
+            class="otp-input"
+            id="otp3"
+            inputmode="numeric"
+          />
+          <input
+            type="text"
+            maxlength="1"
+            class="otp-input"
+            id="otp4"
+            inputmode="numeric"
+          />
+          <input
+            type="text"
+            maxlength="1"
+            class="otp-input"
+            id="otp5"
+            inputmode="numeric"
+          />
+          <input
+            type="text"
+            maxlength="1"
+            class="otp-input"
+            id="otp6"
+            inputmode="numeric"
+          />
+        </div>
+        <button type="submit" class="verify-button">Verify</button>
+      </form>
+      <div class="resend-timer">
+        <span id="timer">Resend OTP in <span id="countdown">60</span>s</span>
+        <a href="#" id="resendOtpLink" style="display: none">Resend OTP</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/public/user/js/validation.js"></script>
+<script src="/public/user/js/authModal.js"></script>

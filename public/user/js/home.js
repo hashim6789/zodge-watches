@@ -26,13 +26,13 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   // Reinitialize Slick carousel in the modal
-  $(".slick3").slick({
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    fade: true,
-    arrows: false,
-    dots: true,
-  });
+  // $(".slick3").slick({
+  //   slidesToShow: 1,
+  //   slidesToScroll: 1,
+  //   fade: true,
+  //   arrows: false,
+  //   dots: true,
+  // });
 });
 
 // Fetch products based on category, page, sorting, and search query
@@ -242,7 +242,7 @@ $(".js-select2").each(function () {
 });
 
 /*---------------------------------------------*/
-$(".parallax100").parallax100();
+// $(".parallax100").parallax100();
 /*---------------------------------------------*/
 
 $(".gallery-lb").each(function () {
