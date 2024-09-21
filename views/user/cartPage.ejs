@@ -41,7 +41,7 @@
                     <th class="column-3">Price</th>
                     <th class="column-4">Quantity</th>
                     <th class="column-5">Total</th>
-                    <th class="column-6">Remove</th>
+                    <!-- <th class="column-6">Remove</th> -->
                   </tr>
 
                   <% cart.products.forEach(function(product) { %>
@@ -114,34 +114,7 @@
                   <% }) %>
                 </table>
               </div>
-              <div
-                class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm"
-              >
-                <div class="flex-w flex-m m-r-20 m-tb-5">
-                  <input
-                    id="couponCode"
-                    class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5"
-                    type="text"
-                    name="coupon"
-                    placeholder="Coupon Code"
-                  />
-                  <button
-                    class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5"
-                    id="applyCouponBtn"
-                    type="button"
-                  >
-                    Apply coupon
-                  </button>
-                </div>
 
-                <button
-                  class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10"
-                  type="button"
-                  onclick="removeCoupon()"
-                >
-                  Remove Coupon
-                </button>
-              </div>
               <% } else { %>
               <div class="text-center">
                 <p class="mtext-103 cl2">Your cart is currently empty.</p>
@@ -176,18 +149,6 @@
                 </div>
               </div>
 
-              <!-- Coupon Discount Field -->
-              <div class="flex-w flex-t p-t-15 p-b-13">
-                <div class="size-208">
-                  <span class="stext-110 cl2"> Coupon Discount: </span>
-                </div>
-                <div class="size-209">
-                  <span id="couponDiscountAmount" class="mtext-110 cl2">
-                    ₹ <%= cart.coupon.discountAmount || "0.00" %>
-                  </span>
-                </div>
-              </div>
-
               <!-- Total -->
               <div class="flex-w flex-t p-t-27 p-b-33">
                 <div class="size-208">
@@ -207,30 +168,40 @@
             </div>
           </div>
           <% } %>
-
-          <!-- Add a section to display the coupon discount, if applied -->
-          <div
-            id="couponFeedback"
-            class="stext-101 cl2 m-tb-10"
-            style="display: none"
-          >
-            Coupon applied! Discount: ₹ <span id="couponDiscount"></span>
-          </div>
-
-          <!-- Error message for invalid coupon -->
-          <div
-            id="invalidCouponFeedback"
-            class="invalid-feedback"
-            style="display: none; color: red"
-          >
-            Invalid or expired coupon code.
-          </div>
-
-          <!-- Hidden field to store discount amount -->
-          <input type="hidden" id="discountAmount" value="0" />
         </div>
       </div>
     </form>
+    <!-- Coupon Discount Field
+    <div class="flex-w flex-t p-t-15 p-b-13">
+      <div class="size-208">
+        <span class="stext-110 cl2"> Coupon Discount: </span>
+      </div>
+      <div class="size-209">
+        <span id="couponDiscountAmount" class="mtext-110 cl2">
+          ₹ <%= cart.coupon.discountAmount || "0.00" %>
+        </span>
+      </div>
+    </div> -->
+    <!-- Add a section to display the coupon discount, if applied -->
+    <!-- <div
+      id="couponFeedback"
+      class="stext-101 cl2 m-tb-10"
+      style="display: none"
+    >
+      Coupon applied! Discount: ₹ <span id="couponDiscount"></span>
+    </div> -->
+
+    <!-- Error message for invalid coupon -->
+    <!-- <div
+      id="invalidCouponFeedback"
+      class="invalid-feedback"
+      style="display: none; color: red"
+    >
+      Invalid or expired coupon code.
+    </div> -->
+
+    <!-- Hidden field to store discount amount -->
+    <!-- <input type="hidden" id="discountAmount" value="0" /> -->
 
     <!-- Footer -->
     <%- include('partials/_footer') %>
@@ -244,165 +215,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-      document
-        .getElementById("applyCouponBtn")
-        .addEventListener("click", function () {
-          const couponCode = document.getElementById("couponCode").value;
-
-          if (couponCode) {
-            axios
-              .post("/cart/coupon/apply", { couponCode })
-              .then((response) => {
-                if (response.data.success) {
-                  const originalCart = response.data.cart;
-                  const coupon = originalCart.coupon;
-                  console.log(coupon);
-
-                  let discountAmount =
-                    (coupon.discountPercentage / 100) *
-                    parseFloat(
-                      document
-                        .getElementById("subtotal")
-                        .innerText.replace("₹ ", "")
-                    );
-
-                  if (discountAmount > coupon.maxDiscountAmount) {
-                    discountAmount = coupon.maxDiscountAmount;
-                  }
-
-                  console.log(discountAmount);
-
-                  const subtotal = parseFloat(
-                    document
-                      .getElementById("subtotal")
-                      .innerText.replace("₹ ", "")
-                  );
-                  const newTotal = subtotal - discountAmount;
-
-                  document.getElementById(
-                    "couponDiscountAmount"
-                  ).innerText = `₹ ${discountAmount.toFixed(2)}`;
-                  document.getElementById(
-                    "totalAmount"
-                  ).innerText = `₹ ${newTotal.toFixed(2)}`;
-
-                  let cart = JSON.parse(localStorage.getItem("cart")) || {
-                    products: [],
-                    totalPrice: 0,
-                    coupon: null,
-                    address: null,
-                  };
-
-                  cart.coupon = {
-                    code: couponCode,
-                    discountPercentage: coupon.discountPercentage,
-                    discountAmount: discountAmount,
-                    maxDiscountAmount: coupon.maxDiscountAmount,
-                  };
-
-                  cart.totalPrice = newTotal;
-
-                  localStorage.setItem("cart", JSON.stringify(cart));
-
-                  Swal.fire({
-                    icon: "success",
-                    title: "Coupon applied successfully",
-                    text: `Discount: ₹ ${discountAmount.toFixed(2)}`,
-                    confirmButtonText: "OK",
-                  });
-                } else {
-                  Swal.fire({
-                    icon: "error",
-                    title: "Invalid Coupon",
-                    text: "The coupon code you entered is not valid or has expired.",
-                    confirmButtonText: "OK",
-                  });
-
-                  document.getElementById(
-                    "invalidCouponFeedback"
-                  ).style.display = "block";
-                }
-              })
-              .catch((error) => {
-                console.error(error);
-
-                Swal.fire({
-                  icon: "error",
-                  title: "Error",
-                  text: error.response.data.message,
-                  confirmButtonText: "OK",
-                });
-              });
-          } else {
-            Swal.fire({
-              icon: "warning",
-              title: "No Coupon Code",
-              text: "Please enter a coupon code before applying.",
-              confirmButtonText: "OK",
-            });
-          }
-        });
-
-      function removeCoupon() {
-        const subtotal = parseFloat(
-          document.getElementById("subtotal").innerText.replace("₹ ", "")
-        );
-
-        // Clear coupon input and reset discount display
-        document.getElementById("couponCode").value = "";
-        document.getElementById("couponDiscountAmount").innerText = "₹ 0.00";
-
-        document.getElementById(
-          "totalAmount"
-        ).innerText = `₹ ${subtotal.toFixed(2)}`;
-
-        // Retrieve the cart from localStorage
-        let cart = JSON.parse(localStorage.getItem("cart")) || {
-          products: [],
-          totalPrice: 0,
-          coupon: null,
-          address: null,
-        };
-
-        // Remove coupon data from the cart
-        delete cart.coupon;
-        cart.totalPrice = subtotal;
-
-        // Update the cart in localStorage
-        localStorage.setItem("cart", JSON.stringify(cart));
-
-        // Make an Axios request to the backend to remove the coupon
-        axios
-          .delete("/cart/coupon/remove") // Adjust the route based on your backend API
-          .then((response) => {
-            if (response.data.success) {
-              Swal.fire({
-                icon: "success",
-                title: "Coupon removed successfully",
-                confirmButtonText: "OK",
-              });
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: "Failed to remove coupon",
-                text: response.data.message,
-                confirmButtonText: "OK",
-              });
-            }
-          })
-          .catch((error) => {
-            console.error("Error removing coupon:", error);
-            Swal.fire({
-              icon: "error",
-              title: "Server error",
-              text: "Could not remove the coupon. Please try again.",
-              confirmButtonText: "OK",
-            });
-          });
-      }
-    </script>
 
     <!--===============================================================================================-->
     <script src="/public/user/vendor/jquery/jquery-3.2.1.min.js"></script>

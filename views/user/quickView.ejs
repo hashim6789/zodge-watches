@@ -9,6 +9,9 @@
     <!-- Header -->
     <%- include('partials/_navbar', {user, wishlist, cart}) %>
 
+    <!-- authentication modals -->
+    <%- include('partials/_authModals') %>
+
     <!-- Wishlist -->
     <%- include('partials/_wishlist', {wishlist}) %>
 
@@ -385,28 +388,13 @@
             });
           })
           .catch((error) => {
-            console.error(error);
-            if (error.response && error.response.status === 401) {
-              // Redirect to login page if the user is not authenticated
-              Swal.fire({
-                icon: "warning",
-                title: "Authentication Required",
-                text: "Please log in to add products to your cart.",
-                confirmButtonText: "Log In",
-              }).then(() => {
-                window.location.href = "/auth/login"; // Change '/auth/login' to your actual login route
-              });
-            } else {
-              // Handle other errors
-              Swal.fire({
-                icon: "error",
-                title: "Error",
-                text:
-                  error.response?.data?.message ||
-                  "An error occurred while adding the product to the cart.",
-                confirmButtonText: "OK",
-              });
-            }
+            console.error("Error adding product to cart:", error);
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: error.response.data.message,
+              showConfirmButton: true,
+            });
           });
       }
     </script>

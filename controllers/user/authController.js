@@ -2,6 +2,8 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
 const UserModel = require("../../models/User");
+const WishlistModel = require("../../models/Wishlist");
+const CartModel = require("../../models/Cart");
 
 const {
   sendVerificationMail,
@@ -11,57 +13,146 @@ const {
 require("dotenv").config();
 
 /**-------------for traditional signup and login-------------------- */
-
 const postLocalLogin = async (req, res, next) => {
-  passport.authenticate("local-login", (err, user, info) => {
+  passport.authenticate("local-login", async (err, user, info) => {
     if (err) {
       return next(err);
     }
     if (!user) {
       return res.status(404).json({ success: false, message: info.message });
-      // return res.redirect("/auth/login?error=" + info.message);
     }
 
-    req.logIn(user, (err) => {
+    req.logIn(user, async (err) => {
       if (err) {
         return next(err);
       }
 
-      return res
-        .status(200)
-        .json({ success: true, message: "user login successfully" });
+      try {
+        // Fetch wishlist and cart from the database for the user
+        const wishlist = await WishlistModel.findOne({ userId: user._id });
+        const cart = await CartModel.findOne({ userId: user._id });
 
-      // const returnTo = req.session.returnTo || "/";
-      // delete req.session.returnTo;
-      // return res.redirect(`${returnTo}?message=The user login successfully.`);
+        // Send wishlist and cart data along with success response
+        // return res.status(200).json({
+        //   success: true,
+        //   message: "User login successfully",
+        //   wishlist: wishlist ? wishlist.productIds : [], // Return array of product IDs from wishlist
+        //   cart: cart
+        //     ? cart.products.map((item) => ({
+        //         productId: item.productId,
+        //         quantity: item.quantity,
+        //         price: item.price,
+        //       }))
+        //     : [], // Return array of products with productId, quantity, and price
+        //   totalPrice: cart ? cart.totalPrice : 0, // Return total price of cart
+        // });
+        return res.status(200).json({
+          success: true,
+          message: "User login successfully",
+          wishlist: wishlist ? wishlist.productIds : [], // Return array of product IDs from wishlist
+          cart, // Return array of products with productId, quantity, and price
+          // totalPrice: cart ? cart.totalPrice : 0, // Return total price of cart
+        });
+      } catch (dbError) {
+        return next(dbError);
+      }
     });
   })(req, res, next);
 };
 
 const postLocalSignup = async (req, res, next) => {
-  passport.authenticate("local-signup", (err, user, info) => {
+  passport.authenticate("local-signup", async (err, user, info) => {
     if (err) {
       return next(err);
     }
     if (!user) {
       return res.status(404).json({ success: false, message: info.message });
-
-      // return res.redirect("/auth/signup?error=" + info.message);
     }
-    console.log(req.user);
+
     req.logIn(user, async (err) => {
       if (err) {
         return next(err);
       }
-      console.log(user);
 
-      // Optionally, send verification email
-      await sendVerificationMail(user, res);
+      try {
+        // Optionally send a verification email
+        await sendVerificationMail(user, res);
+
+        // Initialize empty wishlist and cart for the new user
+        const wishlist = await WishlistModel.create({
+          userId: user._id,
+          productIds: [], // Start with an empty productIds array
+        });
+
+        const cart = await CartModel.create({
+          userId: user._id,
+          products: [], // Start with an empty products array
+          totalPrice: 0, // Total price set to 0 initially
+        });
+
+        return res.status(200).json({
+          success: true,
+          message: "User signup successful",
+          wishlist: wishlist.productIds, // Return an empty wishlist array
+          cart, // Return an empty cart array
+        });
+      } catch (dbError) {
+        return next(dbError);
+      }
     });
   })(req, res, next);
-
-  // return res.redirect(`/auth/otp`);
 };
+
+// const postLocalLogin = async (req, res, next) => {
+//   passport.authenticate("local-login", (err, user, info) => {
+//     if (err) {
+//       return next(err);
+//     }
+//     if (!user) {
+//       return res.status(404).json({ success: false, message: info.message });
+//       // return res.redirect("/auth/login?error=" + info.message);
+//     }
+
+//     req.logIn(user, (err) => {
+//       if (err) {
+//         return next(err);
+//       }
+
+//       return res
+//         .status(200)
+//         .json({ success: true, message: "user login successfully" });
+
+//       // const returnTo = req.session.returnTo || "/";
+//       // delete req.session.returnTo;
+//       // return res.redirect(`${returnTo}?message=The user login successfully.`);
+//     });
+//   })(req, res, next);
+// };
+
+// const postLocalSignup = async (req, res, next) => {
+//   passport.authenticate("local-signup", (err, user, info) => {
+//     if (err) {
+//       return next(err);
+//     }
+//     if (!user) {
+//       return res.status(404).json({ success: false, message: info.message });
+
+//       // return res.redirect("/auth/signup?error=" + info.message);
+//     }
+//     console.log(req.user);
+//     req.logIn(user, async (err) => {
+//       if (err) {
+//         return next(err);
+//       }
+//       console.log(user);
+
+//       // Optionally, send verification email
+//       await sendVerificationMail(user, res);
+//     });
+//   })(req, res, next);
+
+//   // return res.redirect(`/auth/otp`);
+// };
 
 const verifyOtp = async (req, res) => {
   try {
@@ -301,17 +392,91 @@ const googleLogin = passport.authenticate("google-login", {
   scope: ["profile", "email"],
 });
 
+// //googleSignupCallback
+// const googleSignupCallback = (req, res, next) => {
+//   passport.authenticate("google-signup", {
+//     failureRedirect: "/?error=The user is already exist login please",
+//   })(req, res, next);
+// };
+
+// //googleLoginCallback
+// const googleLoginCallback = (req, res, next) => {
+//   passport.authenticate("google-login", {
+//     failureRedirect: `/?error=The user is not exist or blocked!!!`,
+//   })(req, res, next);
+// };
+
 //googleSignupCallback
-const googleSignupCallback = (req, res, next) => {
-  passport.authenticate("google-signup", {
-    failureRedirect: "/?error=The user is already exist login please",
+const googleSignupCallback = async (req, res, next) => {
+  passport.authenticate("google-signup", async (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.status(404).json({ success: false, message: info.message });
+    }
+
+    req.logIn(user, async (err) => {
+      if (err) {
+        return next(err);
+      }
+
+      try {
+        // Initialize empty wishlist and cart for the new user
+        const wishlist = await WishlistModel.create({
+          userId: user._id,
+          productIds: [], // Start with an empty productIds array
+        });
+
+        const cart = await CartModel.create({
+          userId: user._id,
+          products: [], // Start with an empty products array
+          totalPrice: 0, // Total price set to 0 initially
+        });
+
+        // Redirect to profile/home page after successful signup
+        redirectToProfile(req, res);
+      } catch (dbError) {
+        return next(dbError);
+      }
+    });
   })(req, res, next);
 };
 
 //googleLoginCallback
-const googleLoginCallback = (req, res, next) => {
-  passport.authenticate("google-login", {
-    failureRedirect: `/?error=The user is not exist or blocked!!!`,
+const googleLoginCallback = async (req, res, next) => {
+  passport.authenticate("google-login", async (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.status(404).json({ success: false, message: info.message });
+    }
+
+    req.logIn(user, async (err) => {
+      if (err) {
+        return next(err);
+      }
+
+      try {
+        // Fetch wishlist and cart from the database for the user
+        const wishlist = await WishlistModel.findOne({ userId: user._id });
+        const cart = await CartModel.findOne({ userId: user._id });
+
+        // Send wishlist and cart data along with success response
+        res.status(200).json({
+          success: true,
+          message: "User login successfully",
+          wishlist: wishlist ? wishlist.productIds : [], // Return array of product IDs from wishlist
+          cart: cart || { products: [], totalPrice: 0 }, // Return existing cart or a new one
+        });
+
+        // Redirect to profile/home page after successful login
+        redirectToProfile(req, res);
+      } catch (dbError) {
+        return next(dbError);
+      }
+    });
   })(req, res, next);
 };
 

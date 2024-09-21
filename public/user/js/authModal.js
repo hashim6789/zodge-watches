@@ -159,18 +159,15 @@ async function handleResendOtp(e) {
 function initializeForms() {
   const loginForm = document.getElementById("loginForm");
   const signUpForm = document.getElementById("signUpForm");
-  // Handle Signup Form Submission
+
   signUpForm.addEventListener("submit", async function (event) {
     event.preventDefault();
-    $("#signupModal").modal("hide");
-
+    console.log("testing");
     const firstName = document.getElementById("firstName").value;
     const lastName = document.getElementById("lastName").value;
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
 
-    // Disable the signup button to prevent duplicate submissions
     const signupButton = event.target.querySelector('button[type="submit"]');
     signupButton.disabled = true;
 
@@ -181,6 +178,21 @@ function initializeForms() {
         email,
         password,
       });
+
+      // Check and initialize localStorage with wishlist and cart if not already initialized
+      const wishlistFromDB = response.data.wishlist || [];
+      const cartFromDB = response.data.cart || {};
+
+      console.log("wishlist = ", wishlistFromDB);
+      console.log("cart = ", cartFromDB);
+
+      if (!localStorage.getItem("wishlist")) {
+        localStorage.setItem("wishlist", JSON.stringify(wishlistFromDB));
+      }
+
+      if (!localStorage.getItem("cart")) {
+        localStorage.setItem("cart", JSON.stringify(cartFromDB));
+      }
 
       Swal.fire({
         icon: "success",
@@ -202,21 +214,17 @@ function initializeForms() {
         icon: "error",
         title: "Sign Up Failed",
         text:
-          error.response.data.message ||
+          error.response?.data?.message ||
           "An unexpected error occurred. Please try again later.",
         showConfirmButton: true,
       }).then(() => {
-        // Optionally re-enable the button if needed
         signupButton.disabled = false;
-        window.location.href = "/";
       });
     } finally {
-      // Re-enable the button if it wasn't already
       signupButton.disabled = false;
     }
   });
 
-  // Handle Login Form Submission
   loginForm.addEventListener("submit", async function (event) {
     event.preventDefault();
     const email = document.getElementById("loginEmail").value;
@@ -224,6 +232,22 @@ function initializeForms() {
 
     try {
       const response = await axios.post("/auth/login", { email, password });
+
+      // Check and initialize localStorage with wishlist and cart if not already initialized
+      const wishlistFromDB = response.data.wishlist || [];
+      const cartFromDB = response.data.cart || [];
+
+      console.log("wishlist = ", wishlistFromDB);
+      console.log("cart = ", cartFromDB);
+
+      if (!localStorage.getItem("wishlist")) {
+        localStorage.setItem("wishlist", JSON.stringify(wishlistFromDB));
+      }
+
+      if (!localStorage.getItem("cart")) {
+        localStorage.setItem("cart", JSON.stringify(cartFromDB));
+      }
+
       Swal.fire({
         icon: "success",
         title: "Login Successful",
@@ -235,14 +259,100 @@ function initializeForms() {
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: error.response.data.message,
+        title: "Login Failed",
         text:
-          error.response.data.message ||
+          error.response?.data?.message ||
           "An unexpected error occurred. Please try again later.",
         showConfirmButton: true,
       });
     }
   });
+
+  // Handle Signup Form Submission
+  // signUpForm.addEventListener("submit", async function (event) {
+  //   event.preventDefault();
+  //   $("#signupModal").modal("hide");
+
+  //   const firstName = document.getElementById("firstName").value;
+  //   const lastName = document.getElementById("lastName").value;
+  //   const email = document.getElementById("email").value;
+  //   const password = document.getElementById("password").value;
+  //   const confirmPassword = document.getElementById("confirmPassword").value;
+
+  //   // Disable the signup button to prevent duplicate submissions
+  //   const signupButton = event.target.querySelector('button[type="submit"]');
+  //   signupButton.disabled = true;
+
+  //   try {
+  //     const response = await axios.post("/auth/signup", {
+  //       firstName,
+  //       lastName,
+  //       email,
+  //       password,
+  //     });
+
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "Sign Up Successful",
+  //       text: response.data.message,
+  //       showConfirmButton: true,
+  //     }).then(() => {
+  //       $(".modal").modal("hide");
+  //       $(".modal-backdrop").remove();
+
+  //       // Show the OTP modal
+  //       setTimeout(() => {
+  //         $("#otpModal").modal("show");
+  //         initializeOtpInputs();
+  //       }, 300);
+  //     });
+  //   } catch (error) {
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Sign Up Failed",
+  //       text:
+  //         error.response.data.message ||
+  //         "An unexpected error occurred. Please try again later.",
+  //       showConfirmButton: true,
+  //     }).then(() => {
+  //       // Optionally re-enable the button if needed
+  //       signupButton.disabled = false;
+  //       window.location.href = "/";
+  //     });
+  //   } finally {
+  //     // Re-enable the button if it wasn't already
+  //     signupButton.disabled = false;
+  //   }
+  // });
+
+  // // Handle Login Form Submission
+  // loginForm.addEventListener("submit", async function (event) {
+  //   event.preventDefault();
+  //   const email = document.getElementById("loginEmail").value;
+  //   const password = document.getElementById("loginPassword").value;
+
+  //   try {
+  //     const response = await axios.post("/auth/login", { email, password });
+
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "Login Successful",
+  //       text: response.data.message,
+  //       showConfirmButton: true,
+  //     }).then(() => {
+  //       window.location.href = "/"; // Redirect on success
+  //     });
+  //   } catch (error) {
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: error.response.data.message,
+  //       text:
+  //         error.response.data.message ||
+  //         "An unexpected error occurred. Please try again later.",
+  //       showConfirmButton: true,
+  //     });
+  //   }
+  // });
 }
 
 // <!-- Include SweetAlert2 library -->

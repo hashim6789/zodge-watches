@@ -108,6 +108,7 @@ const addToCart = async (req, res) => {
     }
 
     await cart.save();
+    req.session.cart = cart;
 
     console.log("Product added to cart successfully");
     res.status(200).json({
@@ -166,6 +167,8 @@ const updateQuantity = async (req, res) => {
     cart.updatedAt = Date.now();
     await cart.save();
 
+    req.session.cart = cart;
+
     return res.status(200).json({
       status: "Success",
       message: "The quantity is updated",
@@ -214,6 +217,8 @@ const deleteCartProduct = async (req, res) => {
     cart.updatedAt = Date.now();
 
     await cart.save();
+
+    req.session.cart = cart;
 
     return res.status(200).json({
       status: "Success",

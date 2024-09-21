@@ -44,7 +44,7 @@ document
         }
       })
       .catch((error) => {
-        Swal.fire("Error", "Address creation failed", "error");
+        Swal.fire("Error", error.res, "error");
       });
   });
 
@@ -63,16 +63,14 @@ document
     try {
       const response = await axios.patch(`/profile/personal/${userId}`, data);
       if (response.status === 200) {
-        Swal.fire("Success", "Profile updated successfully!", "success").then(
-          () => {
-            window.location.reload();
-          }
-        );
+        Swal.fire("Success", response.data.message, "success").then(() => {
+          window.location.reload();
+        });
       } else {
         Swal.fire("Error", "Failed to update profile", "error");
       }
     } catch (error) {
-      Swal.fire("Error", "Profile update failed", "error");
+      Swal.fire("Error", error.response.data.message, "error");
     }
   });
 

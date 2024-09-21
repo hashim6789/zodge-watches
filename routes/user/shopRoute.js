@@ -5,6 +5,7 @@ const router = express.Router();
 const {
   isAuthenticatedUser,
   checkBlocked,
+  isVerifiedUser,
   trackPreviousPage,
 } = require("../../middlewares/authenticationMiddlewares");
 
@@ -30,7 +31,7 @@ router.get("/", getShop);
 
 //get the product details
 //get - /shop/product/:id
-router.get("/products/:productId", checkBlocked, getProductDetails);
+router.get("/products/:productId", getProductDetails);
 
 //get the product image url
 //get - /shop/getImagePath

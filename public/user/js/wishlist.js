@@ -78,7 +78,11 @@ function addToWishlist(productId) {
 
 function removeFromWishlist(productId) {
   axios
-    .delete(`/wishlist/${productId}/remove`)
+    .delete(`/wishlist/${productId}/remove`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
     .then((response) => {
       // const wishlist = response.data.data;
       const data = response.data.data;

@@ -18,7 +18,7 @@ const {
 const {
   isAuthenticatedUser,
   checkBlocked,
-  trackPreviousPage,
+  isVerifiedUser,
 } = require("../../middlewares/authenticationMiddlewares");
 
 //for Authorization
@@ -37,9 +37,21 @@ router.post("/", isAuthenticatedUser, authorizeUser, checkBlocked, postCart);
 
 router.post("/add", isAuthenticatedUser, authorizeUser, addToCart);
 
-router.post("/coupon/apply", applyCoupon);
+router.post(
+  "/coupon/apply",
+  isAuthenticatedUser,
+  authorizeUser,
+  isVerifiedUser,
+  applyCoupon
+);
 
-router.delete("/coupon/remove", removeCoupon);
+router.delete(
+  "/coupon/remove",
+  isAuthenticatedUser,
+  authorizeUser,
+  isVerifiedUser,
+  removeCoupon
+);
 
 router.patch(
   "/update-quantity",

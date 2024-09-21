@@ -5,6 +5,7 @@ const router = express.Router();
 const {
   isAuthenticatedUser,
   checkBlocked,
+  isVerifiedUser,
   redirectIfAuthenticated,
 } = require("../../middlewares/authenticationMiddlewares");
 
@@ -47,11 +48,32 @@ router.post("/signup", redirectIfAuthenticated, postLocalSignup);
 //get otp entering page
 // router.get("/otp", getOtpPage);
 
+//post otp resend
+router.post(
+  "/api/send-otp",
+  isAuthenticatedUser,
+  authorizeUser,
+  checkBlocked,
+  resendOtp
+);
+
 //post otp generator and verify the otp
-router.post("/api/verify-otp", verifyOtp);
+router.post(
+  "/api/verify-otp",
+  isAuthenticatedUser,
+  authorizeUser,
+  checkBlocked,
+  verifyOtp
+);
 
 //post otp resend
-router.post("/api/resend-otp", resendOtp);
+router.post(
+  "/api/resend-otp",
+  isAuthenticatedUser,
+  authorizeUser,
+  checkBlocked,
+  resendOtp
+);
 
 //get the login page
 router.get("/login", redirectIfAuthenticated, getLogin);
@@ -84,15 +106,29 @@ router.get(
 //post - /auth/forgot-password
 router.post("/forgot-password", forgotPassword);
 
-//post - /auth/reset-password
-router.get("/reset-password/:token", getResetPasswordPage);
+// //post - /auth/reset-password
+// router.get("/reset-password/:token", getResetPasswordPage);
 
-//post - /auth/verify-password
-router.post("/change-password", changePassword);
+// //post - /auth/verify-password
+// router.post("/change-password", changePassword);
 
-router.post("/validate-password", validateCurrentPassword);
+router.post(
+  "/validate-password",
+  isAuthenticatedUser,
+  authorizeUser,
+  checkBlocked,
+  isVerifiedUser,
+  validateCurrentPassword
+);
 
-router.post("/change-user-password", changeUserPassword);
+router.post(
+  "/change-user-password",
+  isAuthenticatedUser,
+  authorizeUser,
+  checkBlocked,
+  isVerifiedUser,
+  changeUserPassword
+);
 
 // Auth logout
 router.get("/logout", isAuthenticatedUser, authorizeUser, logout);

@@ -126,7 +126,7 @@ const postCheckout = async (req, res) => {
 
     await newOrder.save();
     req.session.order = newOrder;
-    console.log(req.session.order);
+    // console.log(req.session.order);
 
     const cart = await CartModel.findOne({ userId });
     cart.products = [];
@@ -134,6 +134,7 @@ const postCheckout = async (req, res) => {
     cart.totalPrice = 0;
 
     await cart.save();
+    delete req.session.cart;
     // console.log("order = ", newOrder);
 
     if (paymentMethod === "cod") {
@@ -171,6 +172,7 @@ const postCheckout = async (req, res) => {
       newOrder.orderStatus = "placed";
       newOrder.paymentStatus = "successful";
       newOrder.save();
+
       await finalizeStockReduction(orderProducts);
       await sendOrderConfirmationEmail(newOrder);
 
@@ -202,8 +204,8 @@ const postCheckout = async (req, res) => {
         key_id: process.env.RAZORPAY_KEY_ID,
       });
     }
-    req.session.order = newOrder;
-    console.log(req.session.order);
+    // req.session.order = newOrder;
+    // console.log(req.session.order);
   } catch (err) {
     res.status(500).json({ success: false, message: "Server Error!!!" });
   }
@@ -276,6 +278,7 @@ const getOrderConfirmation = async (req, res) => {
       return res.status(404).send("Order not found");
     }
 
+    delete req.session.order;
     res.render("user/orderSuccessPage", {
       user,
       wishlist,
@@ -283,8 +286,6 @@ const getOrderConfirmation = async (req, res) => {
       orderId: order.orderId,
     });
     // res.render("user/orderConfirmation", { order, user, wishlist, cart });
-    req.session.cart = null;
-    req.session.order = null;
   } catch (error) {
     console.error("Error fetching order:", error);
     res.status(500).json({ success: false, message: "Server Error!!!" });

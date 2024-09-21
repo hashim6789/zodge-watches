@@ -12,10 +12,80 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"
       rel="stylesheet"
     />
+    <!-- <link rel="stylesheet" href="/public/user/css/authModals.css" /> -->
   </head>
   <body class="animsition">
     <!-- Header -->
     <%- include('partials/_navbar', {user, wishlist, cart}) %>
+
+    <!-- for otp modal -->
+    <!-- OTP Verification Modal -->
+    <div id="otpModal" class="otp-modal">
+      <div class="otp-modal-content">
+        <div class="modal-header">
+          <h2>Phone Verification</h2>
+          <button class="close-button" id="closeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="instruction">Enter the 6-digit code sent to</p>
+          <p class="phone-number">+1 (302) 678-2810</p>
+          <form id="otpForm">
+            <div class="otp-inputs">
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-input"
+                id="otp1"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-input"
+                id="otp2"
+                inputmode="numeric"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-input"
+                id="otp3"
+                inputmode="numeric"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-input"
+                id="otp4"
+                inputmode="numeric"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-input"
+                id="otp5"
+                inputmode="numeric"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-input"
+                id="otp6"
+                inputmode="numeric"
+              />
+            </div>
+            <button type="submit" class="verify-button">Verify</button>
+          </form>
+          <div class="resend-timer">
+            <span id="timer"
+              >Resend OTP in <span id="countdown">60</span>s</span
+            >
+            <a href="#" id="resendOtpLink" style="display: none">Resend OTP</a>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Wishlist -->
     <%- include('partials/_wishlist', {wishlist}) %>
@@ -38,7 +108,7 @@
               <% if(user.thumbnail){%>
               <img
                 src="<%= user.thumbnail %>"
-                alt="Profile Picture"
+                alt="thumbnail Picture"
                 class="rounded-circle"
                 style="width: 100px; height: 100px"
               />
@@ -115,6 +185,7 @@
                       <label class="form-label fw-bold">Email</label>
                       <input
                         type="email"
+                        id="userMail"
                         class="form-control border-0 bg-light"
                         value="<%= user.email %>"
                         readonly
@@ -134,7 +205,9 @@
 
                         <% if (!user.isVerified) { %>
                         <div class="col-lg-6">
-                          <button class="btn btn-warning">Verify Email</button>
+                          <button id="verifyEmailBtn" class="btn btn-warning">
+                            Verify Email
+                          </button>
                         </div>
                         <% } %>
                       </div>
@@ -757,6 +830,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- <script src="/public/user/js/authModal.js"></script> -->
 
     <!-- JavaScript for handling Edit Address form submission -->
     <script>
@@ -798,18 +872,16 @@
               addressData
             );
             if (response.status === 200) {
-              Swal.fire(
-                "Success",
-                "Address updated successfully!",
-                "success"
-              ).then(() => {
-                location.reload();
-              });
+              Swal.fire("Success", response.data.message, "success").then(
+                () => {
+                  location.reload();
+                }
+              );
             } else {
               Swal.fire("Error", "Failed to update address", "error");
             }
           } catch (error) {
-            Swal.fire("Error", "Address update failed", "error");
+            Swal.fire("Error", error.response.data.message, "error");
           }
         });
     </script>
@@ -825,24 +897,24 @@
             lastName: document.getElementById("profileLastName").value,
           };
 
+          console.log("data = ", data);
+
           try {
             const response = await axios.patch(
               `/profile/personal/${userId}`,
               data
             );
             if (response.status === 200) {
-              Swal.fire(
-                "Success",
-                "Profile updated successfully!",
-                "success"
-              ).then(() => {
-                window.location.reload();
-              });
+              Swal.fire("Success", response.data.message, "success").then(
+                () => {
+                  window.location.reload();
+                }
+              );
             } else {
               Swal.fire("Error", "Failed to update profile", "error");
             }
           } catch (error) {
-            Swal.fire("Error", "Profile update failed", "error");
+            Swal.fire("Error", error.response.data.message, "error");
           }
         });
 
@@ -882,19 +954,17 @@
             .post("/profile/address", data)
             .then((response) => {
               if (response.status === 201) {
-                Swal.fire(
-                  "Success",
-                  "Address created successfully!",
-                  "success"
-                ).then(() => {
-                  location.reload();
-                });
+                Swal.fire("Success", response.data.message, "success").then(
+                  () => {
+                    location.reload();
+                  }
+                );
               } else {
                 Swal.fire("Error", "Failed to create address", "error");
               }
             })
             .catch((error) => {
-              Swal.fire("Error", "Address creation failed", "error");
+              Swal.fire("Error", error.response.data.message, "error");
             });
         });
 
@@ -968,19 +1038,17 @@
               .then((response) => {
                 console.log(response.data.success);
                 if (response.data.success) {
-                  Swal.fire(
-                    "Deleted!",
-                    "Your address has been deleted.",
-                    "success"
-                  ).then(() => {
-                    location.reload();
-                  });
+                  Swal.fire("Deleted!", response.data.message, "success").then(
+                    () => {
+                      location.reload();
+                    }
+                  );
                 } else {
                   Swal.fire("Error", "Failed to delete the address", "error");
                 }
               })
               .catch((error) => {
-                Swal.fire("Error", "Address deletion failed", "error");
+                Swal.fire("Error", error.response.data.message, "error");
               });
           }
         });
@@ -1127,7 +1195,7 @@
         `;
           })
           .catch((error) => {
-            console.error("Error fetching orders:", error);
+            Swal.fire("Error", error.response.data.message, "error");
           });
       }
 
@@ -1354,6 +1422,7 @@
                 }
               })
               .catch((error) => {
+                Swal.fire("Error", error.response.data.message, "error");
                 currentPasswordInput.classList.remove("is-valid");
                 currentPasswordInput.classList.add("is-invalid");
                 enableNewPasswordFields(false); // Keep new password fields disabled
@@ -1448,6 +1517,179 @@
             });
         });
       });
+    </script>
+
+    <script>
+      // document
+      //   .getElementById("verifyEmailBtn")
+      //   .addEventListener("click", function (e) {
+
+      //     const userId = document.getElementById("editUserId").value;
+      //     const email = document.getElementById("userMail").value;
+
+      //     // Send the verify email request
+      //     axios
+      //       .post("/auth/api/send-otp", { userId, email })
+      //       .then((response) => {
+      //         if (response.data.success) {
+      //           // Show the OTP modal
+      //           setTimeout(() => {
+      //             // // const otpModal = new bootstrap.Modal(
+      //             // //   document.getElementById("otpModal")
+      //             // // );
+      //             // // otpModal.show();
+      //             // $("#otpModal").modal("show");
+      //             // initializeOtpInputs();
+      //           }, 300);
+      //         } else {
+      //           alert("Error sending verification email");
+      //         }
+      //       })
+      //       .catch((error) => {
+      //         console.error("Error:", error);
+      //         alert("Failed to send verification email");
+      //       });
+      //   });
+
+      document
+        .getElementById("verifyEmailBtn")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+
+          const userId = document.getElementById("editUserId").value;
+          const email = document.getElementById("userMail").value;
+          const verifyButton = this; // Reference to the button
+
+          // Disable the button to prevent multiple clicks
+          verifyButton.disabled = true;
+
+          // Send the verify email request
+          axios
+            .post("/auth/api/send-otp", { userId, email })
+            .then((response) => {
+              if (response.data.success) {
+                setTimeout(() => {
+                  // Show the OTP modal
+                  document.getElementById("otpModal").style.display = "block";
+                  initializeOtpInputs(); // Initialize OTP input functionality
+                }, 300);
+              } else {
+                alert("Error sending verification email");
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Failed to send verification email");
+            })
+            .finally(() => {
+              // Re-enable the button after the request is complete
+              verifyButton.disabled = false;
+            });
+        });
+
+      // OTP Input Handling
+      function initializeOtpInputs() {
+        const otpInputs = document.querySelectorAll(".otp-input");
+        otpInputs.forEach((input, index) => {
+          input.addEventListener("input", (e) =>
+            handleOtpInputChange(e, index, otpInputs)
+          );
+          input.addEventListener("keydown", (e) =>
+            handleOtpBackspace(e, index, otpInputs)
+          );
+        });
+
+        // Handle form submission
+        document
+          .getElementById("otpForm")
+          .addEventListener("submit", handleOtpFormSubmit);
+
+        // Handle resend OTP link click
+        document
+          .getElementById("resendOtpLink")
+          .addEventListener("click", handleResendOtp);
+
+        // Close modal
+        document
+          .getElementById("closeModal")
+          .addEventListener("click", function () {
+            document.getElementById("otpModal").style.display = "none";
+          });
+
+        // Start the resend timer
+        startTimer(60);
+      }
+
+      function handleOtpInputChange(e, index, otpInputs) {
+        if (e.inputType === "deleteContentBackward" && index > 0) {
+          otpInputs[index - 1].focus();
+        } else if (
+          otpInputs[index].value.length === 1 &&
+          index < otpInputs.length - 1
+        ) {
+          otpInputs[index + 1].focus();
+        }
+      }
+
+      function handleOtpBackspace(e, index, otpInputs) {
+        if (
+          e.key === "Backspace" &&
+          otpInputs[index].value.length === 0 &&
+          index > 0
+        ) {
+          otpInputs[index - 1].focus();
+        }
+      }
+
+      async function handleOtpFormSubmit(e) {
+        e.preventDefault();
+        const otpValue = Array.from(document.querySelectorAll(".otp-input"))
+          .map((input) => input.value)
+          .join("");
+
+        if (otpValue.length === 6) {
+          try {
+            const response = await axios.post("/auth/api/verify-otp", {
+              otp: otpValue,
+            });
+            alert("OTP verified successfully!");
+            document.getElementById("otpModal").style.display = "none";
+          } catch (error) {
+            alert("OTP verification failed. Please try again.");
+          }
+        } else {
+          alert("Please enter a valid 6-digit OTP");
+        }
+      }
+
+      async function handleResendOtp(e) {
+        e.preventDefault();
+        try {
+          const response = await axios.post("/auth/api/resend-otp");
+          alert("OTP resent successfully!");
+          document.getElementById("resendOtpLink").style.display = "none"; // Hide resend link
+          startTimer(60); // Restart timer
+        } catch (error) {
+          alert("Failed to resend OTP. Please try again.");
+        }
+      }
+
+      // Timer for resend OTP
+      function startTimer(duration) {
+        const countdownElement = document.getElementById("countdown");
+        const resendLink = document.getElementById("resendOtpLink");
+        let timeRemaining = duration;
+
+        const interval = setInterval(() => {
+          timeRemaining--;
+          countdownElement.textContent = timeRemaining;
+
+          if (timeRemaining <= 0) {
+            clearInterval(interval);
+            resendLink.style.display = "inline"; // Show the resend link after time runs out
+          }
+        }, 1000);
+      }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

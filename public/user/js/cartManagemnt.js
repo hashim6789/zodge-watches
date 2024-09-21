@@ -28,6 +28,7 @@ function updateQuantity(productId, changeQuantity, stock) {
       totalPrice: 0,
       coupon: null,
     };
+    console.log(cart);
 
     // Find the product in the cart
     const productIndex = cart.products.findIndex(
@@ -45,7 +46,7 @@ function updateQuantity(productId, changeQuantity, stock) {
       });
 
       // If a coupon is applied, recalculate the discount
-      if (cart.coupon) {
+      if (cart.coupon.code) {
         const discountPercentage = cart.coupon.discountPercentage;
         const maxDiscountAmount = cart.coupon.maxDiscountAmount;
         let discountAmount = (discountPercentage / 100) * subtotal;
@@ -66,7 +67,7 @@ function updateQuantity(productId, changeQuantity, stock) {
       document.getElementById("subtotal").innerText = `₹ ${subtotal.toFixed(
         2
       )}`;
-      if (cart.coupon) {
+      if (cart.coupon.code) {
         document.getElementById(
           "couponDiscountAmount"
         ).innerText = `₹ ${cart.coupon.discountAmount.toFixed(2)}`;
@@ -220,11 +221,12 @@ function removeFromCart(productId) {
           });
         })
         .catch((error) => {
-          console.error("Error removing product:", error);
+          console.error("Error adding product to cart:", error);
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: "Could not remove the product. Try again.",
+            text: error.response.data.message,
+            showConfirmButton: true,
           });
         });
     }

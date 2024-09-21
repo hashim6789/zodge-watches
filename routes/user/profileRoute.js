@@ -4,6 +4,7 @@ const express = require("express");
 const {
   isAuthenticatedUser,
   checkBlocked,
+  isVerifiedUser,
   trackPreviousPage,
 } = require("../../middlewares/authenticationMiddlewares");
 
@@ -40,6 +41,7 @@ router.patch(
   isAuthenticatedUser,
   authorizeUser,
   checkBlocked,
+  isVerifiedUser,
   updatePersonalInfo
 );
 
@@ -50,6 +52,7 @@ router.post(
   isAuthenticatedUser,
   authorizeUser,
   checkBlocked,
+  isVerifiedUser,
   createAddress
 );
 
@@ -59,6 +62,7 @@ router.put(
   isAuthenticatedUser,
   authorizeUser,
   checkBlocked,
+  isVerifiedUser,
   updateAddress
 );
 
@@ -68,6 +72,7 @@ router.delete(
   isAuthenticatedUser,
   authorizeUser,
   checkBlocked,
+  isVerifiedUser,
   deleteAddress
 );
 
@@ -79,6 +84,7 @@ router.patch(
   isAuthenticatedUser,
   authorizeUser,
   checkBlocked,
+  isVerifiedUser,
   cancelOrder
 );
 
@@ -88,6 +94,7 @@ router.get(
   isAuthenticatedUser,
   authorizeUser,
   checkBlocked,
+  isVerifiedUser,
   viewOrderDetail
 );
 
@@ -97,6 +104,7 @@ router.patch(
   isAuthenticatedUser,
   authorizeUser,
   checkBlocked,
+  isVerifiedUser,
   sendReturnRequest
 );
 
@@ -106,6 +114,7 @@ router.get(
   isAuthenticatedUser,
   authorizeUser,
   checkBlocked,
+  isVerifiedUser,
   getOrdersList
 );
 

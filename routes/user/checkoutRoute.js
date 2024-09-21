@@ -6,6 +6,7 @@ const {
 const {
   isAuthenticatedUser,
   checkBlocked,
+  isVerifiedUser,
 } = require("../../middlewares/authenticationMiddlewares");
 const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
 const router = express.Router();
@@ -23,6 +24,8 @@ router.get(
   "/",
   isAuthenticatedUser,
   authorizeUser,
+  checkBlocked,
+  isVerifiedUser,
   checkCartExists,
   getCheckout
 );
@@ -31,16 +34,27 @@ router.post(
   "/",
   isAuthenticatedUser,
   authorizeUser,
+  checkBlocked,
+  isVerifiedUser,
   checkCartExists,
   postCheckout
 );
 
-router.post("/retry", retryPayment);
+router.post(
+  "/retry",
+  isAuthenticatedUser,
+  authorizeUser,
+  checkBlocked,
+  isVerifiedUser,
+  retryPayment
+);
 
 router.post(
   "/verify-payment",
   isAuthenticatedUser,
   authorizeUser,
+  checkBlocked,
+  isVerifiedUser,
   verifyPayment
 );
 
@@ -48,10 +62,19 @@ router.get(
   "/confirmation",
   isAuthenticatedUser,
   authorizeUser,
+  checkBlocked,
+  isVerifiedUser,
   checkOrderExists,
   getOrderConfirmation
 );
 
-router.get("/address/:index", isAuthenticatedUser, authorizeUser, getAddress);
+router.get(
+  "/address/:index",
+  isAuthenticatedUser,
+  authorizeUser,
+  checkBlocked,
+  isVerifiedUser,
+  getAddress
+);
 
 module.exports = router;

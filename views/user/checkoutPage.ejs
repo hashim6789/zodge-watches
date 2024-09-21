@@ -6,7 +6,8 @@
   </head>
   <body class="animsition">
     <!-- Header -->
-    <%- include('partials/_navbar', { user }) %>
+    <%- include('partials/_navbar', { user }) %> <%-
+    include('partials/_wishlist', { wishlist }) %>
 
     <!-- Breadcrumb -->
     <div class="container pt-5">
@@ -37,6 +38,7 @@
                 id="userId"
                 value="<%= user._id %>"
               />
+
               <!-- Address Selection Dropdown -->
               <div class="form-group p-b-23">
                 <label for="savedAddress">Choose a Saved Address</label>
@@ -49,15 +51,15 @@
                   <option value="">Select an address</option>
                   <% addresses.forEach(function(address, index) { %>
                   <option value="<%= index %>">
-                    <%= address.firstName %>, <%= address.secondName %>, <%=
+                    <%= address.firstName %> <%= address.secondName %>, <%=
                     address.city %>, <%= address.state %>, <%= address.pincode
-                    %>, <%= address.country %>, <%= address.street %>,
+                    %>, <%= address.country %>, <%= address.street %>
                   </option>
                   <% }); %>
                 </select>
               </div>
 
-              <!-- Existing Form Fields for Shipping Details -->
+              <!-- Shipping Details Form Fields -->
               <div class="row">
                 <div class="col-sm-6 p-b-23">
                   <div class="form-group">
@@ -87,7 +89,7 @@
 
               <div class="row">
                 <div class="col-sm-6 p-b-23">
-                  <div class="form-group p-b-23">
+                  <div class="form-group">
                     <label for="email">Email Address</label>
                     <input
                       type="email"
@@ -100,7 +102,7 @@
                   </div>
                 </div>
                 <div class="col-sm-6 p-b-23">
-                  <div class="form-group p-b-23">
+                  <div class="form-group">
                     <label for="phoneNo">Phone No</label>
                     <input
                       type="number"
@@ -142,7 +144,7 @@
                   </div>
                 </div>
                 <div class="col-sm-4 p-b-23">
-                  <div class="form-group p-b-23">
+                  <div class="form-group">
                     <label for="city">City</label>
                     <input
                       type="text"
@@ -210,6 +212,7 @@
 
               <!-- Payment Options -->
               <div class="form-group p-b-23">
+                <h5 class="mtext-108 cl2 p-b-10">Payment Method</h5>
                 <div class="form-check">
                   <input
                     class="form-check-input"
@@ -263,43 +266,13 @@
         </div>
 
         <!-- Order Summary -->
-        <!-- <div class="col-md-5 col-lg-4">
-          <div class="p-lr-15-lg">
-            <h4 class="mtext-109 cl2 p-b-30">Order Summary</h4>
-            <div class="flex-w flex-t p-b-13">
-              <div class="size-208">
-                <span class="stext-110 cl2">Subtotal:</span>
-              </div>
-              <div class="size-209">
-                <span class="mtext-110 cl2">₹<%= cart.subtotal %></span>
-              </div>
-            </div>
-
-            <div class="flex-w flex-t p-t-15 p-b-30">
-              <div class="size-208 p-t-1">
-                <span class="stext-110 cl2">Total:</span>
-              </div>
-              <div class="size-209 p-t-1">
-                <span class="mtext-110 cl2">₹<%= cart.total %></span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer"
-              onclick=""
-            >
-              Place Order
-            </button>
-          </div>
-        </div> -->
         <div class="col-md-5 col-lg-4">
           <div class="p-lr-15-lg">
             <h4 class="mtext-109 cl2 p-b-30">Order Summary</h4>
             <!-- Subtotal -->
             <div class="flex-w flex-t bor12 p-b-13">
               <div class="size-208">
-                <span class="stext-110 cl2"> Subtotal: </span>
+                <span class="stext-110 cl2">Subtotal:</span>
               </div>
               <div class="size-209">
                 <span id="subtotal" class="mtext-110 cl2">
@@ -312,7 +285,7 @@
             <!-- Coupon Discount Field -->
             <div class="flex-w flex-t p-t-15 p-b-13">
               <div class="size-208">
-                <span class="stext-110 cl2"> Coupon Discount: </span>
+                <span class="stext-110 cl2">Coupon Discount:</span>
               </div>
               <div class="size-209">
                 <span id="couponDiscountAmount" class="mtext-110 cl2">
@@ -324,12 +297,11 @@
             <!-- Delivery Charges -->
             <div class="flex-w flex-t p-t-27 p-b-33">
               <div class="size-208">
-                <span class="mtext-101 cl2"> Delivery Charges: </span>
+                <span class="mtext-101 cl2">Delivery Charges:</span>
               </div>
               <div class="size-209">
                 <span id="deliveryCharges" class="mtext-110 cl2">
                   ₹ <%= (0).toFixed(2) %>
-                  <!-- Initially, delivery charge is set to 0 -->
                 </span>
               </div>
             </div>
@@ -337,7 +309,7 @@
             <!-- Total -->
             <div class="flex-w flex-t p-t-27 p-b-33">
               <div class="size-208">
-                <span class="mtext-101 cl2"> Total: </span>
+                <span class="mtext-101 cl2">Total:</span>
               </div>
               <div class="size-209 p-t-1">
                 <span id="totalAmount" class="mtext-110 cl2">
@@ -346,18 +318,46 @@
               </div>
             </div>
 
-            <button
-              type="button"
-              class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer"
-              onclick=""
+            <!-- Coupon Application -->
+            <div
+              class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm"
             >
-              Place Order
-            </button>
+              <div class="flex-w flex-m w-full flex-column position-relative">
+                <!-- Remove Coupon Icon -->
+                <button
+                  id="removeCouponBtn"
+                  class="position-absolute left-0 top-50 translate-middle-y bg-transparent border-0 p-2"
+                  type="button"
+                  onclick="removeCoupon()"
+                  aria-label="Remove Coupon"
+                  style="display: none"
+                >
+                  <i class="fas fa-times text-muted"></i>
+                </button>
+
+                <!-- Coupon Input Field -->
+                <input
+                  id="couponCode"
+                  class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-tb-5 pl-5"
+                  type="text"
+                  name="coupon"
+                  placeholder="Enter Coupon Code"
+                />
+
+                <!-- Apply Coupon Button -->
+                <button
+                  id="applyCouponBtn"
+                  class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer mt-2"
+                  type="button"
+                >
+                  Apply Coupon
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
     <!-- Footer -->
     <%- include('partials/_footer') %>
 
@@ -388,6 +388,339 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Check if coupon exists in localStorage and initialize UI
+        let cart = JSON.parse(localStorage.getItem("cart")) || {
+          products: [],
+          totalPrice: 0,
+          coupon: null,
+          address: null,
+        };
+
+        if (cart.coupon) {
+          // Pre-fill coupon and disable input
+          document.getElementById("couponCode").value = cart.coupon.code;
+          document.getElementById("couponCode").setAttribute("disabled", true);
+          document.getElementById("removeCouponBtn").style.display =
+            "inline-block";
+          document
+            .getElementById("applyCouponBtn")
+            .setAttribute("disabled", true);
+        }
+
+        // Apply Coupon Logic
+        document
+          .getElementById("applyCouponBtn")
+          .addEventListener("click", function () {
+            const couponCode = document
+              .getElementById("couponCode")
+              .value.trim();
+
+            if (!couponCode || cart.coupon) {
+              Swal.fire({
+                icon: "warning",
+                title: "Coupon Code Missing",
+                text: "Please enter a coupon code before applying.",
+                confirmButtonText: "OK",
+              });
+              return;
+            }
+
+            axios
+              .post("/cart/coupon/apply", { couponCode })
+              .then((response) => {
+                if (response.data.success) {
+                  const originalCart = response.data.cart;
+                  const coupon = originalCart.coupon;
+
+                  let discountAmount =
+                    (coupon.discountPercentage / 100) *
+                    parseFloat(
+                      document
+                        .getElementById("subtotal")
+                        .innerText.replace("₹ ", "")
+                    );
+
+                  if (discountAmount > coupon.maxDiscountAmount) {
+                    discountAmount = coupon.maxDiscountAmount;
+                  }
+
+                  const subtotal = parseFloat(
+                    document
+                      .getElementById("subtotal")
+                      .innerText.replace("₹ ", "")
+                  );
+                  const newTotal = subtotal - discountAmount;
+
+                  // Update UI with discount and new total
+                  document.getElementById(
+                    "couponDiscountAmount"
+                  ).innerText = `₹ ${discountAmount.toFixed(2)}`;
+                  document.getElementById(
+                    "totalAmount"
+                  ).innerText = `₹ ${newTotal.toFixed(2)}`;
+
+                  // Update localStorage cart with the applied coupon
+                  cart.coupon = {
+                    code: couponCode,
+                    discountPercentage: coupon.discountPercentage,
+                    discountAmount: discountAmount,
+                    maxDiscountAmount: coupon.maxDiscountAmount,
+                  };
+                  cart.totalPrice = newTotal;
+                  localStorage.setItem("cart", JSON.stringify(cart));
+
+                  // Disable input and show remove button
+                  document
+                    .getElementById("couponCode")
+                    .setAttribute("disabled", true);
+                  document.getElementById("removeCouponBtn").style.display =
+                    "inline-block";
+                  document
+                    .getElementById("applyCouponBtn")
+                    .setAttribute("disabled", true);
+
+                  Swal.fire({
+                    icon: "success",
+                    title: "Coupon applied successfully",
+                    text: `Discount: ₹ ${discountAmount.toFixed(2)}`,
+                    confirmButtonText: "OK",
+                  });
+                } else {
+                  Swal.fire({
+                    icon: "error",
+                    title: "Invalid Coupon",
+                    text: "The coupon code you entered is not valid or has expired.",
+                    confirmButtonText: "OK",
+                  });
+                }
+              })
+              .catch((error) => {
+                console.error(error);
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  text: "There was an error applying the coupon. Please try again.",
+                  confirmButtonText: "OK",
+                });
+              });
+          });
+
+        // Remove Coupon Logic
+        window.removeCoupon = function () {
+          const subtotal = parseFloat(
+            document.getElementById("subtotal").innerText.replace("₹ ", "")
+          );
+
+          // Clear coupon input and reset display
+          document.getElementById("couponCode").value = "";
+          document.getElementById("couponDiscountAmount").innerText = "₹ 0.00";
+          document.getElementById(
+            "totalAmount"
+          ).innerText = `₹ ${subtotal.toFixed(2)}`;
+
+          // Remove coupon from localStorage
+          delete cart.coupon;
+          cart.totalPrice = subtotal;
+          localStorage.setItem("cart", JSON.stringify(cart));
+
+          // Enable input and hide remove button
+          document.getElementById("couponCode").removeAttribute("disabled");
+          document.getElementById("removeCouponBtn").style.display = "none";
+          document.getElementById("applyCouponBtn").removeAttribute("disabled");
+
+          // Axios request to remove coupon from backend
+          axios
+            .delete("/cart/coupon/remove")
+            .then((response) => {
+              if (response.data.success) {
+                Swal.fire({
+                  icon: "success",
+                  title: "Coupon removed successfully",
+                  confirmButtonText: "OK",
+                });
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "Failed to remove coupon",
+                  text: response.data.message,
+                  confirmButtonText: "OK",
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Error removing coupon:", error);
+              Swal.fire({
+                icon: "error",
+                title: "Server Error",
+                text: "Could not remove the coupon. Please try again.",
+                confirmButtonText: "OK",
+              });
+            });
+        };
+      });
+    </script>
+
+    <!-- <script>
+      document
+        .getElementById("applyCouponBtn")
+        .addEventListener("click", function () {
+          const couponCode = document.getElementById("couponCode").value;
+
+          if (couponCode) {
+            axios
+              .post("/cart/coupon/apply", { couponCode })
+              .then((response) => {
+                if (response.data.success) {
+                  const originalCart = response.data.cart;
+                  const coupon = originalCart.coupon;
+                  console.log(coupon);
+
+                  let discountAmount =
+                    (coupon.discountPercentage / 100) *
+                    parseFloat(
+                      document
+                        .getElementById("subtotal")
+                        .innerText.replace("₹ ", "")
+                    );
+
+                  if (discountAmount > coupon.maxDiscountAmount) {
+                    discountAmount = coupon.maxDiscountAmount;
+                  }
+
+                  console.log(discountAmount);
+
+                  const subtotal = parseFloat(
+                    document
+                      .getElementById("subtotal")
+                      .innerText.replace("₹ ", "")
+                  );
+                  const newTotal = subtotal - discountAmount;
+
+                  document.getElementById(
+                    "couponDiscountAmount"
+                  ).innerText = `₹ ${discountAmount.toFixed(2)}`;
+                  document.getElementById(
+                    "totalAmount"
+                  ).innerText = `₹ ${newTotal.toFixed(2)}`;
+
+                  let cart = JSON.parse(localStorage.getItem("cart")) || {
+                    products: [],
+                    totalPrice: 0,
+                    coupon: null,
+                    address: null,
+                  };
+
+                  cart.coupon = {
+                    code: couponCode,
+                    discountPercentage: coupon.discountPercentage,
+                    discountAmount: discountAmount,
+                    maxDiscountAmount: coupon.maxDiscountAmount,
+                  };
+
+                  cart.totalPrice = newTotal;
+
+                  localStorage.setItem("cart", JSON.stringify(cart));
+
+                  Swal.fire({
+                    icon: "success",
+                    title: "Coupon applied successfully",
+                    text: `Discount: ₹ ${discountAmount.toFixed(2)}`,
+                    confirmButtonText: "OK",
+                  });
+                } else {
+                  Swal.fire({
+                    icon: "error",
+                    title: "Invalid Coupon",
+                    text: "The coupon code you entered is not valid or has expired.",
+                    confirmButtonText: "OK",
+                  });
+
+                  document.getElementById(
+                    "invalidCouponFeedback"
+                  ).style.display = "block";
+                }
+              })
+              .catch((error) => {
+                console.error(error);
+
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  text: error.response.data.message,
+                  confirmButtonText: "OK",
+                });
+              });
+          } else {
+            Swal.fire({
+              icon: "warning",
+              title: "No Coupon Code",
+              text: "Please enter a coupon code before applying.",
+              confirmButtonText: "OK",
+            });
+          }
+        });
+
+      function removeCoupon() {
+        const subtotal = parseFloat(
+          document.getElementById("subtotal").innerText.replace("₹ ", "")
+        );
+
+        // Clear coupon input and reset discount display
+        document.getElementById("couponCode").value = "";
+        document.getElementById("couponDiscountAmount").innerText = "₹ 0.00";
+
+        document.getElementById(
+          "totalAmount"
+        ).innerText = `₹ ${subtotal.toFixed(2)}`;
+
+        // Retrieve the cart from localStorage
+        let cart = JSON.parse(localStorage.getItem("cart")) || {
+          products: [],
+          totalPrice: 0,
+          coupon: null,
+          address: null,
+        };
+
+        // Remove coupon data from the cart
+        delete cart.coupon;
+        cart.totalPrice = subtotal;
+
+        // Update the cart in localStorage
+        localStorage.setItem("cart", JSON.stringify(cart));
+
+        // Make an Axios request to the backend to remove the coupon
+        axios
+          .delete("/cart/coupon/remove") // Adjust the route based on your backend API
+          .then((response) => {
+            if (response.data.success) {
+              Swal.fire({
+                icon: "success",
+                title: "Coupon removed successfully",
+                confirmButtonText: "OK",
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Failed to remove coupon",
+                text: response.data.message,
+                confirmButtonText: "OK",
+              });
+            }
+          })
+          .catch((error) => {
+            console.error("Error removing coupon:", error);
+            Swal.fire({
+              icon: "error",
+              title: "Server error",
+              text: "Could not remove the coupon. Please try again.",
+              confirmButtonText: "OK",
+            });
+          });
+      }
+    </script> -->
 
     <script src="/public/user/js/checkout.js"></script>
   </body>
