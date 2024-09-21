@@ -38,8 +38,11 @@ function addToWishlist(productId) {
   axios
     .post("/wishlist/add", { productId })
     .then((response) => {
-      const wishlist = response.data.data;
-      if (wishlist) {
+      // console.log("response = ", response.data);
+      const data = response.data.data;
+      const success = response.data.success;
+      if (success) {
+        // const wishlist = response.data.wishlist;
         toggleHeartIcon(productId, true);
         Swal.fire({
           icon: "success",
@@ -51,13 +54,13 @@ function addToWishlist(productId) {
         fetchWishlist(); // Update wishlist UI
         const wishlistIcon = document.getElementById("wishlistIcon");
         if (wishlistIcon) {
-          wishlistIcon.setAttribute("data-notify", wishlist.productIds.length);
+          wishlistIcon.setAttribute("data-notify", data.wishlistLength);
         }
       } else {
         Swal.fire({
           icon: "error",
           title: "Failed",
-          text: "Failed to add product to wishlist. Please try again!",
+          text: "Yes",
           showConfirmButton: true,
         });
       }
@@ -67,7 +70,7 @@ function addToWishlist(productId) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "An error occurred while adding the product to the wishlist. Please try again later.",
+        text: error.response.data.message,
         showConfirmButton: true,
       });
     });
@@ -77,8 +80,10 @@ function removeFromWishlist(productId) {
   axios
     .delete(`/wishlist/${productId}/remove`)
     .then((response) => {
-      const wishlist = response.data.data;
-      if (wishlist) {
+      // const wishlist = response.data.data;
+      const data = response.data.data;
+      const success = response.data.success;
+      if (success) {
         toggleHeartIcon(productId, false);
         Swal.fire({
           icon: "success",
@@ -90,7 +95,7 @@ function removeFromWishlist(productId) {
         fetchWishlist(); // Update wishlist UI
         const wishlistIcon = document.getElementById("wishlistIcon");
         if (wishlistIcon) {
-          wishlistIcon.setAttribute("data-notify", wishlist.productIds.length);
+          wishlistIcon.setAttribute("data-notify", data.wishlistLength);
         }
       } else {
         Swal.fire({
@@ -106,7 +111,7 @@ function removeFromWishlist(productId) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "An error occurred while removing the product from the wishlist. Please try again later.",
+        text: error.response.data.message,
         showConfirmButton: true,
       });
     });

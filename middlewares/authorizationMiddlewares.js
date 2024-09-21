@@ -6,7 +6,7 @@ function authorizeUser(req, res, next) {
   ) {
     return next();
   } else {
-    return res.status(403).send("Access denied");
+    return res.status(403).json({ success: false, message: "Access denied" });
   }
 }
 
@@ -15,7 +15,7 @@ function authorizeAdmin(req, res, next) {
   if (req.session.admin?.role === "Admin") {
     return next();
   } else {
-    return res.status(403).send("Access denied");
+    return res.status(403).json({ success: false, message: "Access denied" });
   }
 }
 
@@ -28,7 +28,7 @@ function authorizeAdminForModule(module) {
     ) {
       return next();
     } else {
-      return res.status(403).send("Access denied");
+      return res.status(403).json({ success: false, message: "Access denied" });
     }
   };
 }

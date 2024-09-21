@@ -1,0 +1,76 @@
+.account-sidebar {
+  background-color: #f8f9fa;
+  padding: 20px;
+}
+.account-content {
+  padding: 20px;
+}
+.account-section {
+  display: none;
+}
+.account-section.active {
+  display: block;
+}
+.nav-link {
+  color: #333;
+}
+.nav-link.active {
+  font-weight: bold;
+  color: #007bff;
+}
+
+#orders-list {
+  margin-top: 20px;
+}
+.order-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+}
+.product-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-right: 20px;
+}
+.product-info {
+  flex-grow: 1;
+}
+.product-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.product-details {
+  color: #666;
+  font-size: 0.9em;
+}
+.product-price {
+  font-weight: bold;
+  margin-right: 20px;
+}
+.delivery-status {
+  text-align: right;
+}
+.delivered {
+  color: #007600;
+  font-weight: bold;
+}
+.status-processing {
+  color: #ff9900;
+}
+.status-shipped {
+  color: #1e90ff;
+}
+.status-cancelled {
+  color: #dc3545;
+}
+.review-link {
+  color: #007bff;
+  text-decoration: none;
+}
+.review-link:hover {
+  text-decoration: underline;
+}

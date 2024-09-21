@@ -12,6 +12,7 @@ const {
   isAuthenticatedUser,
   checkBlocked,
   trackPreviousPage,
+  isVerifiedUser,
 } = require("../../middlewares/authenticationMiddlewares");
 
 //for Authorization
