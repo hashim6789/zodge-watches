@@ -14,9 +14,10 @@ const {
 const {
   getOffers,
   createOffer,
-  getOffer,
-  updateOffer,
+  editOffer,
+  getApplicableItems,
   toggleOffer,
+  fetchOffer,
 } = require("../../controllers/offerController");
 
 const router = express.Router();
@@ -29,8 +30,6 @@ router.get(
   getOffers
 );
 
-router.get("/:offerId", getOffer);
-
 router.post(
   "/",
   isAuthenticatedAdmin,
@@ -39,13 +38,8 @@ router.post(
   createOffer
 );
 
-router.put(
-  "/:offerId",
-  isAuthenticatedAdmin,
-  authorizeAdmin,
-  authorizeAdminForModule("offerManagement"),
-  updateOffer
-);
+// // Route for editing an existing offer
+router.patch("/:offerId", editOffer);
 
 router.put(
   "/:offerId/toggle",
@@ -55,4 +49,30 @@ router.put(
   toggleOffer
 );
 
+router.get(
+  "/api/offers/:id",
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("offerManagement"),
+  fetchOffer
+);
+
+// // Route for fetching applicable items based on the applicable type
+router.get(
+  "/api/applicable-items",
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("offerManagement"),
+  getApplicableItems
+);
+
 module.exports = router;
+
+// // router.put(
+// //   "/:offerId",
+// //   // isAuthenticatedAdmin,
+// //   // authorizeAdmin,
+// //   // authorizeAdminForModule("offerManagement"),
+// //   updateOffer
+// // );
+// // router.get("/:offerId", getOffer);

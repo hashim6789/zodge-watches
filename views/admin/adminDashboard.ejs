@@ -174,43 +174,6 @@
                 </div>
               </div>
             </div>
-            <div class="row">
-              <div class="col-lg-6 grid-margin stretch-card">
-                <div class="card">
-                  <div class="card-body">
-                    <h2>Monthly Sales</h2>
-                    <canvas id="monthlySalesChart"></canvas>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-6 grid-margin stretch-card">
-                <div class="card">
-                  <div class="card-body">
-                    <h2>Top Selling Watches</h2>
-                    <canvas id="topSellingWatchesChart"></canvas>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-lg-6 grid-margin stretch-card">
-                <div class="card">
-                  <div class="card-body">
-                    <h2>Customer Segmentation</h2>
-                    <canvas id="customerSegmentationChart"></canvas>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-6 grid-margin stretch-card">
-                <div class="card">
-                  <div class="card-body">
-                    <h2>Top Selling Watches</h2>
-                    <canvas id="topSellingWatchesChart"></canvas>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- Best Selling Products and Categories -->
             <div class="row">
               <div class="col-lg-6 grid-margin stretch-card">
@@ -264,6 +227,49 @@
                 </div>
               </div>
             </div>
+            <!-- sales-chart.ejs -->
+            <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div
+                      class="d-flex justify-content-between align-items-center mb-3"
+                    >
+                      <h2>Sales Chart</h2>
+                      <select
+                        id="timeRange"
+                        class="form-select"
+                        style="width: auto"
+                      >
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly" selected>Monthly</option>
+                        <option value="yearly">Yearly</option>
+                      </select>
+                    </div>
+                    <canvas id="salesChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h2>Order Status Distribution</h2>
+                    <canvas id="orderStatusChart"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h2>User Growth</h2>
+                    <canvas id="userGrowthChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <!-- Modal -->
             <div id="pdfModal" class="modal">
@@ -288,6 +294,8 @@
     <script src="/public/assets/vendors/js/vendor.bundle.base.js"></script>
     <script src="/public/assets/js/off-canvas.js"></script>
     <script src="/public/assets/js/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <!-- <script src="/public/assets/vendors/chart.js/Chart.min.js"></script> -->
 
     <script src="/public/assets/js/hoverable-collapse.js"></script>
@@ -597,7 +605,7 @@
       }
     </script>
 
-    <script>
+    <!-- <script>
       // admin-charts.js
 
       // Monthly Sales Chart
@@ -711,6 +719,298 @@
         createTopSellingWatchesChart();
         createCustomerSegmentationChart();
       });
+    </script> -->
+    <script>
+      let salesChart;
+
+      function initChart(data) {
+        const ctx = document.getElementById("salesChart").getContext("2d");
+        salesChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                label: "Sales",
+                data: data.values,
+                borderColor: "rgb(75, 192, 192)",
+                tension: 0.1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function (value, index, values) {
+                    return "₹" + value.toLocaleString(); // Assuming Indian Rupees
+                  },
+                },
+              },
+            },
+            tooltips: {
+              callbacks: {
+                label: function (tooltipItem, data) {
+                  let label =
+                    data.datasets[tooltipItem.datasetIndex].label || "";
+                  if (label) {
+                    label += ": ";
+                  }
+                  label += "₹" + tooltipItem.yLabel.toLocaleString();
+                  return label;
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function updateChart(data) {
+        salesChart.data.labels = data.labels;
+        salesChart.data.datasets[0].data = data.values;
+        salesChart.update();
+      }
+
+      function fetchChartData(timeRange) {
+        axios
+          .get(`/admin/reports/api/sales-data?range=${timeRange}`)
+          .then((response) => {
+            const data = response.data;
+            if (salesChart) {
+              updateChart(data);
+            } else {
+              initChart(data);
+            }
+          })
+          .catch((error) => console.error("Error fetching chart data:", error));
+      }
+
+      document
+        .getElementById("timeRange")
+        .addEventListener("change", function () {
+          fetchChartData(this.value);
+        });
+
+      // Initial chart load
+      fetchChartData("monthly");
+    </script>
+    <script>
+      function initOrderStatusChart(data) {
+        const ctx = document
+          .getElementById("orderStatusChart")
+          .getContext("2d");
+        new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                data: data.values,
+                backgroundColor: [
+                  "#FF6384",
+                  "#36A2EB",
+                  "#FFCE56",
+                  "#4BC0C0",
+                  "#9966FF",
+                  "#FF9F40",
+                  "#FF6384",
+                ],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "right",
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    let label = context.label || "";
+                    if (label) {
+                      label += ": ";
+                    }
+                    if (context.parsed !== null) {
+                      label += context.parsed + " orders";
+                    }
+                    return label;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function fetchOrderStatusData() {
+        fetch("/admin/reports/api/order-status-data")
+          .then((response) => response.json())
+          .then((data) => {
+            initOrderStatusChart(data);
+          })
+          .catch((error) =>
+            console.error("Error fetching order status data:", error)
+          );
+      }
+
+      // Load order status data when the page loads
+      document.addEventListener("DOMContentLoaded", fetchOrderStatusData);
+    </script>
+
+    <!-- <script>
+      let userCountChart;
+
+      function initUserCountChart(data) {
+        const ctx = document.getElementById("userCountChart").getContext("2d");
+        userCountChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                label: "User Count",
+                data: data.values,
+                borderColor: "rgb(75, 192, 192)",
+                tension: 0.1,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                type: "time",
+                time: {
+                  unit: "day",
+                  displayFormats: {
+                    day: "MMM d",
+                  },
+                },
+                title: {
+                  display: true,
+                  text: "Date",
+                },
+              },
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: "User Count",
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function updateUserCountChart(data) {
+        userCountChart.data.labels = data.labels;
+        userCountChart.data.datasets[0].data = data.values;
+        userCountChart.update();
+      }
+
+      function fetchUserCountData(timeRange = "monthly") {
+        fetch(`/admin/reports/api/user-count-data?range=${timeRange}`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (userCountChart) {
+              updateUserCountChart(data);
+            } else {
+              initUserCountChart(data);
+            }
+          })
+          .catch((error) =>
+            console.error("Error fetching user count data:", error)
+          );
+      }
+
+      // Load user count data when the page loads
+      document.addEventListener("DOMContentLoaded", () => fetchUserCountData());
+
+      // Add event listener to update chart when time range changes
+      document
+        .getElementById("timeRange")
+        .addEventListener("change", function () {
+          fetchUserCountData(this.value);
+        });
+    </script> -->
+
+    <script>
+      function initUserGrowthChart(data) {
+        const ctx = document.getElementById("userGrowthChart").getContext("2d");
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                label: "New Users",
+                data: data.values,
+                borderColor: "#36A2EB",
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                tension: 0.1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    let label = context.dataset.label || "";
+                    if (label) {
+                      label += ": ";
+                    }
+                    if (context.parsed.y !== null) {
+                      label += context.parsed.y + " new users";
+                    }
+                    return label;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                display: true,
+                title: {
+                  display: true,
+                  text: "Date",
+                },
+              },
+              y: {
+                display: true,
+                title: {
+                  display: true,
+                  text: "Number of New Users",
+                },
+                suggestedMin: 0,
+              },
+            },
+          },
+        });
+      }
+
+      function fetchUserGrowthData() {
+        fetch("/admin/reports/api/user-growth-data")
+          .then((response) => response.json())
+          .then((data) => {
+            initUserGrowthChart(data);
+          })
+          .catch((error) =>
+            console.error("Error fetching user growth data:", error)
+          );
+      }
+
+      // Load user growth data when the page loads
+      document.addEventListener("DOMContentLoaded", fetchUserGrowthData);
     </script>
   </body>
 </html>

@@ -12,6 +12,9 @@ const productSchema = new Schema(
     images: [{ type: String, required: true }],
     isListed: { type: Boolean, default: true },
     soldCount: { type: Number, default: 0 },
+    offers: [
+      { type: Types.ObjectId, required: true, ref: "Offers", default: null },
+    ],
   },
   { timestamps: true }
 );

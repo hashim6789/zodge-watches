@@ -3,20 +3,16 @@ const { Schema, Types } = mongoose;
 
 const OfferSchema = new Schema(
   {
-    title: { type: String, required: true },
-    discountType: {
+    name: { type: String, required: true },
+    description: { type: String },
+    discountValue: { type: Number, required: true },
+    applicableType: {
       type: String,
-      enum: ["percentage", "flat"],
+      enum: ["product", "category"],
       required: true,
     },
-    discountValue: { type: Number, required: true },
-    categoryId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Categories",
-      required: true,
-    }, // Only category reference
-    expiryDate: { type: Date, required: true },
-    usageLimit: { type: Number, default: 1 },
+    categoryIds: [{ type: Types.ObjectId, ref: "Categories", default: null }], // Reference the Category model
+    productIds: [{ type: Types.ObjectId, ref: "Products", default: null }],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -24,3 +20,9 @@ const OfferSchema = new Schema(
 
 const Offer = mongoose.model("Offers", OfferSchema);
 module.exports = Offer;
+
+// discountType: {
+//   type: String,
+//   enum: ["percentage", "fixed"],
+//   required: true,
+// },

@@ -32,7 +32,7 @@ router.get("/login", redirectIfAuthenticated, getLogin);
 router.post("/login", redirectIfAuthenticated, postLogin);
 
 //dashboard
-router.get("/dashboard", isAuthenticatedAdmin, authorizeAdmin, getDashboard);
+router.get("/dashboard", getDashboard);
 
 //get - /admin/logout
 router.get("/logout", isAuthenticatedAdmin, authorizeAdmin, getLogout);
