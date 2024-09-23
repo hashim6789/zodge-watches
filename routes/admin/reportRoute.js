@@ -16,7 +16,7 @@ const {
   getSalesChart,
   getOrdersStatusChart,
   getUserGrowth,
-} = require("../../controllers/reportController");
+} = require("../../controllers/admin/reportController");
 
 const router = express.Router();
 

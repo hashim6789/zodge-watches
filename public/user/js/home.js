@@ -67,12 +67,10 @@ function filterProducts(category, page) {
 }
 
 function renderProducts(products, wishlist = { productIds: [] }) {
-  // console.log(wishlist);
   const productList = document.getElementById("product-list");
   productList.style.height = "756.575px";
   productList.innerHTML = products
     .map((product) => {
-      // Check if wishlist is null or undefined, and default to an empty object if so
       const wishlistProductIds =
         wishlist && wishlist.productIds ? wishlist.productIds : [];
 
@@ -80,18 +78,12 @@ function renderProducts(products, wishlist = { productIds: [] }) {
         (productId) => productId.toString() === product._id.toString()
       );
 
-      // console.log(isInWishlist);
-
-      // Determine if the product is out of stock
       const isOutOfStock = product.stock < 1;
 
-      // Calculate the discounted price and original price
-      const hasDiscount =
-        product.discountedPrice !== 0 &&
-        product.price !== product.discountedPrice;
-      // console.log("discount = ", hasDiscount);
+      // Calculate the original and discounted prices
       const originalPrice = product.price.toFixed(2);
       const discountedPrice = product.discountedPrice.toFixed(2);
+      const hasDiscount = discountedPrice < originalPrice;
 
       // Generate HTML for the product
       return `
@@ -118,14 +110,9 @@ function renderProducts(products, wishlist = { productIds: [] }) {
               <!-- Price Section -->
               ${
                 hasDiscount
-                  ? product.discountType === "percentage"
-                    ? `<span class="stext-105 cl3"><del>₹${originalPrice}</del> ₹${discountedPrice}   off ${
-                        ((originalPrice - discountedPrice) * 100) /
-                        originalPrice
-                      }% </span>`
-                    : `<span class="stext-105 cl3"><del>₹${originalPrice}</del> ₹${discountedPrice}   off ₹${
-                        originalPrice - discountedPrice
-                      } </span>`
+                  ? `<span class="stext-105 cl3"><del>₹${originalPrice}</del>  off ₹${
+                      originalPrice - discountedPrice
+                    }<br> ₹${discountedPrice} </span> `
                   : `<span class="stext-105 cl3">₹${originalPrice}</span>`
               }
               

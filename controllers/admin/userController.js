@@ -1,4 +1,4 @@
-const UserModel = require("../models/User");
+const UserModel = require("../../models/User");
 
 //for get all users with pagination
 const getUsers = async (req, res) => {

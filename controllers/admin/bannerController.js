@@ -1,4 +1,4 @@
-const BannerModel = require("../models/Banner");
+const BannerModel = require("../../models/Banner");
 
 //get all banners with pagination
 const getBanners = async (req, res) => {

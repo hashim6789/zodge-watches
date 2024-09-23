@@ -28,61 +28,30 @@ function updateQuantity(productId, changeQuantity, stock) {
       totalPrice: 0,
       coupon: null,
     };
-    console.log(cart);
 
-    // Find the product in the cart
     const productIndex = cart.products.findIndex(
       (item) => item.productId === productId
     );
 
     if (productIndex !== -1) {
-      // Update the product quantity
       cart.products[productIndex].quantity = newQuantity;
 
-      // Recalculate the subtotal (sum of all products' price * quantity)
       let subtotal = 0;
       cart.products.forEach((item) => {
         subtotal += item.price * item.quantity;
       });
 
-      // If a coupon is applied, recalculate the discount
-      if (cart.coupon.code) {
-        const discountPercentage = cart.coupon.discountPercentage;
-        const maxDiscountAmount = cart.coupon.maxDiscountAmount;
-        let discountAmount = (discountPercentage / 100) * subtotal;
-        if (maxDiscountAmount < discountAmount) {
-          discountAmount = maxDiscountAmount;
-        }
-        cart.coupon.discountAmount = discountAmount;
-        cart.totalPrice = subtotal - discountAmount;
-      } else {
-        // If no coupon, total price is just the subtotal
-        cart.totalPrice = subtotal;
-      }
-
-      // Update the cart in local storage
+      cart.totalPrice = subtotal;
       localStorage.setItem("cart", JSON.stringify(cart));
 
-      // Update DOM elements to reflect the new subtotal and total price
       document.getElementById("subtotal").innerText = `₹ ${subtotal.toFixed(
         2
       )}`;
-      if (cart.coupon.code) {
-        document.getElementById(
-          "couponDiscountAmount"
-        ).innerText = `₹ ${cart.coupon.discountAmount.toFixed(2)}`;
-        document.getElementById(
-          "totalAmount"
-        ).innerText = `₹ ${cart.totalPrice.toFixed(2)}`;
-      } else {
-        document.getElementById(
-          "totalAmount"
-        ).innerText = `₹ ${subtotal.toFixed(2)}`;
-      }
+      document.getElementById("totalAmount").innerText = `₹ ${subtotal.toFixed(
+        2
+      )}`;
     }
 
-    console.log(cart.totalPrice);
-    // Update server (if needed)
     axios
       .patch("/cart/update-quantity", {
         productId,
@@ -93,25 +62,9 @@ function updateQuantity(productId, changeQuantity, stock) {
         const product = response.data.product;
         const totalPrice = response.data.cartTotal;
 
-        console.log("total price = ", totalPrice);
-        console.log("total", product);
-
         document.getElementById(`totalPrice-${productId}`).innerHTML = (
           product.price * product.quantity
         ).toFixed(2);
-        // document.getElementById("subtotal").innerText = newSubtotal.toFixed(2);
-
-        // Handle coupon and update total price
-        // if (cart.coupon) {
-        //   const newTotalWithDiscount = newSubtotal - cart.coupon.discountAmount;
-        //   document.getElementById(
-        //     "totalAmount"
-        //   ).innerText = `₹ ${newTotalWithDiscount.toFixed(2)}`;
-        // } else {
-        //   document.getElementById(
-        //     "totalAmount"
-        //   ).innerText = `₹ ${newSubtotal.toFixed(2)}`;
-        // }
 
         Swal.fire({
           toast: true,
@@ -123,7 +76,6 @@ function updateQuantity(productId, changeQuantity, stock) {
         });
       })
       .catch((error) => {
-        console.error("Error updating quantity:", error);
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -160,6 +112,9 @@ function removeFromCart(productId) {
           };
 
           // Filter out the removed product
+          const removedProduct = cart.products.find(
+            (item) => item.productId === productId
+          );
           cart.products = cart.products.filter(
             (item) => item.productId !== productId
           );
@@ -167,23 +122,23 @@ function removeFromCart(productId) {
           // Recalculate the subtotal (sum of all products' price * quantity)
           let subtotal = 0;
           cart.products.forEach((item) => {
-            subtotal += item.price * item.quantity;
+            subtotal += item.price * item.quantity; // Assuming item.price is available in the cart
           });
 
           // Handle coupon recalculation if it exists
-          if (cart.coupon) {
-            const discountPercentage = cart.coupon.discountPercentage;
-            const maxDiscountAmount = cart.coupon.maxDiscountAmount;
-            let discountAmount = (discountPercentage / 100) * subtotal;
-            if (maxDiscountAmount < discountAmount) {
-              discountAmount = maxDiscountAmount;
-            }
-            cart.coupon.discountAmount = discountAmount;
-            cart.totalPrice = subtotal - discountAmount;
-          } else {
-            // No coupon, total price is the subtotal
-            cart.totalPrice = subtotal;
-          }
+          // if (cart.coupon) {
+          //   const discountPercentage = cart.coupon.discountPercentage;
+          //   const maxDiscountAmount = cart.coupon.maxDiscountAmount;
+          //   let discountAmount = (discountPercentage / 100) * subtotal;
+          //   if (maxDiscountAmount < discountAmount) {
+          //     discountAmount = maxDiscountAmount;
+          //   }
+          //   cart.coupon.discountAmount = discountAmount;
+          //   cart.totalPrice = subtotal - discountAmount;
+          // } else {
+          // No coupon, total price is the subtotal
+          cart.totalPrice = subtotal;
+          // }
 
           // Update the cart in localStorage
           localStorage.setItem("cart", JSON.stringify(cart));
@@ -192,18 +147,18 @@ function removeFromCart(productId) {
           document.getElementById("subtotal").innerText = `₹ ${subtotal.toFixed(
             2
           )}`;
-          if (cart.coupon) {
-            document.getElementById(
-              "couponDiscountAmount"
-            ).innerText = `₹ ${cart.coupon.discountAmount.toFixed(2)}`;
-            document.getElementById(
-              "totalAmount"
-            ).innerText = `₹ ${cart.totalPrice.toFixed(2)}`;
-          } else {
-            document.getElementById(
-              "totalAmount"
-            ).innerText = `₹ ${subtotal.toFixed(2)}`;
-          }
+          // if (cart.coupon) {
+          //   document.getElementById(
+          //     "couponDiscountAmount"
+          //   ).innerText = `₹ ${cart.coupon.discountAmount.toFixed(2)}`;
+          //   document.getElementById(
+          //     "totalAmount"
+          //   ).innerText = `₹ ${cart.totalPrice.toFixed(2)}`;
+          // } else {
+          document.getElementById(
+            "totalAmount"
+          ).innerText = `₹ ${subtotal.toFixed(2)}`;
+          // }
 
           // Display success message
           Swal.fire({
@@ -221,7 +176,7 @@ function removeFromCart(productId) {
           });
         })
         .catch((error) => {
-          console.error("Error adding product to cart:", error);
+          console.error("Error removing product from cart:", error);
           Swal.fire({
             icon: "error",
             title: "Error",

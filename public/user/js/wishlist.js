@@ -122,6 +122,7 @@ function removeFromWishlist(productId) {
 }
 
 function updateWishlistUI(wishlist) {
+  console.log("wishlist", wishlist);
   const wishlistContainer = document.getElementById("wishlistItems");
   const wishlistTotal = document.getElementById("wishlistTotal");
 
@@ -140,7 +141,7 @@ function updateWishlistUI(wishlist) {
           <a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
             ${item.name}
           </a>
-          <span class="header-cart-item-info">1 x $${item.price}</span>
+          <span class="header-cart-item-info">1 x $${item.discountedPrice}</span>
         </div>
         <div class="header-cart-item-remove p-t-8">
           <a href="#" class="cl2 p-lr-5 pointer hov-cl1 trans-04" onclick="removeFromWishlist('${item._id}')">
@@ -153,7 +154,10 @@ function updateWishlistUI(wishlist) {
 
     // Update total
     const total = wishlist
-      .reduce((sum, item) => sum + item.price * (item.quantity || 1), 0)
+      .reduce(
+        (sum, item) => sum + item.discountedPrice * (item.quantity || 1),
+        0
+      )
       .toFixed(2);
     wishlistTotal.textContent = `Total: $${total}`;
   } else {
@@ -173,8 +177,9 @@ function fetchWishlist() {
   axios
     .get("/wishlist")
     .then((response) => {
+      console.log(response.data.wishlist);
       if (response.data && response.data.wishlist) {
-        updateWishlistUI(response.data.wishlist.productIds);
+        updateWishlistUI(response.data.wishlist);
       }
     })
     .catch((error) => {

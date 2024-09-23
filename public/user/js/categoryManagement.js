@@ -1,29 +1,25 @@
 //for create category
-document
-  .getElementById("createCategoryForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
+function createCategory() {
+  event.preventDefault();
 
-    const categoryName = document.getElementById("newCategoryName").value;
+  const categoryName = document.getElementById("newCategoryName").value;
 
-    axios
-      .post("/admin/categories", {
-        categoryName: categoryName,
-      })
-      .then((response) => {
-        // Extract the new category from the response
-        const newCategory = response.data.data.category;
-        console.log(newCategory);
-        const isListedClass = newCategory.isListed
-          ? "btn-danger"
-          : "btn-success";
-        const listAction = newCategory.isListed ? "Unlist" : "List";
-        const currentRowNumber = 1; // The new category will always be at the top of the list
+  axios
+    .post("/admin/categories", {
+      categoryName: categoryName,
+    })
+    .then((response) => {
+      // Extract the new category from the response
+      const newCategory = response.data.data.category;
+      console.log(newCategory);
+      const isListedClass = newCategory.isListed ? "btn-danger" : "btn-success";
+      const listAction = newCategory.isListed ? "Unlist" : "List";
+      const currentRowNumber = 1; // The new category will always be at the top of the list
 
-        // Insert the new row at the top of the table body
-        const tableBody = document.querySelector(".table tbody");
-        const newRow = document.createElement("tr");
-        newRow.innerHTML = `
+      // Insert the new row at the top of the table body
+      const tableBody = document.querySelector(".table tbody");
+      const newRow = document.createElement("tr");
+      newRow.innerHTML = `
           <td>${currentRowNumber}</td>
           <td>${newCategory.name}</td>
           <td>
@@ -45,35 +41,35 @@ document
             </button>
           </td>
         `;
-        tableBody.insertBefore(newRow, tableBody.firstChild);
+      tableBody.insertBefore(newRow, tableBody.firstChild);
 
-        // Clear the form input field
-        document.getElementById("newCategoryName").value = "";
+      // Clear the form input field
+      document.getElementById("newCategoryName").value = "";
 
-        // Optional: Recalculate the SI numbers for all rows
-        updateSINumbers();
+      // Optional: Recalculate the SI numbers for all rows
+      updateSINumbers();
 
-        // Hide the modal after SweetAlert confirmation
-        $("#createCategoryModal").modal("hide");
-        // Use SweetAlert to show a success message and hide the modal
-        Swal.fire({
-          title: "Success!",
-          text: "Category created successfully!",
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        // Use SweetAlert to show an error message
-        Swal.fire({
-          title: "Error!",
-          text: error.response.data.message,
-          icon: "error",
-          confirmButtonText: "OK",
-        });
+      // Hide the modal after SweetAlert confirmation
+      $("#createCategoryModal").modal("hide");
+      // Use SweetAlert to show a success message and hide the modal
+      Swal.fire({
+        title: "Success!",
+        text: "Category created successfully!",
+        icon: "success",
+        confirmButtonText: "OK",
       });
-  });
+    })
+    .catch((error) => {
+      console.log(error);
+      // Use SweetAlert to show an error message
+      Swal.fire({
+        title: "Error!",
+        text: error.response.data.message,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    });
+}
 
 // Function to update the serial numbers of the categories
 function updateSINumbers() {
@@ -84,43 +80,41 @@ function updateSINumbers() {
 }
 
 // <!-- for edit the category -->
-document
-  .getElementById("editCategoryForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
+function editCategory() {
+  event.preventDefault();
 
-    const categoryId = document.getElementById("editCategoryId").value;
-    const categoryName = document.getElementById("editCategoryName").value;
+  const categoryId = document.getElementById("editCategoryId").value;
+  const categoryName = document.getElementById("editCategoryName").value;
 
-    axios
-      .put(`/admin/categories/${categoryId}`, {
-        categoryName: categoryName.toUpperCase(),
-      })
-      .then((response) => {
-        const category = response.data.data;
-        // Clear the form input field
-        document.getElementById(
-          `categoryName-${category._id}`
-        ).innerHTML = `${category.name}`;
+  axios
+    .put(`/admin/categories/${categoryId}`, {
+      categoryName: categoryName.toUpperCase(),
+    })
+    .then((response) => {
+      const category = response.data.data;
+      // Clear the form input field
+      document.getElementById(
+        `categoryName-${category._id}`
+      ).innerHTML = `${category.name}`;
 
-        // Hide the modal after SweetAlert confirmation
-        $("#editCategoryModal").modal("hide");
-        Swal.fire({
-          title: "Success!",
-          text: "Category updated successfully!",
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-      })
-      .catch((error) => {
-        Swal.fire({
-          title: "Error!",
-          text: error.response.data.message,
-          icon: "error",
-          confirmButtonText: "OK",
-        });
+      // Hide the modal after SweetAlert confirmation
+      $("#editCategoryModal").modal("hide");
+      Swal.fire({
+        title: "Success!",
+        text: "Category updated successfully!",
+        icon: "success",
+        confirmButtonText: "OK",
       });
-  });
+    })
+    .catch((error) => {
+      Swal.fire({
+        title: "Error!",
+        text: error.response.data.message,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    });
+}
 
 // Function to dropdown the categories to  the modal
 function populateEditCategoryModal(categoryId, categoryName) {
@@ -131,12 +125,20 @@ function populateEditCategoryModal(categoryId, categoryName) {
 //for confirm the list and unlist categories
 function confirmAndToggleListCategory(categoryId, isListed) {
   const action = isListed === "true" ? "unlist" : "list";
-  const confirmAction = confirm(
-    `Are you sure you want to ${action} this category?`
-  );
-  if (confirmAction) {
-    toggleListCategory(categoryId, isListed);
-  }
+  Swal.fire({
+    title: "Are you sure?",
+    text: `Do you really want to ${action} this category? This action cannot be undone!`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, proceed!",
+    cancelButtonText: "No, cancel!",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      toggleListCategory(categoryId, isListed);
+    }
+  });
 }
 
 //for convert the listed categories to unlist and viseversa

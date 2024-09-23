@@ -138,24 +138,24 @@
                 <% if (discountedPrice < product.price && discountedPrice !== 0)
                 { %>
                 <span class="original-price">
-                  $<%= product.price.toFixed(2) %>
+                  ₹<%= product.price.toFixed(2) %>
                 </span>
                 <span class="discounted-price">
-                  $<%= discountedPrice.toFixed(2) %>
+                  ₹<%= discountedPrice.toFixed(2) %>
                 </span>
                 <% } else { %>
                 <!-- Display only the original price if there's no discount -->
-                $<%= product.price.toFixed(2) %> <% } %>
+                ₹<%= product.price.toFixed(2) %> <% } %>
               </span>
 
               <!-- Discounts or Coupons Applied -->
-              <!-- <% if(product.discount) { %>
+              <% if (discountedPrice < product.price) { %>
               <div class="discounts">
-                <span class="badge badge-success"
-                  >Discount Applied: $<%= product.discount %></span
-                >
+                <span class="badge badge-success">
+                  ₹<%= (product.price - discountedPrice).toFixed(2) %> off
+                </span>
               </div>
-              <% } %> -->
+              <% } %>
 
               <!-- Product Description -->
               <p class="stext-102 cl3 p-t-23"><%= product.description %></p>
@@ -323,25 +323,18 @@
     <script src="/public/user/js/quickview.js"></script>
     <script>
       function addToCart(productId) {
-        const quantity = parseInt(
+        let quantity = parseInt(
           document.getElementById("productQuantity").value
         );
 
-        console.log(productId, quantity);
-
         axios
-          .post(`/cart/add`, {
-            quantity,
-            productId,
-          })
+          .post(`/cart/add`, { quantity, productId })
           .then((response) => {
             const product = response.data.product;
             const originalCart = response.data.cart;
-            const productPrice = product.price;
-            console.log(product, originalCart);
-            const newTotalPrice = response.data.newTotalPrice; // Assuming this comes from the server
+            const productPrice = product.discountedPrice || product.price;
 
-            // Retrieve cart from local storage
+            // Retrieve the cart from local storage or initialize it
             let cart = JSON.parse(localStorage.getItem("cart")) || {
               products: [],
               totalPrice: 0,
@@ -355,23 +348,22 @@
             );
 
             if (existingProductIndex !== -1) {
-              // Update the quantity of the existing product
+              // Update the quantity of the existing product in localStorage
               cart.products[existingProductIndex].quantity = quantity;
             } else {
               // Add the new product to the cart
               cart.products.push({
-                productId: productId,
-                name: product.name,
-                price: productPrice, // Assuming price is available in the response
+                productId: product._id,
+                price: productPrice,
                 quantity: quantity,
               });
-              // Update total price in the cart
-              cart.totalPrice = newTotalPrice;
             }
+
+            // Update total price in the local storage cart from backend response
+            cart.totalPrice = originalCart.totalPrice;
 
             // Save the updated cart to local storage
             localStorage.setItem("cart", JSON.stringify(cart));
-            console.log("Updated Cart:", cart);
 
             // SweetAlert for success message
             Swal.fire({

@@ -149,118 +149,6 @@
           </div>
           <!-- content-wrapper ends -->
 
-          <!-- Create Category Modal -->
-          <div
-            class="modal fade"
-            id="createCategoryModal"
-            tabindex="-1"
-            aria-labelledby="createCategoryModalLabel"
-            aria-hidden="true"
-          >
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <form id="createCategoryForm">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="createCategoryModalLabel">
-                      Create New Category
-                    </h5>
-                    <button
-                      type="button"
-                      class="close"
-                      data-dismiss="modal"
-                      aria-label="Close"
-                    >
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  <div class="modal-body">
-                    <div class="form-group">
-                      <label for="newCategoryName">Category Name:</label>
-                      <input
-                        type="text"
-                        id="newCategoryName"
-                        name="categoryName"
-                        class="form-control"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button
-                      type="button"
-                      class="btn btn-secondary"
-                      data-dismiss="modal"
-                    >
-                      Close
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                      Create
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          <!-- Edit Category Modal -->
-
-          <div
-            class="modal fade"
-            id="editCategoryModal"
-            tabindex="-1"
-            aria-labelledby="editCategoryModalLabel"
-            aria-hidden="true"
-          >
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <form id="editCategoryForm">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="editCategoryModalLabel">
-                      Edit Category
-                    </h5>
-                    <button
-                      type="button"
-                      class="close"
-                      data-dismiss="modal"
-                      aria-label="Close"
-                    >
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  <div class="modal-body">
-                    <input
-                      type="hidden"
-                      id="editCategoryId"
-                      name="categoryId"
-                    />
-                    <div class="form-group">
-                      <label for="editCategoryName">Category Name:</label>
-                      <input
-                        type="text"
-                        id="editCategoryName"
-                        name="categoryName"
-                        class="form-control"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button
-                      type="button"
-                      class="btn btn-secondary"
-                      data-dismiss="modal"
-                    >
-                      Close
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                      Save changes
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
           <!-- content-wrapper ends -->
 
           <!-- partial:partials/_footer.ejs -->
@@ -271,6 +159,172 @@
       </div>
       <!-- page-body-wrapper ends -->
     </div>
+    <!-- Create Category Modal -->
+    <!-- Create New Category Modal -->
+    <div
+      class="modal fade"
+      id="createCategoryModal"
+      tabindex="-1"
+      aria-labelledby="createCategoryModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="createCategoryForm">
+            <div class="modal-header">
+              <h5 class="modal-title" id="createCategoryModalLabel">
+                Create New Category
+              </h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="newCategoryName">Category Name:</label>
+                <input
+                  type="text"
+                  id="newCategoryName"
+                  name="categoryName"
+                  class="form-control"
+                />
+                <div class="invalid-feedback">Category name is required.</div>
+                <div class="valid-feedback">Looks good!</div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                Close
+              </button>
+              <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div
+      class="modal fade"
+      id="editCategoryModal"
+      tabindex="-1"
+      aria-labelledby="editCategoryModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="editCategoryForm">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editCategoryModalLabel">
+                Edit Category
+              </h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="editCategoryId" name="categoryId" />
+              <div class="form-group">
+                <label for="editCategoryName">Category Name:</label>
+                <input
+                  type="text"
+                  id="editCategoryName"
+                  name="categoryName"
+                  class="form-control"
+                />
+                <div class="invalid-feedback">Category name is required.</div>
+                <div class="valid-feedback">Looks good!</div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                Close
+              </button>
+              <button type="submit" class="btn btn-primary">
+                Save changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Real-time validation for category name in create and edit forms
+      document
+        .getElementById("newCategoryName")
+        .addEventListener("input", function () {
+          validationUtils.validateRequiredField(
+            this,
+            "Category name is required."
+          );
+        });
+
+      document
+        .getElementById("editCategoryName")
+        .addEventListener("input", function () {
+          validationUtils.validateRequiredField(
+            this,
+            "Category name is required."
+          );
+        });
+
+      // Form validation on submit
+      document
+        .getElementById("createCategoryForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const isValid = validationUtils.validateForm("createCategoryForm", [
+            {
+              id: "newCategoryName",
+              type: "required",
+              message: "Category name is required.",
+            },
+          ]);
+
+          if (isValid) {
+            // Form is valid, you can proceed to submit or further actions
+            createCategory();
+          }
+        });
+
+      document
+        .getElementById("editCategoryForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const isValid = validationUtils.validateForm("editCategoryForm", [
+            {
+              id: "editCategoryName",
+              type: "required",
+              message: "Category name is required.",
+            },
+          ]);
+
+          if (isValid) {
+            // Form is valid, you can proceed to submit or further actions
+            editCategory();
+          }
+        });
+    </script>
+
     <!-- container-scroller -->
 
     <!-- for modals -->
@@ -286,6 +340,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
 
     <script src="/public/user/js/categoryManagement.js"></script>
+    <script src="/public/user/js/validationUtils.js"></script>
 
     <!-- partial:partials/_footer.ejs -->
     <%- include('partials/_scripts') %>

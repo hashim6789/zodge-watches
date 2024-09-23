@@ -27,86 +27,70 @@ const getCart = async (req, res) => {
 //for add to cart the product
 const addToCart = async (req, res) => {
   try {
+    console.log("testing");
     const userId = req.user?._id;
     const { quantity, productId } = req.body;
 
-    // Fetch the product
-    const product = await ProductModel.findById(productId);
+    // Fetch the product along with the offers
+    const product = await ProductModel.findById(productId).populate("offers");
+
     if (!product) {
       return res
         .status(404)
         .json({ success: false, message: "Product not found!" });
     }
 
-    // Fetch active offers for the product's category
-    const activeOffers = await OfferModel.find({
-      isActive: true,
-      expiryDate: { $gte: new Date() },
-      categoryId: product.categoryId,
-    });
-
-    // Calculate the discounted price
     let discountedPrice = product.price;
-    if (activeOffers.length > 0) {
-      const highestOffer = activeOffers.reduce((max, offer) =>
-        offer.discountValue > max.discountValue ? offer : max
-      );
 
-      if (highestOffer.discountType === "percentage") {
-        discountedPrice =
-          product.price - (product.price * highestOffer.discountValue) / 100;
-      } else if (highestOffer.discountType === "flat") {
+    // If the product has associated offers, apply the highest discount
+    if (product.offers && product.offers.length > 0) {
+      const activeOffers = product.offers.filter((offer) => offer.isActive);
+
+      if (activeOffers.length > 0) {
+        // Get the highest discount value from the offers
+        const highestOffer = activeOffers.reduce((max, offer) =>
+          offer.discountValue > max.discountValue ? offer : max
+        );
+
+        // Apply the discount from the highest offer
         discountedPrice = product.price - highestOffer.discountValue;
+        discountedPrice = Math.max(discountedPrice, 0); // Ensure the price is not negative
       }
-
-      // Ensure discountedPrice is not negative
-      discountedPrice = Math.max(discountedPrice, 0);
     }
-    console.log("discount = ", discountedPrice);
 
-    // Fetch the cart for the user
+    // Fetch the user's cart
     let cart = await CartModel.findOne({ userId });
     if (!cart) {
       cart = new CartModel({
         userId: userId,
         products: [],
         totalPrice: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
     }
 
-    // Update cart with the new product
+    // Update the cart with the new product or update the quantity of an existing product
     const existingProductIndex = cart.products.findIndex(
       (p) => p.productId.toString() === productId
     );
 
     if (existingProductIndex > -1) {
+      // If the product is already in the cart, update the quantity and adjust the total price
       const previousQuantity = cart.products[existingProductIndex].quantity;
       cart.products[existingProductIndex].quantity = quantity;
-      if (discountedPrice !== 0) {
-        cart.totalPrice += discountedPrice * (quantity - previousQuantity);
-      } else {
-        cart.totalPrice += product.price * (quantity - previousQuantity);
-      }
+      cart.totalPrice += discountedPrice * (quantity - previousQuantity);
     } else {
-      if (discountedPrice !== 0) {
-        cart.products.push({
-          productId: productId,
-          quantity: quantity,
-          price: discountedPrice, // Save the discounted price
-        });
-        cart.totalPrice += discountedPrice * quantity;
-      } else {
-        cart.products.push({
-          productId: productId,
-          quantity: quantity,
-          price: product.price, // Save the discounted price
-        });
-        cart.totalPrice += product.price * quantity;
-      }
+      // If the product is not in the cart, add it and update the total price
+      cart.products.push({
+        productId: productId,
+        quantity: quantity,
+        price: discountedPrice, // Save the discounted price
+      });
+      cart.totalPrice += discountedPrice * quantity;
     }
 
+    console.log(cart.totalPrice);
+
+    // Save the updated cart
     await cart.save();
     req.session.cart = cart;
 
@@ -115,109 +99,155 @@ const addToCart = async (req, res) => {
       success: true,
       message: "Product added to cart!",
       cart,
-      product: { ...product.toObject(), discountedPrice }, // Include discountedPrice in response
+      product: { ...product.toObject(), discountedPrice }, // Include the discounted price in the response
     });
   } catch (err) {
     console.error("Error in addToCart:", err);
-    res.status(500).json({ success: false, message: "Server Error!!!" });
+    res.status(500).json({ success: false, message: "Server Error!" });
   }
 };
 
 const updateQuantity = async (req, res) => {
   try {
-    const { productId, changeQuantity, totalPrice } = req.body;
+    const { productId, changeQuantity } = req.body;
     const userId = req.user?._id;
-    console.log(totalPrice);
 
+    // Fetch the user's cart
     const cart = await CartModel.findOne({ userId });
     if (!cart) {
       return res
         .status(404)
-        .json({ status: "Failed", message: "The cart is not found" });
+        .json({ status: "Failed", message: "Cart not found" });
     }
 
+    // Find the product in the cart
     const productIdx = cart.products.findIndex(
       (p) => p.productId.toString() === productId
     );
     if (productIdx === -1) {
-      return res.status(404).json({
-        status: "Failed",
-        message: "The product is not found in the cart",
-      });
+      return res
+        .status(404)
+        .json({ status: "Failed", message: "Product not found in the cart" });
     }
 
-    cart.products[productIdx].quantity += changeQuantity;
+    // Calculate new quantity
+    const newQuantity = cart.products[productIdx].quantity + changeQuantity;
 
-    // const total = await cart.products.reduce(
-    //   async (totalPromise, currProduct) => {
-    //     const total = await totalPromise;
-    //     const product = await ProductModel.findById(currProduct.productId);
+    // Fetch the product along with its offers
+    const product = await ProductModel.findById(productId).populate("offers");
+    if (!product) {
+      return res
+        .status(404)
+        .json({ status: "Failed", message: "Product not found" });
+    }
 
-    //     if (!product) {
-    //       throw new Error(`Product with ID ${currProduct.productId} not found`);
-    //     }
+    // Determine discounted price based on active offers
+    let discountedPrice = product.price;
+    if (product.offers && product.offers.length > 0) {
+      const activeOffers = product.offers.filter((offer) => offer.isActive);
+      if (activeOffers.length > 0) {
+        const highestOffer = activeOffers.reduce((max, offer) =>
+          offer.discountValue > max.discountValue ? offer : max
+        );
+        discountedPrice = product.price - highestOffer.discountValue;
+        discountedPrice = Math.max(discountedPrice, 0); // Ensure the price is not negative
+      }
+    }
 
-    //     return total + product.price * currProduct.quantity;
-    //   },
-    //   Promise.resolve(0)
-    // );
+    // Recalculate total price for the cart
+    // cart.totalPrice =
+    //   cart.totalPrice -
+    //   cart.products[productIdx].price * cart.products[productIdx].quantity +
+    //   discountedPrice * cart.products[productIdx].quantity;
+    // cart.products[productIdx].price = discountedPrice; // Update price in the cart
 
-    cart.totalPrice = totalPrice;
+    cart.totalPrice =
+      cart.totalPrice -
+      discountedPrice * cart.products[productIdx].quantity +
+      discountedPrice * newQuantity;
+    if (newQuantity <= 0) {
+      cart.products[productIdx].quantity = 1; // Set to minimum 1 if quantity is <= 0
+    } else {
+      cart.products[productIdx].quantity = newQuantity;
+    }
+    console.log("quantity = ", newQuantity);
 
-    cart.updatedAt = Date.now();
+    console.log("total = ", cart.totalPrice);
     await cart.save();
-
-    req.session.cart = cart;
 
     return res.status(200).json({
       status: "Success",
-      message: "The quantity is updated",
+      message: "Quantity updated successfully",
       product: cart.products[productIdx],
       cartTotal: cart.totalPrice,
     });
   } catch (err) {
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+    console.error("Error updating quantity:", err);
+    res.status(500).json({ status: "Error", message: "Server Error!" });
   }
 };
 
-//for deleting the cart products
 const deleteCartProduct = async (req, res) => {
   try {
     const productId = req.params.productId;
     const userId = req.user?._id;
 
+    // Fetch the user's cart
     const cart = await CartModel.findOne({ userId });
     if (!cart) {
       return res
         .status(404)
         .json({ status: "Failed", message: "The cart is not found" });
     }
-    console.log(productId, userId);
-    console.log("cart = ", cart);
 
+    // Filter out the product to be deleted
+    const productToDelete = cart.products.find(
+      (product) => product.productId.toString() === productId
+    );
+    if (!productToDelete) {
+      return res
+        .status(404)
+        .json({ status: "Failed", message: "Product not found in the cart" });
+    }
+
+    // Remove the product from the cart
     cart.products = cart.products.filter(
       (product) => product.productId.toString() !== productId
     );
 
-    const total = await cart.products.reduce(
-      async (totalPromise, currProduct) => {
-        const total = await totalPromise;
-        const product = await ProductModel.findById(currProduct.productId);
+    // Recalculate total price for the cart
+    let total = 0;
+    for (const currProduct of cart.products) {
+      const product = await ProductModel.findById(
+        currProduct.productId
+      ).populate("offers");
+      if (!product) {
+        throw new Error(`Product with ID ${currProduct.productId} not found`);
+      }
 
-        if (!product) {
-          throw new Error(`Product with ID ${currProduct.productId} not found`);
+      // Determine discounted price based on active offers
+      let discountedPrice = product.price;
+      if (product.offers && product.offers.length > 0) {
+        const activeOffers = product.offers.filter((offer) => offer.isActive);
+        if (activeOffers.length > 0) {
+          const highestOffer = activeOffers.reduce((max, offer) =>
+            offer.discountValue > max.discountValue ? offer : max
+          );
+          discountedPrice = product.price - highestOffer.discountValue;
+          discountedPrice = Math.max(discountedPrice, 0); // Ensure the price is not negative
         }
+      }
 
-        return total + product.price * currProduct.quantity;
-      },
-      Promise.resolve(0)
-    );
+      total += discountedPrice * currProduct.quantity;
+    }
 
+    console.log("total = ", total);
+
+    // Update cart details
     cart.totalPrice = total;
-    cart.updatedAt = Date.now();
 
+    // Save the updated cart
     await cart.save();
-
     req.session.cart = cart;
 
     return res.status(200).json({
@@ -226,6 +256,7 @@ const deleteCartProduct = async (req, res) => {
       cart,
     });
   } catch (err) {
+    console.error("Error deleting product from cart:", err);
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
   }
 };

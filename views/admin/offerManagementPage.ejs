@@ -82,11 +82,16 @@
                         <tbody>
                           <% offers.forEach((offer, idx) => { %>
                           <tr>
-                            <td><%= ((current - 1) * perPage) + (idx + 1) %></td>
+                            <td>
+                              <%= ((current - 1) * perPage) + (idx + 1) %>
+                            </td>
                             <td><%= offer.name %></td>
                             <td><%= offer.description %></td>
                             <td><%= offer.discountValue %>%</td>
-                            <td><%= offer.applicableType.charAt(0).toUpperCase() + offer.applicableType.slice(1) %></td>
+                            <td>
+                              <%= offer.applicableType.charAt(0).toUpperCase() +
+                              offer.applicableType.slice(1) %>
+                            </td>
                             <!-- <td>
                               <span class="badge <%= offer.isActive ? 'badge-success' : 'badge-danger' %>">
                                 <%= offer.isActive ? 'Active' : 'Inactive' %>
@@ -94,39 +99,42 @@
                             </td> -->
                             <td>
                               <% if (offer.applicableType === 'category') { %>
-                                <% offer.categoryIds.forEach(category => { %>
-                                  <span><%= category.name %></span><br>
-                                <% }) %>
-                              <% } else { %>
-                                <% offer.productIds.forEach(product => { %>
-                                  <span><%= product.name %></span><br>
-                                <% }) %>
-                              <% } %>
+                              <% offer.categoryIds.forEach(category => { %>
+                              <span><%= category.name %></span><br />
+                              <% }) %> <% } else { %> <%
+                              offer.productIds.forEach(product => { %>
+                              <span><%= product.name %></span><br />
+                              <% }) %> <% } %>
                             </td>
                             <td>
                               <!-- <button class="btn btn-sm btn-info" onclick="viewApplicableItems('<%= offer._id %>', '<%= offer.applicableType %>')">
                                 View <%= offer.applicableType === 'product' ? 'Products' : 'Categories' %>
                               </button> -->
-                              <button class="btn btn-primary" onClick="openEditOfferModal('<%= offer._id %>')">Edit</button>
-                           
+                              <button
+                                class="btn btn-primary"
+                                onClick="openEditOfferModal('<%= offer._id %>')"
+                              >
+                                Edit
+                              </button>
+
                               <button
                                 id="listButton-<%= offer._id %>"
                                 class="btn <%= offer.isActive ? 'btn-danger' : 'btn-success' %>"
                                 onclick="confirmAndToggleListOffer('<%= offer._id %>', '<%= offer.isActive %>')"
                               >
-                                <%= offer.isActive ? 'Deactivate' : 'Activate' %>
+                                <%= offer.isActive ? 'Deactivate' : 'Activate'
+                                %>
                               </button>
                             </td>
                           </tr>
                           <% }) %>
                         </tbody>
                       </table>
-                      
                     </div>
                   </div>
                 </div>
               </div>
-              </div>
+            </div>
 
             <!-- Pagination -->
             <nav aria-label="Page navigation">
@@ -159,94 +167,131 @@
               </ul>
             </nav>
           </div>
+
+          <!-- Modals for Create and Edit Offer -->
+          <!-- Implement CreateOfferModal and EditOfferModal according to your requirements -->
+
+          <!-- End Modals -->
+          <!-- partial:partials/_footer.ejs -->
+          <%- include('partials/_footer') %>
+          <!-- partial -->
         </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+    <!-- Create Offer Modal -->
+    <!-- Create Offer Modal -->
+    <!-- Create/Edit Offer Modal -->
+    <!-- Create Offer Modal -->
+    <!-- Create Offer Modal -->
+    <div
+      class="modal fade"
+      id="createOfferModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="createOfferModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createOfferModalLabel">
+              Create New Offer
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="offerForm">
+              <div class="form-group">
+                <label for="offerName">Offer Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="offerName"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="offerDescription">Description</label>
+                <textarea
+                  class="form-control"
+                  id="offerDescription"
+                  required
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label for="discountValue">Discount Value (%)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="discountValue"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="applicableType">Applicable Type</label>
+                <select class="form-control" id="applicableType">
+                  <option value="product">Product</option>
+                  <option value="category">Category</option>
+                </select>
+              </div>
+              <div class="form-group" id="applicableItemsContainer">
+                <label>Applicable Items</label>
+                <div id="applicableItems"></div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="createOffer()"
+            >
+              Save Offer
+            </button>
+          </div>
         </div>
-
-        <!-- Modals for Create and Edit Offer -->
-        <!-- Implement CreateOfferModal and EditOfferModal according to your requirements -->
-
-        
-        <!-- End Modals -->
-        <!-- partial:partials/_footer.ejs -->
-        <%- include('partials/_footer') %>
-        <!-- partial -->
-      </div>
-      <!-- main-panel ends -->
-    </div>
-    <!-- page-body-wrapper ends -->
-  </div>
-  <!-- container-scroller -->
-  <!-- Create Offer Modal -->
-  <!-- Create Offer Modal -->
-  <!-- Create/Edit Offer Modal -->
-<!-- Create Offer Modal -->
-<!-- Create Offer Modal -->
-<div class="modal fade" id="createOfferModal" tabindex="-1" role="dialog" aria-labelledby="createOfferModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="createOfferModalLabel">Create New Offer</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="offerForm">
-          <div class="form-group">
-            <label for="offerName">Offer Name</label>
-            <input type="text" class="form-control" id="offerName" required>
-          </div>
-          <div class="form-group">
-            <label for="offerDescription">Description</label>
-            <textarea class="form-control" id="offerDescription" required></textarea>
-          </div>
-          <div class="form-group">
-            <label for="discountValue">Discount Value (%)</label>
-            <input type="number" class="form-control" id="discountValue" required>
-          </div>
-          <div class="form-group">
-            <label for="applicableType">Applicable Type</label>
-            <select class="form-control" id="applicableType">
-              <option value="product">Product</option>
-              <option value="category">Category</option>
-            </select>
-          </div>
-          <div class="form-group" id="applicableItemsContainer">
-            <label>Applicable Items</label>
-            <div id="applicableItems"></div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" onclick="createOffer()">Save Offer</button>
       </div>
     </div>
-  </div>
-</div>
 
+    <script>
+      // Event listener for applicable type dropdown change
+      document
+        .getElementById("applicableType")
+        .addEventListener("change", function () {
+          const selectedType = this.value;
+          console.log(selectedType);
+          populateApplicableItemsCreate(selectedType);
+        });
 
-
-
-
-    <script>// Event listener for applicable type dropdown change
-      document.getElementById('applicableType').addEventListener('change', function() {
-        const selectedType = this.value;
-        console.log(selectedType)
-        populateApplicableItemsCreate(selectedType);
-      });
-      
       // Function to fetch applicable items based on selected type
       function populateApplicableItemsCreate(type) {
-        console.log("type = ",type)
-        axios.get(`/admin/offers/api/applicable-items?type=${type}`)
-          .then(response => {
-            const container = document.getElementById('applicableItems');
-            container.innerHTML = ''; // Clear previous items
-      
-            response.data.items.forEach(item => {
-              const checkbox = document.createElement('div');
-              checkbox.classList.add('form-check');
+        console.log("type = ", type);
+        axios
+          .get(`/admin/offers/api/applicable-items?type=${type}`)
+          .then((response) => {
+            const container = document.getElementById("applicableItems");
+            container.innerHTML = ""; // Clear previous items
+
+            response.data.items.forEach((item) => {
+              const checkbox = document.createElement("div");
+              checkbox.classList.add("form-check");
               checkbox.innerHTML = `
                 <input class="form-check-input" type="checkbox" value="${item._id}" id="${item._id}">
                 <label class="form-check-label" for="${item._id}">${item.name}</label>
@@ -254,238 +299,296 @@
               container.appendChild(checkbox);
             });
           })
-          .catch(error => {
-            console.error('Error fetching applicable items:', error);
+          .catch((error) => {
+            console.error("Error fetching applicable items:", error);
           });
       }
-      
+
       // Function to save the offer
-     // Function to create a new offer
-async function createOffer() {
-  const applicableType = document.getElementById('applicableType').value;
+      // Function to create a new offer
+      async function createOffer() {
+        const applicableType = document.getElementById("applicableType").value;
 
-  const offer = {
-    name: document.getElementById('offerName').value,
-    description: document.getElementById('offerDescription').value,
-    discountValue: document.getElementById('discountValue').value,
-    applicableType: applicableType,
-    isActive: true, // Default active status
-    categoryIds: [],
-    productIds: []
-  };
+        const offer = {
+          name: document.getElementById("offerName").value,
+          description: document.getElementById("offerDescription").value,
+          discountValue: document.getElementById("discountValue").value,
+          applicableType: applicableType,
+          isActive: true, // Default active status
+          categoryIds: [],
+          productIds: [],
+        };
 
-  // Collect selected IDs
-  Array.from(document.querySelectorAll('#applicableItems input:checked')).forEach(input => {
-    if (applicableType === 'category') {
-      offer.categoryIds.push(input.value);
-    } else {
-      offer.productIds.push(input.value);
-    }
-  });
+        // Collect selected IDs
+        Array.from(
+          document.querySelectorAll("#applicableItems input:checked")
+        ).forEach((input) => {
+          if (applicableType === "category") {
+            offer.categoryIds.push(input.value);
+          } else {
+            offer.productIds.push(input.value);
+          }
+        });
 
-  try {
-    const response = await axios.post('/admin/offers', offer);
-    if (response.data.success) {
-      $('#createOfferModal').modal('hide');
-      window.location.reload(); // Refresh the table or data as needed
-    } else {
-      alert('Failed to create offer: ' + response.data.message);
-    }
-  } catch (error) {
-    console.error('Error creating offer:', error);
-    alert('Server error while creating offer.');
-  }
-}
+        try {
+          const response = await axios.post("/admin/offers", offer);
+          if (response.data.success) {
+            $("#createOfferModal").modal("hide");
+            window.location.reload(); // Refresh the table or data as needed
+          } else {
+            alert("Failed to create offer: " + response.data.message);
+          }
+        } catch (error) {
+          console.error("Error creating offer:", error);
+          alert("Server error while creating offer.");
+        }
+      }
 
+      // Event listener for the Save Offer button
+      document
+        .getElementById("saveOfferButton")
+        .addEventListener("click", async () => {
+          await createOffer();
+        });
 
-// Event listener for the Save Offer button
-document.getElementById('saveOfferButton').addEventListener('click', async () => {
-  await createOffer(); 
-});
-
-      
       // Open the modal for creating or editing offers
       function openOfferModal(offerId = null) {
         // if (offerId) {
         //   fetchOfferDetails(offerId);
         // } else {
-          document.getElementById('offerForm').reset();
-          document.getElementById('createOfferModalLabel').textContent = 'Create New Offer';
-          populateApplicableItems(document.getElementById('applicableType').value); // Fetch items for default applicable type
+        document.getElementById("offerForm").reset();
+        document.getElementById("createOfferModalLabel").textContent =
+          "Create New Offer";
+        populateApplicableItems(
+          document.getElementById("applicableType").value
+        ); // Fetch items for default applicable type
         // }
-        $('#createOfferModal').modal('show');
+        $("#createOfferModal").modal("show");
       }
-      
+
       // Fetch offer details for editing
       async function fetchOfferDetails(offerId) {
         try {
-          const response = await axios.get(`/admin/offers/api/offers/${offerId}`);
+          const response = await axios.get(
+            `/admin/offers/api/offers/${offerId}`
+          );
           const offer = response.data.offer;
-      
-          document.getElementById('offerId').value = offer._id;
-          document.getElementById('offerName').value = offer.name;
-          document.getElementById('offerDescription').value = offer.description;
-          document.getElementById('discountValue').value = offer.discountValue;
-          document.getElementById('applicableType').value = offer.applicableType;
-      
+
+          document.getElementById("offerId").value = offer._id;
+          document.getElementById("offerName").value = offer.name;
+          document.getElementById("offerDescription").value = offer.description;
+          document.getElementById("discountValue").value = offer.discountValue;
+          document.getElementById("applicableType").value =
+            offer.applicableType;
+
           // Populate offer items based on applicable type
           await populateApplicableItems(offer.applicableType);
-      
+
           // Select the current items
-          offer.categoryIds.forEach(itemId => {
+          offer.categoryIds.forEach((itemId) => {
             const checkbox = document.getElementById(itemId);
             if (checkbox) {
               checkbox.checked = true; // Check the corresponding checkbox
             }
           });
-      
-          document.getElementById('createOfferModalLabel').textContent = 'Edit Offer';
+
+          document.getElementById("createOfferModalLabel").textContent =
+            "Edit Offer";
         } catch (error) {
-          console.error('Error fetching offer details:', error);
+          console.error("Error fetching offer details:", error);
         }
       }
-      
+
       // Event listener for the Save Offer button
-      document.getElementById('saveOfferButton').addEventListener('click', saveOffer);
-      
+      document
+        .getElementById("saveOfferButton")
+        .addEventListener("click", saveOffer);
     </script>
 
-
-<!-- Edit Offer Modal -->
-<div class="modal fade" id="editOfferModal" tabindex="-1" role="dialog" aria-labelledby="editOfferModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editOfferModalLabel">Edit Offer</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="offerForm">
-          <input type="hidden" id="offerId">
-          <div class="form-group">
-            <label for="offerName">Offer Name</label>
-            <input type="text" class="form-control" id="offerName" required>
+    <!-- Edit Offer Modal -->
+    <div
+      class="modal fade"
+      id="editOfferModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="editOfferModalLabel"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editOfferModalLabel">Edit Offer</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
-          <div class="form-group">
-            <label for="offerDescription">Description</label>
-            <textarea class="form-control" id="offerDescription"></textarea>
+          <div class="modal-body">
+            <form id="offerForm">
+              <input type="hidden" id="offerId" />
+              <div class="form-group">
+                <label for="offerName">Offer Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="offerName"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="offerDescription">Description</label>
+                <textarea class="form-control" id="offerDescription"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="discountValue">Discount Value (%)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="discountValue"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="applicableType">Applicable Type</label>
+                <select class="form-control" id="applicableType" required>
+                  <option value="category">Category</option>
+                  <option value="product">Product</option>
+                </select>
+              </div>
+              <div class="form-group" id="applicableItemsContainer">
+                <!-- Dynamically populate the applicable items (categories/products) -->
+                <label for="editApplicableItems">Applicable Items</label>
+                <div id="editApplicableItems"></div>
+              </div>
+            </form>
           </div>
-          <div class="form-group">
-            <label for="discountValue">Discount Value (%)</label>
-            <input type="number" class="form-control" id="discountValue" required>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary" id="saveOfferButton">
+              Save changes
+            </button>
           </div>
-          <div class="form-group">
-            <label for="applicableType">Applicable Type</label>
-            <select class="form-control" id="applicableType" required>
-              <option value="category">Category</option>
-              <option value="product">Product</option>
-            </select>
-          </div>
-          <div class="form-group" id="applicableItemsContainer">
-            <!-- Dynamically populate the applicable items (categories/products) -->
-            <label for="editApplicableItems">Applicable Items</label>
-            <div id="editApplicableItems"></div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="saveOfferButton">Save changes</button>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<script>
-  // Open the edit modal and populate data
-  async function openEditOfferModal(offerId) {
-    try {
-      const response = await axios.get(`/admin/offers/api/offers/${offerId}`);
-      const { offer, categories, products } = response.data;
+    <script>
+      // Open the edit modal and populate data
+      async function openEditOfferModal(offerId) {
+        try {
+          const response = await axios.get(
+            `/admin/offers/api/offers/${offerId}`
+          );
+          const { offer, categories, products } = response.data;
 
-      // console.log("",{products, categories})
+          // console.log("",{products, categories})
 
-      // Populate the form with the offer details
-      document.getElementById('offerId').value = offer._id;
-      document.getElementById('offerName').value = offer.name;
-      document.getElementById('offerDescription').value = offer.description;
-      document.getElementById('discountValue').value = offer.discountValue;
-      document.getElementById('applicableType').value = offer.applicableType;
+          // Populate the form with the offer details
+          document.getElementById("offerId").value = offer._id;
+          document.getElementById("offerName").value = offer.name;
+          document.getElementById("offerDescription").value = offer.description;
+          document.getElementById("discountValue").value = offer.discountValue;
+          document.getElementById("applicableType").value =
+            offer.applicableType;
 
-      // Populate the applicable items (categories/products)
-      populateApplicableItems(offer.applicableType, categories, products, offer);
+          // Populate the applicable items (categories/products)
+          populateApplicableItems(
+            offer.applicableType,
+            categories,
+            products,
+            offer
+          );
 
-      $('#editOfferModal').modal('show');
-    } catch (error) {
-      console.error('Error fetching offer details:', error);
-    }
-  }
+          $("#editOfferModal").modal("show");
+        } catch (error) {
+          console.error("Error fetching offer details:", error);
+        }
+      }
 
-  // Populate applicable items based on the selected type and check the related ones
-  function populateApplicableItems(applicableType, categories, products, offer) {
-    const container = document.getElementById('editApplicableItems');
-    container.innerHTML = ''; // Clear previous items
+      // Populate applicable items based on the selected type and check the related ones
+      function populateApplicableItems(
+        applicableType,
+        categories,
+        products,
+        offer
+      ) {
+        const container = document.getElementById("editApplicableItems");
+        container.innerHTML = ""; // Clear previous items
 
-    const items = applicableType === 'category' ? categories : products;
-    const selectedIds = applicableType === 'category' ? offer.categoryIds.map(cat => cat._id) : offer.productIds.map(prod => prod._id);
-    console.log(selectedIds)
-    items.forEach(item => {
-      const isChecked = selectedIds.includes(item._id);
-      const checkbox = document.createElement('div');
-      checkbox.classList.add('form-check');
-      checkbox.innerHTML = `
-        <input class="form-check-input" type="checkbox" value="${item._id}" id="${item._id}" ${isChecked ? 'checked' : ''}>
+        const items = applicableType === "category" ? categories : products;
+        const selectedIds =
+          applicableType === "category"
+            ? offer.categoryIds.map((cat) => cat._id)
+            : offer.productIds.map((prod) => prod._id);
+        console.log(selectedIds);
+        items.forEach((item) => {
+          const isChecked = selectedIds.includes(item._id);
+          const checkbox = document.createElement("div");
+          checkbox.classList.add("form-check");
+          checkbox.innerHTML = `
+        <input class="form-check-input" type="checkbox" value="${
+          item._id
+        }" id="${item._id}" ${isChecked ? "checked" : ""}>
         <label class="form-check-label" for="${item._id}">${item.name}</label>
       `;
-      container.appendChild(checkbox);
-    });
-  }
-
-  // Save the edited offer
-  async function saveEditedOffer() {
-    const offerId = document.getElementById('offerId').value;
-    const applicableType = document.getElementById('applicableType').value;
-
-    const offer = {
-      name: document.getElementById('offerName').value,
-      description: document.getElementById('offerDescription').value,
-      discountValue: document.getElementById('discountValue').value,
-      applicableType: applicableType,
-      isActive: true,
-      categoryIds: [],
-      productIds: []
-    };
-
-    // Collect selected IDs
-    Array.from(document.querySelectorAll('#editApplicableItems input:checked')).forEach(input => {
-      if (applicableType === 'category') {
-        offer.categoryIds.push(input.value);
-      } else {
-        offer.productIds.push(input.value);
+          container.appendChild(checkbox);
+        });
       }
-    });
 
-    try {
-      const response = await axios.patch(`/admin/offers/${offerId}`, offer);
-      if (response.data.success) {
-        $('#editOfferModal').modal('hide');
-        window.location.reload(); // Refresh the table or data as needed
-      } else {
-        alert('Failed to save offer: ' + response.data.message);
+      // Save the edited offer
+      async function saveEditedOffer() {
+        const offerId = document.getElementById("offerId").value;
+        const applicableType = document.getElementById("applicableType").value;
+
+        const offer = {
+          name: document.getElementById("offerName").value,
+          description: document.getElementById("offerDescription").value,
+          discountValue: document.getElementById("discountValue").value,
+          applicableType: applicableType,
+          isActive: true,
+          categoryIds: [],
+          productIds: [],
+        };
+
+        // Collect selected IDs
+        Array.from(
+          document.querySelectorAll("#editApplicableItems input:checked")
+        ).forEach((input) => {
+          if (applicableType === "category") {
+            offer.categoryIds.push(input.value);
+          } else {
+            offer.productIds.push(input.value);
+          }
+        });
+
+        try {
+          const response = await axios.patch(`/admin/offers/${offerId}`, offer);
+          if (response.data.success) {
+            $("#editOfferModal").modal("hide");
+            window.location.reload(); // Refresh the table or data as needed
+          } else {
+            alert("Failed to save offer: " + response.data.message);
+          }
+        } catch (error) {
+          console.error("Error saving offer:", error);
+          alert("Server error while saving offer.");
+        }
       }
-    } catch (error) {
-      console.error('Error saving offer:', error);
-      alert('Server error while saving offer.');
-    }
-  }
 
-  // Event listener for saving the edited offer
-  document.getElementById('saveOfferButton').addEventListener('click', saveEditedOffer);
-</script>
-
-    
+      // Event listener for saving the edited offer
+      document
+        .getElementById("saveOfferButton")
+        .addEventListener("click", saveEditedOffer);
+    </script>
 
     <!-- plugins:js -->
     <script src="/public/assets/vendors/js/vendor.bundle.base.js"></script>
@@ -515,9 +618,9 @@ document.getElementById('saveOfferButton').addEventListener('click', async () =>
     <script>
       function confirmAndToggleListOffer(id, isActive) {
         const action = isActive === "true" ? "Deactivate" : "Activate";
-        const newStatus =  isActive === "true" ? false : true;
-        console.log(newStatus)
-    
+        const newStatus = isActive === "true" ? false : true;
+        console.log(newStatus);
+
         Swal.fire({
           text: `Are you sure you want to ${action} this offer?`,
           icon: "warning",
@@ -527,45 +630,50 @@ document.getElementById('saveOfferButton').addEventListener('click', async () =>
           confirmButtonText: `Yes, ${action} it!`,
         }).then((result) => {
           if (result.isConfirmed) {
-            axios.put(`/admin/offers/${id}/toggle`, {
-              isActive: newStatus,
-            })
-            .then((response) => {
-              const data = response.data.offer; // Assuming response contains the updated offer
-    
-              // Select the button element using the offer id
-              const buttonElement = document.getElementById(`listButton-${data._id}`);
-    
+            axios
+              .put(`/admin/offers/${id}/toggle`, {
+                isActive: newStatus,
+              })
+              .then((response) => {
+                const data = response.data.offer; // Assuming response contains the updated offer
 
-              // Update button text and class based on the new status
-              const resultText = data.isActive ? "Deactivate" : "Activate";
-              const buttonClass = data.isActive ? "btn-danger" : "btn-success";
-    
-              // Update button properties
-              buttonElement.className = `btn ${buttonClass}`;
-              buttonElement.innerHTML = resultText;
-              buttonElement.setAttribute("onclick", `confirmAndToggleListOffer("${data._id}", '${data.isActive}')`);
-    
-              Swal.fire(
-                `${action}d!`,
-                `Offer has been ${action.toLowerCase()}d.`,
-                "success"
-              );
-            })
-            .catch((error) => {
-              Swal.fire(
-                "Error",
-                "There was a problem updating the offer status.",
-                "error"
-              );
-            });
+                // Select the button element using the offer id
+                const buttonElement = document.getElementById(
+                  `listButton-${data._id}`
+                );
+
+                // Update button text and class based on the new status
+                const resultText = data.isActive ? "Deactivate" : "Activate";
+                const buttonClass = data.isActive
+                  ? "btn-danger"
+                  : "btn-success";
+
+                // Update button properties
+                buttonElement.className = `btn ${buttonClass}`;
+                buttonElement.innerHTML = resultText;
+                buttonElement.setAttribute(
+                  "onclick",
+                  `confirmAndToggleListOffer("${data._id}", '${data.isActive}')`
+                );
+
+                Swal.fire(
+                  `${action}d!`,
+                  `Offer has been ${action.toLowerCase()}d.`,
+                  "success"
+                );
+              })
+              .catch((error) => {
+                Swal.fire(
+                  "Error",
+                  "There was a problem updating the offer status.",
+                  "error"
+                );
+              });
           }
         });
       }
     </script>
-    
 
-    
     <!-- <script>
       function handleDiscountTypeChange() {
         const discountType = document.getElementById("editDiscountType").value;

@@ -1,6 +1,6 @@
-const OrderModel = require("../models/Order");
-const WalletModel = require("../models/Wallet");
-const UserModel = require("../models/User");
+const OrderModel = require("../../models/Order");
+const WalletModel = require("../../models/Wallet");
+const UserModel = require("../../models/User");
 
 const getOrders = async (req, res) => {
   try {

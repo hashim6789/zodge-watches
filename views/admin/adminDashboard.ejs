@@ -120,21 +120,28 @@
                     <h5 id="generateReport" class="card-title">
                       Generate Sales Report
                     </h5>
-                    <form id="reportForm">
+                    <form id="reportForm" novalidate>
                       <div class="form-group">
                         <label for="reportType">Select Report Type:</label>
                         <select
                           id="reportType"
                           name="reportType"
                           class="form-control"
+                          required
                         >
+                          <option value="default">Select...</option>
                           <option value="yearly">Yearly</option>
                           <option value="monthly">Monthly</option>
                           <option value="weekly">Weekly</option>
                           <option value="daily">Daily</option>
                           <option value="custom">Custom Range</option>
                         </select>
+                        <div class="invalid-feedback">
+                          Please select a report type.
+                        </div>
+                        <div class="valid-feedback">Looks good!</div>
                       </div>
+
                       <div
                         class="form-group"
                         id="customDateRange"
@@ -146,15 +153,27 @@
                           id="startDate"
                           name="startDate"
                           class="form-control"
+                          required
                         />
+                        <div class="invalid-feedback">
+                          Please select a valid start date.
+                        </div>
+                        <div class="valid-feedback">Looks good!</div>
+
                         <label for="endDate">End Date:</label>
                         <input
                           type="date"
                           id="endDate"
                           name="endDate"
                           class="form-control"
+                          required
                         />
+                        <div class="invalid-feedback">
+                          Please select a valid end date.
+                        </div>
+                        <div class="valid-feedback">Looks good!</div>
                       </div>
+
                       <button
                         type="button"
                         id="generateReportButton"
@@ -174,6 +193,7 @@
                 </div>
               </div>
             </div>
+
             <!-- Best Selling Products and Categories -->
             <div class="row">
               <div class="col-lg-6 grid-margin stretch-card">
@@ -306,23 +326,156 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
-
     <script>
-      // Show or hide custom date range fields based on report type
-      document
-        .getElementById("reportType")
-        .addEventListener("change", function () {
-          const customRange = document.getElementById("customDateRange");
-          if (this.value === "custom") {
-            customRange.style.display = "block";
+      // document
+      //   .getElementById("reportType")
+      //   .addEventListener("change", function () {
+      //     const customDateRange = document.getElementById("customDateRange");
+      //     if (this.value === "custom") {
+      //       customDateRange.style.display = "block";
+      //     } else {
+      //       customDateRange.style.display = "none";
+      //     }
+      //     document
+      //       .getElementById("generateReportButton")
+      //       .addEventListener("click", async () => {
+      //   });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const reportType = document.getElementById("reportType");
+        const startDate = document.getElementById("startDate");
+        const endDate = document.getElementById("endDate");
+        const customDateRange = document.getElementById("customDateRange");
+        const generateReportButton = document.getElementById(
+          "generateReportButton"
+        );
+        const generateExcelReportButton = document.getElementById(
+          "generateExcelReportButton"
+        );
+
+        // Validate the report type on change
+        reportType.addEventListener("change", function () {
+          validateReportType();
+          toggleCustomDateRange();
+        });
+
+        // Validate start date on change
+        startDate.addEventListener("input", function () {
+          validateDateRange();
+        });
+
+        // Validate end date on change
+        endDate.addEventListener("input", function () {
+          validateDateRange();
+        });
+
+        // PDF Report Generation Button Click
+        generateReportButton.addEventListener("click", function (e) {
+          if (validateForm()) {
+            // All fields are valid, proceed with PDF generation
+            generatePDFReport();
           } else {
-            customRange.style.display = "none";
+            // Prevent form submission if fields are invalid
+            e.preventDefault();
+            alert(
+              "Please fill out all required fields correctly before generating the report."
+            );
           }
         });
-      // Generate report button event listener for PDF
-      document
-        .getElementById("generateReportButton")
-        .addEventListener("click", async () => {
+
+        // Excel Report Generation Button Click
+        generateExcelReportButton.addEventListener("click", function (e) {
+          if (validateForm()) {
+            // All fields are valid, proceed with Excel report generation
+            generateExcelReport();
+          } else {
+            // Prevent form submission if fields are invalid
+            e.preventDefault();
+            alert(
+              "Please fill out all required fields correctly before generating the report."
+            );
+          }
+        });
+
+        // Function to validate the report type
+        function validateReportType() {
+          reportType.classList.remove("is-invalid", "is-valid");
+
+          if (reportType.value === "default") {
+            reportType.classList.add("is-invalid");
+            return false;
+          } else {
+            reportType.classList.add("is-valid");
+            return true;
+          }
+        }
+
+        // Function to show or hide the custom date range fields
+        function toggleCustomDateRange() {
+          if (reportType.value === "custom") {
+            customDateRange.style.display = "block";
+          } else {
+            customDateRange.style.display = "none";
+            resetDateFields(); // Reset date fields if custom is not selected
+          }
+        }
+
+        // Function to validate the custom date range
+        function validateDateRange() {
+          let isValid = true;
+          startDate.classList.remove("is-invalid", "is-valid");
+          endDate.classList.remove("is-invalid", "is-valid");
+
+          const start = new Date(startDate.value);
+          const end = new Date(endDate.value);
+
+          if (!startDate.value) {
+            startDate.classList.add("is-invalid");
+            isValid = false;
+          } else {
+            startDate.classList.add("is-valid");
+          }
+
+          if (!endDate.value) {
+            endDate.classList.add("is-invalid");
+            isValid = false;
+          } else {
+            endDate.classList.add("is-valid");
+          }
+
+          if (startDate.value && endDate.value && start > end) {
+            startDate.classList.add("is-invalid");
+            endDate.classList.add("is-invalid");
+            isValid = false;
+          }
+
+          return isValid;
+        }
+
+        // Function to reset date fields
+        function resetDateFields() {
+          startDate.value = "";
+          endDate.value = "";
+          startDate.classList.remove("is-invalid", "is-valid");
+          endDate.classList.remove("is-invalid", "is-valid");
+        }
+
+        // Function to validate the entire form
+        function validateForm() {
+          const isReportTypeValid = validateReportType();
+          let isDateRangeValid = true;
+
+          if (reportType.value === "custom") {
+            isDateRangeValid = validateDateRange();
+          }
+
+          return isReportTypeValid && isDateRangeValid;
+        }
+
+        // Placeholder for actual PDF report generation logic
+        async function generatePDFReport() {
+          console.log("Generating PDF report...");
+          // Add your PDF generation logic here
           try {
             const reportType = document.getElementById("reportType").value;
             const startDate = document.getElementById("startDate").value;
@@ -510,11 +663,12 @@
               alert("An unknown error occurred.");
             }
           }
-        });
+        }
 
-      document
-        .getElementById("generateExcelReportButton")
-        .addEventListener("click", async () => {
+        // Placeholder for actual Excel report generation logic
+        async function generateExcelReport() {
+          console.log("Generating Excel report...");
+          // Add your Excel generation logic here
           try {
             const reportType = document.getElementById("reportType").value;
             const startDate = document.getElementById("startDate").value;
@@ -598,7 +752,27 @@
             console.error("Error generating Excel report:", error);
             alert("An error occurred while generating the Excel report.");
           }
-        });
+          document
+            .getElementById("reportType")
+            .addEventListener("change", function () {
+              const customRange = document.getElementById("customDateRange");
+              if (this.value === "custom") {
+                customRange.style.display = "block";
+              } else {
+                customRange.style.display = "none";
+              }
+            });
+        }
+      });
+    </script>
+    <script>
+      // Show or hide custom date range fields based on report type
+      // Generate report button event listener for PDF
+
+      // document
+      //   .getElementById("generateExcelReportButton")
+      //   .addEventListener("click", async () => {
+      // });
 
       function closeModal() {
         document.getElementById("pdfModal").style.display = "none";
@@ -1012,5 +1186,7 @@
       // Load user growth data when the page loads
       document.addEventListener("DOMContentLoaded", fetchUserGrowthData);
     </script>
+
+    <script src="/public/user/js/validationUtils.js"></script>
   </body>
 </html>

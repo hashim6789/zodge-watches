@@ -1,5 +1,6 @@
 const WishlistModel = require("../../models/Wishlist");
 const ProductModel = require("../../models/Product");
+const OfferModel = require("../../models/Offer");
 
 //for adding a product into a wishlist
 const addToWishlist = async (req, res) => {
@@ -95,18 +96,55 @@ const removeFromWishlist = async (req, res) => {
   }
 };
 
-// Express.js example
 const fetchWishlist = async (req, res) => {
   try {
     const userId = req.user?._id;
-    const wishlist = await WishlistModel.findOne({ userId }).populate(
-      "productIds",
-      "name price images"
-    );
-    // console.log(wishlist);
-    res.json({ wishlist });
+
+    // Populate productIds first, then populate offers for each product
+    const wishlist = await WishlistModel.findOne({ userId }).populate({
+      path: "productIds",
+      select: "name price images offers categoryId", // Select the fields you need
+      populate: {
+        path: "offers", // Populate offers inside each product
+        select: "discountValue isActive", // Select the relevant fields from offers
+      },
+    });
+
+    if (!wishlist) {
+      return res.status(404).json({ message: "Wishlist not found" });
+    }
+
+    const productsWithDiscounts = wishlist.productIds.map((product) => {
+      // Determine discounted price based on active offers
+      let discountedPrice = product.price;
+
+      if (product.offers && product.offers.length > 0) {
+        // Filter for active offers
+        const activeOffers = product.offers.filter((offer) => offer.isActive);
+
+        if (activeOffers.length > 0) {
+          // Find the highest offer
+          const highestOffer = activeOffers.reduce((max, offer) =>
+            offer.discountValue > max.discountValue ? offer : max
+          );
+
+          // Calculate discounted price
+          discountedPrice -= highestOffer.discountValue;
+          discountedPrice = Math.max(discountedPrice, 0); // Ensure not negative
+        }
+      }
+
+      return {
+        productId: product._id,
+        name: product.name,
+        images: product.images,
+        discountedPrice,
+      };
+    });
+
+    res.status(200).json({ wishlist: productsWithDiscounts });
   } catch (error) {
-    // console.error("Error fetching wishlist:", error);
+    console.error("Error fetching wishlist:", error);
     res.status(500).json({ error: "Failed to fetch wishlist" });
   }
 };

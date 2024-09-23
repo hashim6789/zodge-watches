@@ -1,4 +1,4 @@
-const OrderModel = require("../models/Order");
+const OrderModel = require("../../models/Order");
 
 require("dotenv").config();
 

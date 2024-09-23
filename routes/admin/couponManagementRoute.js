@@ -16,7 +16,7 @@ const {
   createCoupon,
   updateCoupon,
   unlistCoupon,
-} = require("../../controllers/couponController");
+} = require("../../controllers/admin/couponController");
 
 const router = express.Router();
 

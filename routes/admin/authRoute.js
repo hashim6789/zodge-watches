@@ -16,7 +16,7 @@ const {
   postLogin,
   getDashboard,
   getLogout,
-} = require("../../controllers/adminController");
+} = require("../../controllers/admin/adminController");
 
 const router = express.Router();
 
@@ -32,7 +32,7 @@ router.get("/login", redirectIfAuthenticated, getLogin);
 router.post("/login", redirectIfAuthenticated, postLogin);
 
 //dashboard
-router.get("/dashboard", getDashboard);
+router.get("/dashboard", isAuthenticatedAdmin, authorizeAdmin, getDashboard);
 
 //get - /admin/logout
 router.get("/logout", isAuthenticatedAdmin, authorizeAdmin, getLogout);

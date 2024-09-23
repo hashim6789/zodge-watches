@@ -149,38 +149,33 @@ const getProductDetails = async (req, res) => {
     const productId = req.params.productId;
     const userId = req.user?._id;
 
-    // Fetch product details
-    const product = await ProductModel.findById(productId);
+    // Fetch product details along with offers using populate
+    const product = await ProductModel.findById(productId).populate({
+      path: "offers", // Populate the offers field
+      match: { isActive: true }, // Only active offers
+    });
+
     if (!product) {
       return res.status(404).send("Product not found");
     }
 
-    const productOffers = await OfferModel.find({
-      isActive: true,
-      categoryId: product.categoryId,
-      expiryDate: { $gte: new Date() },
-    }).populate("categoryId", "name");
-
-    // console.log("offers = ", productOffers);
     let discountedPrice = product.price;
 
-    if (productOffers.length > 0) {
-      const highestOffer = productOffers.reduce((max, offer) =>
+    // Check if there are any active offers in the populated offers array
+    if (product.offers.length > 0) {
+      // Find the offer with the highest discount value
+      const highestOffer = product.offers.reduce((max, offer) =>
         offer.discountValue > max.discountValue ? offer : max
       );
 
-      if (highestOffer.discountType === "percentage") {
-        discountedPrice =
-          product.price - (product.price * highestOffer.discountValue) / 100;
-      } else if (highestOffer.discountType === "flat") {
-        discountedPrice = product.price - highestOffer.discountValue;
-      }
+      // Apply the discount from the highest offer
+      discountedPrice -= highestOffer.discountValue;
 
       // Ensure discountedPrice is not negative
       discountedPrice = Math.max(discountedPrice, 0);
     }
 
-    console.log("discount = ", discountedPrice);
+    console.log("Discounted price = ", discountedPrice);
 
     // Fetch user-specific data if logged in
     let userData = { user: null, cart: null, wishlist: null };
@@ -193,27 +188,12 @@ const getProductDetails = async (req, res) => {
       );
     }
 
-    // console.log("user = ", userData);
-
-    // // Fetch related products
-    // const relatedProducts = await ProductModel.find({
-    //   categoryId: product.categoryId,
-    //   _id: { $ne: product._id },
-    // }).limit(4);
-
-    // console.log("related = ", relatedProducts);
-
-    // Fetch product ratings and reviews
-    // const ratings = await RatingModel.find({ productId });
-    // const averageRating =
-    //   ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length || 0;
-
+    // Render the product details page
     res.render("user/quickview", {
       product,
       discountedPrice,
-      averageRating: 4,
-      ratings: 4,
-      // relatedProducts,
+      averageRating: 4, // Placeholder for average rating
+      ratings: 4, // Placeholder for total ratings
       ...userData,
     });
   } catch (error) {

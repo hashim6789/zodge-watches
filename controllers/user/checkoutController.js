@@ -5,6 +5,7 @@ const AddressModel = require("../../models/Address");
 const ProductModel = require("../../models/Product");
 const OrderModel = require("../../models/Order");
 const WalletModel = require("../../models/Wallet");
+const CouponModel = require("../../models/Coupon");
 
 const { sendOrderConfirmationEmail } = require("../../utils/emailSender");
 
@@ -53,6 +54,124 @@ const getAddress = async (req, res) => {
   }
 };
 
+const applyCoupon = async (req, res) => {
+  try {
+    const { couponCode } = req.body;
+    const userId = req.user?._id;
+
+    console.log(couponCode, userId);
+
+    const coupon = await CouponModel.findOne({
+      code: couponCode,
+      isListed: true,
+    });
+
+    if (!coupon) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Coupon not found or inactive." });
+    }
+
+    if (coupon.expiryDate < new Date()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Coupon has expired." });
+    }
+
+    const cart = await CartModel.findOne({ userId });
+
+    if (!cart) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Cart not found." });
+    }
+    console.log(cart.totalPrice, coupon.minPurchaseAmount);
+
+    if (cart.totalPrice < coupon.minPurchaseAmount) {
+      return res.status(400).json({
+        success: false,
+        message: `Minimum purchase amount for this coupon is ₹${coupon.minPurchaseAmount}.`,
+      });
+    }
+
+    let discountAmount = (cart.totalPrice * coupon.discountPercentage) / 100;
+
+    if (
+      coupon.maxDiscountAmount > 0 &&
+      discountAmount > coupon.maxDiscountAmount
+    ) {
+      discountAmount = coupon.maxDiscountAmount;
+    }
+
+    cart.coupon = {
+      code: coupon.code,
+      discountAmount: discountAmount,
+      discountPercentage: coupon.discountPercentage,
+      maxDiscountAmount: coupon.maxDiscountAmount,
+    };
+
+    cart.totalPrice -= discountAmount;
+
+    await cart.save();
+
+    coupon.usedCount += 1;
+    await coupon.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Coupon applied successfully!",
+      cart,
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+const removeCoupon = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+
+    const cart = await CartModel.findOne({ userId });
+    if (!cart) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Cart not found." });
+    }
+
+    if (!cart.coupon || !cart.coupon.code) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No coupon applied to the cart." });
+    }
+
+    const discountAmount = cart.coupon.discountAmount;
+    cart.totalPrice += discountAmount;
+
+    cart.coupon = {
+      discountAmount: null,
+      code: null,
+      discountPercentage: null,
+      maxDiscountAmount: null,
+    };
+
+    await cart.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Coupon removed successfully!",
+      cart,
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
 //proceed to payment or cod or wallet
 const postCheckout = async (req, res) => {
   try {
@@ -80,24 +199,52 @@ const postCheckout = async (req, res) => {
     const orderProducts = [];
 
     for (const product of products) {
-      const foundProduct = await ProductModel.findById(product.productId);
+      const foundProduct = await ProductModel.findById(
+        product.productId
+      ).populate("offers"); // Fetch all offer details linked to this product
+
       if (!foundProduct || foundProduct.stock < product.quantity) {
         return res.status(400).json({
           message: `Insufficient stock for product ${product.productId}`,
         });
       }
 
-      totalPrice += foundProduct.price * product.quantity;
+      // Check if there are any active offers for this product
+      let discountValue = 0;
+      if (foundProduct.offers.length > 0) {
+        const activeOffers = foundProduct.offers.filter(
+          (offer) => offer.isActive
+        );
 
-      //for inventory management
+        // Find the highest discount from the active offers
+        if (activeOffers.length > 0) {
+          const highestOffer = activeOffers.reduce((maxOffer, currentOffer) => {
+            return currentOffer.discountValue > maxOffer.discountValue
+              ? currentOffer
+              : maxOffer;
+          });
+
+          discountValue = highestOffer.discountValue;
+        }
+      }
+
+      // Apply the highest discount to the product price
+      const discountedPrice = Math.max(foundProduct.price - discountValue, 0); // Ensure price is not negative
+
+      // Calculate total price for this product (with quantity)
+      const productTotal = discountedPrice * product.quantity;
+      totalPrice += productTotal;
+
+      // Inventory management
       foundProduct.stock -= product.quantity;
       foundProduct.reservedStock += product.quantity;
       await foundProduct.save();
 
+      // Add the product details to the order
       orderProducts.push({
         productId: product.productId,
         quantity: product.quantity,
-        price: foundProduct.price,
+        price: discountedPrice, // Save the discounted price
       });
     }
 
@@ -110,7 +257,7 @@ const postCheckout = async (req, res) => {
     //for decreasing the delivery charge
     const deliveryCharge = 50;
     totalPrice += deliveryCharge;
-    console.log(totalPrice);
+    console.log("Total = ", totalPrice);
     // console.log("ordered products = ", orderProducts);
     // console.log("method = ", paymentMethod);
     let newOrder = new OrderModel({
@@ -341,6 +488,8 @@ const finalizeStockReduction = async (orderProducts) => {
 module.exports = {
   getCheckout,
   getAddress,
+  applyCoupon,
+  removeCoupon,
   postCheckout,
   retryPayment,
   getOrderConfirmation,

@@ -21,7 +21,7 @@ const {
   editBanner,
   toggleBanner, // searc,
   // getAllBannersAPI,
-} = require("../../controllers/bannerController");
+} = require("../../controllers/admin/bannerController");
 
 // //for testing purpose
 // // const test = (req, res, next) => {

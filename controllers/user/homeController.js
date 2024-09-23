@@ -221,24 +221,30 @@ const getProductsByPages = async (req, res) => {
     }
 
     let sortCriteria = {};
-
-    if (sortOption === "priceLowToHigh") {
-      sortCriteria = { price: 1 };
-    } else if (sortOption === "priceHighToLow") {
-      sortCriteria = { price: -1 };
-    } else if (sortOption === "lettersAscendingOrder") {
-      sortCriteria = { name: 1 };
-    } else if (sortOption === "lettersDescendingOrder") {
-      sortCriteria = { name: -1 };
-    } else if (sortOption === "popularity") {
-      sortCriteria = { soldCount: 1 };
+    // Sorting logic
+    switch (sortOption) {
+      case "priceLowToHigh":
+        sortCriteria = { price: 1 };
+        break;
+      case "priceHighToLow":
+        sortCriteria = { price: -1 };
+        break;
+      case "lettersAscendingOrder":
+        sortCriteria = { name: 1 };
+        break;
+      case "lettersDescendingOrder":
+        sortCriteria = { name: -1 };
+        break;
+      case "popularity":
+        sortCriteria = { soldCount: -1 };
+        break;
+      default:
+        sortCriteria = { createdAt: -1 }; // Default to new arrivals
+        break;
     }
 
     // Fetch active offers
-    const activeOffers = await OfferModel.find({
-      isActive: true,
-      expiryDate: { $gte: new Date() },
-    }).populate("categoryId", "name");
+    const activeOffers = await OfferModel.find({ isActive: true });
 
     const products = await ProductModel.find(query)
       .sort(sortCriteria)
@@ -251,40 +257,43 @@ const getProductsByPages = async (req, res) => {
 
     const wishlist = await WishlistModel.findOne({ userId: req.user?._id });
 
-    // Calculate the discountedPrice for each product based on active offers
+    // Calculate the discounted price for each product based on active offers
     const updatedProducts = products.map((product) => {
-      let discountedPrice = product.price;
-      let discountType;
-      const applicableOffers = activeOffers.filter((offer) =>
-        offer.categoryId.equals(product.categoryId)
-      );
+      let discountedPrice = product.price; // Default to original price
+      let highestDiscountValue = 0; // To track the highest discount value
 
-      if (applicableOffers.length > 0) {
-        const highestOffer = applicableOffers.reduce((max, offer) =>
-          offer.discountValue > max.discountValue ? offer : max
-        );
-        discountType = highestOffer.discountType;
+      // Find applicable offers for the product
+      const applicableOffers = activeOffers.filter((offer) => {
+        const isCategoryApplicable =
+          offer.applicableType === "category" &&
+          offer.categoryIds.includes(product.categoryId);
+        const isProductApplicable =
+          offer.applicableType === "product" &&
+          offer.productIds.includes(product._id);
+        return isCategoryApplicable || isProductApplicable;
+      });
 
-        if (discountType === "percentage") {
-          discountedPrice =
-            product.price - (product.price * highestOffer.discountValue) / 100;
-        } else if (discountType === "flat") {
-          discountedPrice = product.price - highestOffer.discountValue;
+      // Determine the highest discount value among applicable offers
+      applicableOffers.forEach((offer) => {
+        if (offer.discountValue > highestDiscountValue) {
+          highestDiscountValue = offer.discountValue; // Track the highest discount value
         }
+      });
 
+      // Calculate the discounted price if there is a discount
+      if (highestDiscountValue > 0) {
+        discountedPrice = product.price - highestDiscountValue; // Apply the highest flat discount
         // Ensure discountedPrice is not negative
         discountedPrice = Math.max(discountedPrice, 0);
       }
 
       return {
         ...product,
-        discountType,
         discountedPrice:
           discountedPrice < product.price ? discountedPrice : product.price,
+        highestDiscountValue, // Include the highest discount value for display
       };
     });
-
-    // console.log(updatedProducts);
 
     res.json({
       products: updatedProducts,

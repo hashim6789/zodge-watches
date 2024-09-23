@@ -1,6 +1,6 @@
-const OfferModel = require("../models/Offer");
-const CategoryModel = require("../models/Category");
-const ProductModel = require("../models/Product");
+const OfferModel = require("../../models/Offer");
+const CategoryModel = require("../../models/Category");
+const ProductModel = require("../../models/Product");
 const mongoose = require("mongoose");
 
 const getOffers = async (req, res) => {

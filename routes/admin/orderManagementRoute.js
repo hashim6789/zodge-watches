@@ -19,13 +19,13 @@ const {
   updateOrderStatus,
   handleReturnRequest,
   searchOrders,
-} = require("../../controllers/orderController");
+} = require("../../controllers/admin/orderController");
 
-// //for testing purpose
-const test = (req, res, next) => {
-  console.log(req.url);
-  next();
-};
+// // //for testing purpose
+// const test = (req, res, next) => {
+//   console.log(req.url);
+//   next();
+// };
 
 // //get - /admin/orders/
 router.get(

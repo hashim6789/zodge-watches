@@ -1,5 +1,5 @@
-const OrderModel = require("../models/Order");
-const UserModel = require("../models/User");
+const OrderModel = require("../../models/Order");
+const UserModel = require("../../models/User");
 
 const getSalesReport = async (req, res) => {
   try {

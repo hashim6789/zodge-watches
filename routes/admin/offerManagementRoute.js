@@ -18,7 +18,7 @@ const {
   getApplicableItems,
   toggleOffer,
   fetchOffer,
-} = require("../../controllers/offerController");
+} = require("../../controllers/admin/offerController");
 
 const router = express.Router();
 

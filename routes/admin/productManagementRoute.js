@@ -23,7 +23,7 @@ const {
   getProductDetails,
   searchProducts,
   getAllProductsAPI,
-} = require("../../controllers/productController");
+} = require("../../controllers/admin/productController");
 
 // //for uploading the images of the products
 const storage = multer.diskStorage({

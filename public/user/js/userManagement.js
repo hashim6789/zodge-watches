@@ -1,11 +1,32 @@
 function confirmAndToggleBlock(userId, isBlocked) {
   const action = isBlocked === "true" ? "unblock" : "block";
-  const confirmAction = confirm(
-    `Are you sure you want to ${action} this user?`
-  );
-  if (confirmAction) {
-    toggleBlock(userId, isBlocked);
-  }
+
+  // Use SweetAlert2 for confirmation
+  Swal.fire({
+    icon: "warning",
+    showCancelButton: true,
+    text: `Are you sure you want to ${action} this user?`,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: `Yes, ${action}`,
+    cancelButtonText: "Cancel",
+    customClass: {
+      title: "swal-custom-title",
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // If confirmed, proceed to toggle block/unblock action
+      toggleBlock(userId, isBlocked);
+      Swal.fire({
+        toast: true,
+        icon: "success",
+        title: `User ${action}ed!`,
+        position: "bottom",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
+  });
 }
 
 function toggleBlock(userId, isBlocked) {

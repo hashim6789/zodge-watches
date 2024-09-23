@@ -20,7 +20,7 @@
     <!-- Banner put here -->
 
     <!-- Product -->
-    <section class="bg0 p-t-23 p-b-140">
+    <!-- <section class="bg0 p-t-23 p-b-140">
       <div class="container">
         <div class="p-b-10">
           <h3 class="ltext-103 cl5">Product Overview</h3>
@@ -71,10 +71,10 @@
               ></i>
               Search
             </div>
-          </div>
+          </div> -->
 
           <!-- Search product -->
-          <div class="dis-none panel-search w-full p-t-10 p-b-15">
+          <!-- <div class="dis-none panel-search w-full p-t-10 p-b-15">
             <div class="bor8 dis-flex p-l-15">
               <button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
                 <i class="zmdi zmdi-search"></i>
@@ -88,10 +88,10 @@
                 placeholder="Search"
               />
             </div>
-          </div>
+          </div> -->
 
           <!-- Filter -->
-          <div class="dis-none panel-filter w-full p-t-10">
+          <!-- <div class="dis-none panel-filter w-full p-t-10">
             <div
               class="wrap-filter flex-w bg6 w-full p-lr-40 p-t-27 p-lr-15-sm"
             >
@@ -153,7 +153,7 @@
                     </button>
                   </li>
                 </ul>
-              </div>
+              </div> -->
 
               <!-- <div class="filter-col2 p-r-15 p-b-27">
                 <div class="mtext-102 cl2 p-b-15">Price</div>
@@ -218,7 +218,7 @@
           </div>
         </div>
 
-        <div id="product-list" class="row isotope-grid">
+        <!-- <div id="product-list" class="row isotope-grid">
           <% products.forEach(function(product) { %>
           <div
             class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item <%= product.categoryId %>"
@@ -230,7 +230,6 @@
                   alt="IMG-PRODUCT"
                 />
 
-                <!-- Quick View Button for available products -->
                 <form action="/shop/products/<%= product._id %>">
                   <button
                     class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04"
@@ -241,7 +240,6 @@
                 </form>
               </div>
 
-              <!-- Product details -->
               <div class="block2-txt flex-w flex-t p-t-14">
                 <div class="block2-txt-child1 flex-col-l">
                   <a
@@ -251,7 +249,6 @@
                     <%= product.name %>
                   </a>
 
-                  <!-- Original and discounted prices -->
                   <div class="product-pricing">
                     <% if (product.discountedPrice !== product.price) { %>
                     <span class="stext-105 cl3">
@@ -261,7 +258,6 @@
                       $<%= product.discountedPrice.toFixed(2) %>
                     </span>
 
-                    <!-- Calculate and display the discount percentage -->
                     <% const discountPercentage = Math.round(((product.price -
                     product.discountedPrice) / product.price) * 100); %>
                     <span class="discount-label text-success ml-2">
@@ -274,7 +270,6 @@
                     <% } %>
                   </div>
 
-                  <!-- Display messages below the price -->
                   <% if (!product.isListed) { %>
                   <div class="product-unavailable text-danger mt-2">
                     Currently unavailable
@@ -284,7 +279,6 @@
                   <% } %>
                 </div>
 
-                <!-- Wishlist button -->
                 <div class="block2-txt-child2 flex-r p-t-3">
                   <div
                     class="btn-addwish-b2 dis-block pos-relative js-addwish-b2"
@@ -293,7 +287,6 @@
                     <% const isInWishlist = wishlist?.productIds.some(item =>
                     item._id.toString() === product._id.toString()); %>
 
-                    <!-- Conditionally display heart icons based on wishlist status -->
                     <% if (isInWishlist) { %>
                     <img
                       id="heart1-<%= product._id %>"
@@ -331,10 +324,10 @@
             </div>
           </div>
           <% }); %>
-        </div>
+        </div> -->
 
         <!-- Pagination -->
-        <nav aria-label="Page navigation">
+        <!-- <nav aria-label="Page navigation">
           <ul class="pagination justify-content-center">
             <% if (current > 1) { %>
             <li class="page-item">
@@ -370,7 +363,7 @@
             </li>
             <% } %>
           </ul>
-        </nav>
+        </nav> -->
       </div>
     </section>
 
@@ -388,6 +381,6 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <!--===============================================================================================-->
-    <script src="/public/user/js/home.js"></script>
+    <!-- <script src="/public/user/js/home.js"></script> -->
   </body>
 </html>

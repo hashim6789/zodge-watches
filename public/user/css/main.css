@@ -94,6 +94,10 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
   src: url("../fonts/Montserrat/Montserrat-Bold.ttf");
 }
 
+.swal-custom-title {
+  color: black !important; /* Change this color as needed */
+}
+
 /*//////////////////////////////////////////////////////////////////
 [ RS PLUGIN ]*/
 

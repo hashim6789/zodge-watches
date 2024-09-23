@@ -392,93 +392,93 @@ const googleLogin = passport.authenticate("google-login", {
   scope: ["profile", "email"],
 });
 
-// //googleSignupCallback
-// const googleSignupCallback = (req, res, next) => {
-//   passport.authenticate("google-signup", {
-//     failureRedirect: "/?error=The user is already exist login please",
-//   })(req, res, next);
-// };
-
-// //googleLoginCallback
-// const googleLoginCallback = (req, res, next) => {
-//   passport.authenticate("google-login", {
-//     failureRedirect: `/?error=The user is not exist or blocked!!!`,
-//   })(req, res, next);
-// };
-
 //googleSignupCallback
-const googleSignupCallback = async (req, res, next) => {
-  passport.authenticate("google-signup", async (err, user, info) => {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return res.status(404).json({ success: false, message: info.message });
-    }
-
-    req.logIn(user, async (err) => {
-      if (err) {
-        return next(err);
-      }
-
-      try {
-        // Initialize empty wishlist and cart for the new user
-        const wishlist = await WishlistModel.create({
-          userId: user._id,
-          productIds: [], // Start with an empty productIds array
-        });
-
-        const cart = await CartModel.create({
-          userId: user._id,
-          products: [], // Start with an empty products array
-          totalPrice: 0, // Total price set to 0 initially
-        });
-
-        // Redirect to profile/home page after successful signup
-        redirectToProfile(req, res);
-      } catch (dbError) {
-        return next(dbError);
-      }
-    });
+const googleSignupCallback = (req, res, next) => {
+  passport.authenticate("google-signup", {
+    failureRedirect: "/?error=The user is already exist login please",
   })(req, res, next);
 };
 
 //googleLoginCallback
-const googleLoginCallback = async (req, res, next) => {
-  passport.authenticate("google-login", async (err, user, info) => {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return res.status(404).json({ success: false, message: info.message });
-    }
-
-    req.logIn(user, async (err) => {
-      if (err) {
-        return next(err);
-      }
-
-      try {
-        // Fetch wishlist and cart from the database for the user
-        const wishlist = await WishlistModel.findOne({ userId: user._id });
-        const cart = await CartModel.findOne({ userId: user._id });
-
-        // Send wishlist and cart data along with success response
-        res.status(200).json({
-          success: true,
-          message: "User login successfully",
-          wishlist: wishlist ? wishlist.productIds : [], // Return array of product IDs from wishlist
-          cart: cart || { products: [], totalPrice: 0 }, // Return existing cart or a new one
-        });
-
-        // Redirect to profile/home page after successful login
-        redirectToProfile(req, res);
-      } catch (dbError) {
-        return next(dbError);
-      }
-    });
+const googleLoginCallback = (req, res, next) => {
+  passport.authenticate("google-login", {
+    failureRedirect: `/?error=The user is not exist or blocked!!!`,
   })(req, res, next);
 };
+
+//googleSignupCallback
+// const googleSignupCallback = async (req, res, next) => {
+//   passport.authenticate("google-signup", async (err, user, info) => {
+//     if (err) {
+//       return next(err);
+//     }
+//     if (!user) {
+//       return res.status(404).json({ success: false, message: info.message });
+//     }
+
+//     req.logIn(user, async (err) => {
+//       if (err) {
+//         return next(err);
+//       }
+
+//       try {
+//         // Initialize empty wishlist and cart for the new user
+//         const wishlist = await WishlistModel.create({
+//           userId: user._id,
+//           productIds: [], // Start with an empty productIds array
+//         });
+
+//         const cart = await CartModel.create({
+//           userId: user._id,
+//           products: [], // Start with an empty products array
+//           totalPrice: 0, // Total price set to 0 initially
+//         });
+
+//         // Redirect to profile/home page after successful signup
+//         redirectToProfile(req, res);
+//       } catch (dbError) {
+//         return next(dbError);
+//       }
+//     });
+//   })(req, res, next);
+// };
+
+// //googleLoginCallback
+// const googleLoginCallback = async (req, res, next) => {
+//   passport.authenticate("google-login", async (err, user, info) => {
+//     if (err) {
+//       return next(err);
+//     }
+//     if (!user) {
+//       return res.status(404).json({ success: false, message: info.message });
+//     }
+
+//     req.logIn(user, async (err) => {
+//       if (err) {
+//         return next(err);
+//       }
+
+//       try {
+//         // Fetch wishlist and cart from the database for the user
+//         const wishlist = await WishlistModel.findOne({ userId: user._id });
+//         const cart = await CartModel.findOne({ userId: user._id });
+
+//         // Send wishlist and cart data along with success response
+//         res.status(200).json({
+//           success: true,
+//           message: "User login successfully",
+//           wishlist: wishlist ? wishlist.productIds : [], // Return array of product IDs from wishlist
+//           cart: cart || { products: [], totalPrice: 0 }, // Return existing cart or a new one
+//         });
+
+//         // Redirect to profile/home page after successful login
+//         redirectToProfile(req, res);
+//       } catch (dbError) {
+//         return next(dbError);
+//       }
+//     });
+//   })(req, res, next);
+// };
 
 //for redirect the home page after google login and google signup
 const redirectToProfile = (req, res) => {

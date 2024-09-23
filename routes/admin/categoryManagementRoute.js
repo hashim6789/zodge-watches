@@ -20,7 +20,7 @@ const {
   unlistCategory,
   searchCategories,
   getAllCategoriesAPI,
-} = require("../../controllers/categoryController");
+} = require("../../controllers/admin/categoryController");
 
 // //for testing purpose
 // // const test = (req, res, next) => {

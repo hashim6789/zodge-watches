@@ -13,6 +13,8 @@ const router = express.Router();
 const {
   getCheckout,
   getAddress,
+  applyCoupon,
+  removeCoupon,
   postCheckout,
   retryPayment,
   getOrderConfirmation,
@@ -75,6 +77,22 @@ router.get(
   checkBlocked,
   isVerifiedUser,
   getAddress
+);
+
+router.post(
+  "/coupon/apply",
+  isAuthenticatedUser,
+  authorizeUser,
+  isVerifiedUser,
+  applyCoupon
+);
+
+router.delete(
+  "/coupon/remove",
+  isAuthenticatedUser,
+  authorizeUser,
+  isVerifiedUser,
+  removeCoupon
 );
 
 module.exports = router;

@@ -16,7 +16,7 @@ const {
   getUsers,
   blockUser,
   searchUsers,
-} = require("../../controllers/userController");
+} = require("../../controllers/admin/userController");
 
 const router = express.Router();
 
