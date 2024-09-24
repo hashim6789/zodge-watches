@@ -165,7 +165,8 @@
         <% }) %>
       </div>
 
-      <% if (order.orderStatus !== 'Delivered') { %>
+      <% if (order.orderStatus === 'shipped' || order.orderStatus === 'placed')
+      { %>
       <div class="order-section text-center">
         <h5 class="mb-3">Track Your Order</h5>
         <button id="trackPackageBtn" class="btn btn-track-order">
@@ -176,10 +177,18 @@
           Date().getDate() + 5)).toLocaleDateString() %>
         </p>
       </div>
-      <% } else { %>
-      <div class="order-section">
+      <% } else if(order.orderStatus === 'delivered' &&
+      order.returnDetails.returnStatus === null) { const today = new Date();
+      const deliveredDate = new Date(order.updatedAt); const diffTime =
+      Math.abs(today - deliveredDate); const diffDays = Math.ceil(diffTime /
+      (1000 * 60 * 60 * 24)); if(diffDays <= 7){%>
+      <div class="order-section" id="returnBlock">
         <h5 class="mb-3">Return Option</h5>
-        <form action="/orders/<%= order.orderId %>/return" method="post">
+
+        <!-- Hidden input to store order ID -->
+        <input type="hidden" id="orderIdForReturn" value="<%= order._id %>" />
+
+        <form id="returnForm">
           <div class="form-group">
             <label for="returnReason">Return Reason:</label>
             <textarea
@@ -190,10 +199,66 @@
               required
             ></textarea>
           </div>
-          <button type="submit" class="btn btn-danger">Request Return</button>
+
+          <!-- Button to trigger return request submission -->
+          <button
+            id="returnOrderBtn"
+            class="btn btn-danger"
+            onclick="submitReturn(event)"
+          >
+            Request Return
+          </button>
         </form>
       </div>
-      <% } %>
+
+      <!-- Modal for showing return reason -->
+      <div
+        class="modal fade"
+        id="returnReasonModal"
+        tabindex="-1"
+        aria-labelledby="returnReasonLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="returnReasonLabel">Return Reason</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <textarea
+                id="returnReason"
+                name="returnReason"
+                class="form-control"
+                rows="3"
+                required
+              ></textarea>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger"
+                onclick="submitReturn(event)"
+              >
+                Submit Return
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }} %>
 
       <div class="order-section invoice-section">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -326,10 +391,10 @@
                 >
                   <%= index + 1 %>
                 </div>
-                <div class="step-details ml-3">
+                <!-- <div class="step-details ml-3">
                   <p class="mb-0 font-weight-bold"><%= step %></p>
-                  <!-- <p class="text-muted small mb-0">
-                    <%= step.date %> - <%= step.time %>
+                  <p class="text-muted small mb-0">
+                    <%= order %> - <%= step.time %>
                   </p>
                   <p class="text-muted small mb-0"><%= step.location %></p> -->
                 </div>
@@ -349,7 +414,7 @@
       </span>
     </div>
 
-    <!-- Return Reason Modal -->
+    <!-- Return Reason Modal
     <div
       class="modal fade"
       id="returnReasonModal"
@@ -395,10 +460,58 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+      function submitReturn(e) {
+        e.preventDefault(); // Prevent form from submitting the default way
+
+        const orderId = document.getElementById("orderIdForReturn").value; // Get order ID
+        const returnReason = document.getElementById("returnReason").value; // Get return reason
+
+        // Check if the user has entered a return reason
+        if (!returnReason) {
+          Swal.fire("Warning", "Please enter a return reason.", "warning");
+          return;
+        }
+
+        // Send the return request using Axios
+        axios
+          .patch(`/profile/orders/${orderId}/return`, { returnReason }) // Make a PATCH request to send the return reason
+          .then((response) => {
+            const updatedStatus =
+              response.data.order.returnDetails.returnStatus;
+
+            // If the return request was successful
+            if (updatedStatus === "requested") {
+              document.getElementById("returnOrderBtn").style.display = "none"; // Hide return button
+
+              // Show success message using SweetAlert
+              Swal.fire(
+                "Success",
+                "Return request submitted successfully!",
+                "success"
+              ).then(() => {
+                // Hide the modal after the success response
+                var returnReasonModal = new bootstrap.Modal(
+                  document.getElementById("returnReasonModal")
+                );
+
+                returnReasonModal.hide();
+                document.getElementById("returnBlock").style.display = "none";
+              });
+            }
+          })
+          .catch(() => {
+            // If there's an error in submitting the request
+            Swal.fire("Error", "Failed to submit return request", "error");
+          });
+      }
+    </script>
+
     <script>
       // Function to cancel order with confirmation
       function cancelOrder(orderId) {
@@ -451,38 +564,38 @@
           submitReturn();
         });
 
-      function submitReturn() {
-        const orderId = document.getElementById("orderIdForReturn").value;
-        const returnReason = document.getElementById("returnReason").value;
+      // function submitReturn() {
+      //   const orderId = document.getElementById("orderIdForReturn").value;
+      //   const returnReason = document.getElementById("returnReason").value;
 
-        if (!returnReason) {
-          Swal.fire("Warning", "Please enter a return reason.", "warning");
-          return;
-        }
+      //   if (!returnReason) {
+      //     Swal.fire("Warning", "Please enter a return reason.", "warning");
+      //     return;
+      //   }
 
-        axios
-          .patch(`/profile/orders/${orderId}/return`, { returnReason })
-          .then((response) => {
-            const updatedStatus =
-              response.data.order.returnDetails.returnStatus;
-            if (updatedStatus === "requested") {
-              document.getElementById("returnOrderBtn").style.display = "none";
-            }
-            Swal.fire(
-              "Success",
-              "Return request submitted successfully!",
-              "success"
-            ).then(() => {
-              var returnReasonModal = new bootstrap.Modal(
-                document.getElementById("returnReasonModal")
-              );
-              returnReasonModal.hide();
-            });
-          })
-          .catch(() => {
-            Swal.fire("Error", "Failed to submit return request", "error");
-          });
-      }
+      //   axios
+      //     .patch(`/profile/orders/${orderId}/return`, { returnReason })
+      //     .then((response) => {
+      //       const updatedStatus =
+      //         response.data.order.returnDetails.returnStatus;
+      //       if (updatedStatus === "requested") {
+      //         document.getElementById("returnOrderBtn").style.display = "none";
+      //       }
+      //       Swal.fire(
+      //         "Success",
+      //         "Return request submitted successfully!",
+      //         "success"
+      //       ).then(() => {
+      //         var returnReasonModal = new bootstrap.Modal(
+      //           document.getElementById("returnReasonModal")
+      //         );
+      //         returnReasonModal.hide();
+      //       });
+      //     })
+      //     .catch(() => {
+      //       Swal.fire("Error", "Failed to submit return request", "error");
+      //     });
+      // }
     </script>
     <script>
       // Make sure to include the jsPDF library in your HTML file:

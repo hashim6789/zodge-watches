@@ -35,6 +35,7 @@ const verifyPayment = async (req, res) => {
         .json({ success: false, message: "Payment verification failed." });
     }
 
+    order.paymentMethod = "onlinePayment";
     order.paymentStatus = "successful";
     order.orderStatus = "placed";
     await order.save();

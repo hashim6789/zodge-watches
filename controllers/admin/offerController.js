@@ -168,8 +168,8 @@ const fetchOffer = async (req, res) => {
       .populate("productIds", "name")
       .exec();
 
-    const categories = await CategoryModel.find({}, "name");
-    const products = await ProductModel.find({}, "name");
+    const categories = await CategoryModel.find({ isListed: true }, "name");
+    const products = await ProductModel.find({ isListed: true }, "name");
 
     console.log(products, categories);
 

@@ -556,6 +556,7 @@
         const couponDiscount = row.children[2].innerText.replace("%", ""); // Discount (remove percentage sign)
         const couponDescription = row.children[3].innerText; // Description
         const couponExpiryDate = row.children[4].innerText; // Expiry Date
+        console.log("amount = ", couponExpiryDate);
         const couponMinPurchase = row.children[5].innerText; // Minimum Purchase
         const couponMaxDiscount = row.children[6].innerText; // Minimum Purchase
         const couponUsageLimit = row.children[7].innerText; // Usage Limit
@@ -566,14 +567,13 @@
         document.getElementById("editCouponDiscount").value = couponDiscount;
         document.getElementById("editCouponDescription").value =
           couponDescription;
-        document.getElementById("editCouponExpiry").value =
-          formatDateForInput(couponExpiryDate); // Format the date for input[type="date"]
         document.getElementById("editCouponMinPurchase").value =
           couponMinPurchase;
         document.getElementById("editMaximumDiscount").value =
           couponMaxDiscount;
         document.getElementById("editCouponUsageLimit").value =
           couponUsageLimit;
+        document.getElementById("editCouponExpiry").value = couponExpiryDate; // Format the date for input[type="date"]
       }
 
       // Helper function to format the date into YYYY-MM-DD for the input[type="date"] element
@@ -599,17 +599,24 @@
           ).value;
           const updatedCouponDiscount =
             document.getElementById("editCouponDiscount").value;
-          const updatedCouponMaxPurchase = document.getElementById(
-            "editCouponMaxPurchase"
-          ).value;
+          // const updatedCouponMaxPurchase = document.getElementById(
+          //   "editCouponMaximumPurchase"
+          // ).value;
+          // console.log(updatedCouponMaxPurchase);
           const updatedCouponMinPurchase = document.getElementById(
             "editCouponMinPurchase"
           ).value;
           const updatedCouponUsageLimit = document.getElementById(
             "editCouponUsageLimit"
           ).value;
-
-          console.log("code = ", updatedCouponCode);
+          console.log("code = ", {
+            code: updatedCouponCode.toUpperCase(),
+            expiryDate: updatedCouponExpiry,
+            description: updatedCouponDescription,
+            discountPercentage: updatedCouponDiscount,
+            minimumPurchase: updatedCouponMinPurchase,
+            usageLimit: updatedCouponUsageLimit,
+          });
 
           // Axios PUT request to update the coupon
           axios

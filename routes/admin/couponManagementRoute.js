@@ -22,33 +22,33 @@ const router = express.Router();
 
 router.get(
   "/",
-  isAuthenticatedAdmin,
-  authorizeAdmin,
-  authorizeAdminForModule("couponManagement"),
+  // isAuthenticatedAdmin,
+  // authorizeAdmin,
+  // authorizeAdminForModule("couponManagement"),
   getCoupons
 );
 
 router.post(
   "/",
-  isAuthenticatedAdmin,
-  authorizeAdmin,
-  authorizeAdminForModule("couponManagement"),
+  // isAuthenticatedAdmin,
+  // authorizeAdmin,
+  // authorizeAdminForModule("couponManagement"),
   createCoupon
 );
 
 router.put(
   "/:couponId",
-  isAuthenticatedAdmin,
-  authorizeAdmin,
-  authorizeAdminForModule("couponManagement"),
+  // isAuthenticatedAdmin,
+  // authorizeAdmin,
+  // authorizeAdminForModule("couponManagement"),
   updateCoupon
 );
 
 router.put(
   "/:couponId/unlist",
-  isAuthenticatedAdmin,
-  authorizeAdmin,
-  authorizeAdminForModule("couponManagement"),
+  // isAuthenticatedAdmin,
+  // authorizeAdmin,
+  // authorizeAdminForModule("couponManagement"),
   unlistCoupon
 );
 

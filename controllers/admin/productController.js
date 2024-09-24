@@ -53,7 +53,7 @@ const getProducts = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * perPage)
       .limit(perPage);
-    let categories = await CategoryModel.find();
+    let categories = await CategoryModel.find({ isListed: true });
 
     if (products.length < 1) {
       return res.render("admin/productManagementPage", {

@@ -281,11 +281,20 @@ const viewOrderDetail = async (req, res) => {
       });
     }
 
+    let trackingSteps = [];
+    if (order.orderStatus === "placed") {
+      trackingSteps = ["placed"];
+    } else if (order.orderStatus === "shipped") {
+      trackingSteps = ["placed", "shipped"];
+    } else if (order.orderStatus === "delivered") {
+      trackingSteps = ["placed", "shipped", "delivered"];
+    }
+
     res.status(200).render("user/orderDetailsPage", {
       cart,
       order,
       user,
-      trackingSteps: ["placed", "shipped", "delivered"],
+      trackingSteps,
       wishlist,
     });
   } catch (err) {
