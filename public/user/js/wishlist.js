@@ -121,6 +121,77 @@ function removeFromWishlist(productId) {
     });
 }
 
+function addToCartFromWishlist(productId) {
+  let quantity = 1;
+
+  axios
+    .put(`/wishlist/${productId}/cart`, { quantity, productId })
+    .then((response) => {
+      const product = response.data.product;
+      const originalCart = response.data.cart;
+      const productPrice = product.discountedPrice || product.price;
+
+      // Retrieve the cart from local storage or initialize it
+      let cart = JSON.parse(localStorage.getItem("cart")) || {
+        products: [],
+        totalPrice: 0,
+        coupon: null,
+        address: null,
+      };
+
+      // Check if the product already exists in the cart
+      const existingProductIndex = cart.products.findIndex(
+        (item) => item.productId === productId
+      );
+
+      if (existingProductIndex !== -1) {
+        // Update the quantity of the existing product in localStorage
+        cart.products[existingProductIndex].quantity = quantity;
+      } else {
+        // Add the new product to the cart
+        cart.products.push({
+          productId: product._id,
+          price: productPrice,
+          quantity: quantity,
+        });
+      }
+
+      // Update total price in the local storage cart from backend response
+      cart.totalPrice = originalCart.totalPrice;
+
+      // Save the updated cart to local storage
+      localStorage.setItem("cart", JSON.stringify(cart));
+
+      // SweetAlert for success message
+      Swal.fire({
+        icon: "success",
+        title: "Added to Cart",
+        text: `${product.name} added to cart successfully!`,
+        showConfirmButton: false,
+        timer: 2000,
+      }).then(() => {
+        const cartIcon = document.getElementById("cartIcon");
+        if (cartIcon) {
+          cartIcon.setAttribute("data-notify", cart.products.length);
+        }
+
+        const wishlistIcon = document.getElementById("wishlistIcon");
+        if (wishlistIcon) {
+          wishlistIcon.setAttribute("data-notify", data.wishlistLength);
+        }
+      });
+    })
+    .catch((error) => {
+      console.error("Error adding product to cart:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.response.data.message,
+        showConfirmButton: true,
+      });
+    });
+}
+
 function updateWishlistUI(wishlist) {
   console.log("wishlist", wishlist);
   const wishlistContainer = document.getElementById("wishlistItems");
@@ -143,10 +214,13 @@ function updateWishlistUI(wishlist) {
           </a>
           <span class="header-cart-item-info">1 x $${item.discountedPrice}</span>
         </div>
-        <div class="header-cart-item-remove p-t-8">
-          <a href="#" class="cl2 p-lr-5 pointer hov-cl1 trans-04" onclick="removeFromWishlist('${item._id}')">
+        <div class="header-cart-item-actions p-t-8">
+          <a href="#" class="cl2 p-lr-5 pointer hov-cl1 trans-04" onclick="removeFromWishlist('${item.productId}')">
             <i class="zmdi zmdi-delete"></i>
           </a>
+          <button class="add-to-cart-btn" onclick="addToCartFromWishlist('${item.productId}')">
+            Add to Cart
+          </button>
         </div>
       `;
       wishlistContainer.appendChild(listItem);

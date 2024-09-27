@@ -50,6 +50,8 @@ const getOffers = async (req, res) => {
 const createOffer = async (req, res) => {
   try {
     const offerData = req.body;
+    const image = req.file ? req.file.filename : null;
+    console.log(image);
     console.log(offerData);
 
     // Check if the offer already exists
@@ -67,8 +69,10 @@ const createOffer = async (req, res) => {
         .json({ success: false, message: "Invalid applicable type" });
     }
 
+    console.log({ ...offerData, image });
+
     // Create and save the new offer
-    const newOffer = new OfferModel(offerData);
+    const newOffer = new OfferModel({ ...offerData, image });
     await newOffer.save();
 
     // Find and update products based on applicable type
@@ -104,6 +108,21 @@ const editOffer = async (req, res) => {
     const { offerId } = req.params;
     const offerData = req.body;
 
+    const image = req.file ? req.file.filename : null;
+    if (image) {
+      offerData.image = image;
+    }
+
+    console.log(offerData);
+
+    if (offerData.applicableType === "category" && !offerData.categoryIds) {
+      offerData.categoryIds = [];
+    }
+
+    if (offerData.applicableType === "product" && !offerData.productIds) {
+      offerData.productIds = [];
+    }
+
     // Find the existing offer
     const existingOffer = await OfferModel.findById(offerId);
     if (!existingOffer) {
@@ -118,6 +137,7 @@ const editOffer = async (req, res) => {
       offerData,
       { new: true }
     );
+    console.log(updatedOffer);
 
     // Remove the offer ID from products that are no longer part of the offer
     if (existingOffer.applicableType === "product") {

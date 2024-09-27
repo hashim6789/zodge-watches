@@ -13,6 +13,7 @@ const OfferSchema = new Schema(
     },
     categoryIds: [{ type: Types.ObjectId, ref: "Categories", default: null }], // Reference the Category model
     productIds: [{ type: Types.ObjectId, ref: "Products", default: null }],
+    image: { type: String, required: false },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

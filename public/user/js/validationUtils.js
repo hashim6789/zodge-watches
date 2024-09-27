@@ -106,6 +106,19 @@ const validationUtils = (() => {
     return true;
   };
 
+  const validateImageCount = (
+    inputElement,
+    minCount = 3,
+    message = `Please upload at least ${minCount} images.`
+  ) => {
+    if (inputElement.files.length < minCount) {
+      showInvalidFeedback(inputElement, message);
+      return false;
+    }
+    clearInvalidFeedback(inputElement);
+    return true;
+  };
+
   // Generic form validator that accepts dynamic validation rules
   const validateForm = (formId, validationRules) => {
     const form = document.getElementById(formId);
@@ -132,6 +145,10 @@ const validationUtils = (() => {
           if (!validateDateRange(element, endElement, rule.message))
             isValid = false;
           break;
+        case "imageCount":
+          if (!validateImageCount(element, rule.minCount, rule.message))
+            isValid = false;
+          break;
         default:
           console.warn("Unknown validation type");
       }
@@ -148,7 +165,8 @@ const validationUtils = (() => {
     validateDateRange,
     validateSelect,
     validateNumber,
+    validateImageCount,
     validateForm,
   };
 })();
-// export default validationUtils;
+export default validationUtils;

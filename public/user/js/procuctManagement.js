@@ -1,3 +1,171 @@
+// productManagement.js
+import validationUtils from "./validationUtils.js";
+// Function to submit the product form
+
+function submitProductForm() {
+  const submitButton = document.querySelector(
+    '#createProductForm button[type="submit"]'
+  );
+  submitButton.disabled = true;
+
+  const formData = new FormData();
+  formData.append("name", document.getElementById("createProductName").value);
+  formData.append(
+    "description",
+    document.getElementById("createProductDescription").value
+  );
+  formData.append(
+    "categoryId",
+    document.getElementById("createProductCategory").value
+  );
+  formData.append("price", document.getElementById("createProductPrice").value);
+  formData.append("stock", document.getElementById("createProductStock").value);
+
+  croppedImages.forEach((image, index) => {
+    formData.append("images", image, `croppedImage${index + 1}.png`);
+  });
+
+  axios
+    .post("/admin/products/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((response) => {
+      if (response.status === 200) {
+        // Show success message
+        Swal.fire({
+          title: "Success!",
+          text: "Product created successfully!",
+          icon: "success",
+          confirmButtonText: "OK",
+        }).then(() => {
+          // Reload the page after success
+          window.location.reload();
+        });
+
+        $("#createProductModal").modal("hide");
+      } else {
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to create product.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+        submitButton.disabled = false;
+      }
+    })
+    .catch((error) => {
+      console.error("Error creating product:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Product creation failed.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      submitButton.disabled = false;
+    });
+}
+
+// Form validation and submission
+// Real-time validation for product creation form fields
+document
+  .getElementById("createProductName")
+  .addEventListener("input", function () {
+    validationUtils.validateRequiredField(this, "Product name is required.");
+  });
+
+document
+  .getElementById("createProductDescription")
+  .addEventListener("input", function () {
+    validationUtils.validateRequiredField(
+      this,
+      "Product description is required."
+    );
+  });
+
+document
+  .getElementById("createProductCategory")
+  .addEventListener("change", function () {
+    validationUtils.validateSelect(this, "Please select a category.");
+  });
+
+document
+  .getElementById("createProductPrice")
+  .addEventListener("input", function () {
+    validationUtils.validateNumber(this, "Price must be greater than zero.");
+  });
+
+document
+  .getElementById("createProductStock")
+  .addEventListener("input", function () {
+    validationUtils.validateNumber(this, "Stock must be greater than zero.");
+  });
+
+// Real-time validation for product images
+document
+  .getElementById("createProductImages")
+  .addEventListener("change", function () {
+    validationUtils.validateImageCount(
+      this,
+      3,
+      "Please upload at least 3 images."
+    );
+  });
+
+// Form validation on submit
+document
+  .getElementById("createProductForm")
+  .addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const isValid = validationUtils.validateForm("createProductForm", [
+      {
+        id: "createProductName",
+        type: "required",
+        message: "Product name is required.",
+      },
+      {
+        id: "createProductDescription",
+        type: "required",
+        message: "Product description is required.",
+      },
+      {
+        id: "createProductCategory",
+        type: "select",
+        message: "Please select a category.",
+      },
+      {
+        id: "createProductPrice",
+        type: "required",
+        message: "Price is required.",
+      },
+      {
+        id: "createProductStock",
+        type: "required",
+        message: "Stock is required.",
+      },
+      {
+        id: "createProductImages",
+        type: "imageCount",
+        minCount: 3,
+        message: "Please upload at least 3 images.",
+      },
+    ]);
+
+    if (isValid) {
+      // Form is valid, proceed to submit or further actions
+      submitProductForm(); // Example function for submitting the form
+    } else {
+      Swal.fire({
+        title: "Error!",
+        text: "Please correct the highlighted errors.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  });
+
 //for create product and image cropping
 const cropperInstances = [];
 const croppedImages = [];
@@ -65,365 +233,270 @@ document
     }
   });
 
-// Handle form submission
-document
-  .getElementById("createProductForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    const submitButton = document.querySelector(
-      '#createProductForm button[type="submit"]'
-    );
-    submitButton.disabled = true;
-
-    const formData = new FormData();
-    formData.append("name", document.getElementById("createProductName").value);
-    formData.append(
-      "description",
-      document.getElementById("createProductDescription").value
-    );
-    formData.append(
-      "categoryId",
-      document.getElementById("createProductCategory").value
-    );
-    formData.append(
-      "price",
-      document.getElementById("createProductPrice").value
-    );
-    formData.append(
-      "stock",
-      document.getElementById("createProductStock").value
-    );
-
-    croppedImages.forEach((image, index) => {
-      formData.append("images", image, `croppedImage${index + 1}.png`);
-    });
-
-    axios
-      .post("/admin/products/", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          const newProduct = response.data.data.newProduct; // Assuming the new product data is returned in this format
-          const category = response.data.data.category;
-          // Extract product details from the response
-          const productName = newProduct.name;
-          const productCategory = category ? category.name : "Unknown"; // Ensure category is handled correctly
-          const productPrice = newProduct.price;
-          const productStock = newProduct.stock;
-          const productId = newProduct._id;
-          const isListed = newProduct.isListed;
-          const productDescription = newProduct.description;
-
-          // Calculate the current SI number (always 1 for the new product at the top)
-          const currentRowNumber = 1;
-
-          // Create a new row element
-          const newRow = document.createElement("tr");
-          newRow.innerHTML = `
-        <td>${currentRowNumber}</td>
-        <td>${productName}</td>
-        <td>${productCategory}</td>
-        <td>${productPrice}</td>
-        <td>${productStock}</td>
-        <td>
-          <button
-            id="editClick"
-            class="btn btn-primary"
-            data-toggle="modal"
-            data-target="#editProductModal"
-            data-id="${productId}"
-            data-name="${productName}"
-            data-description="${productDescription}"
-            data-category="${newProduct.categoryId}"
-            data-price="${productPrice}"
-            data-stock="${productStock}"
-            onclick="populateEditProductModal('${productId}', '${productName}', '${productDescription}', '${
-            newProduct.categoryId
-          }', '${productPrice}', '${productStock}')"
-          >
-            Edit
-          </button>
-          <button
-            id="listButton-${productId}"
-            class="btn ${isListed ? "btn-danger" : "btn-success"}"
-            onclick="confirmAndToggleListProduct('${productId}', ${isListed})"
-          >
-            ${isListed ? "Unlist" : "List"}
-          </button>
-        </td>
-      `;
-
-          // Insert the new row at the top of the table body
-          const tableBody = document.querySelector(".table tbody");
-          tableBody.insertBefore(newRow, tableBody.firstChild);
-
-          // Optional: Recalculate the SI numbers for all rows if needed
-          updateSINumbers();
-
-          // Use SweetAlert to show a success message
-          Swal.fire({
-            title: "Success!",
-            text: "Product created successfully!",
-            icon: "success",
-            confirmButtonText: "OK",
-          });
-
-          // // Clear form input fields or close modal as necessary
-          // document.getElementById("createProductForm").reset();
-          $("#createProductModal").modal("hide");
-
-          submitButton.disabled = false;
-        } else {
-          Swal.fire({
-            title: "Error!",
-            text: "Failed to create product.",
-            icon: "error",
-            confirmButtonText: "OK",
-          });
-          submitButton.disabled = false; // Re-enable the submit button even if there's an error
-        }
-      })
-      .catch((error) => {
-        console.error("Error creating product:", error);
-        Swal.fire({
-          title: "Error!",
-          text: "Product creation failed.",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
-      });
-  });
-
 //for edit the product
-document.addEventListener("DOMContentLoaded", () => {
-  const editCropperInstances = [];
-  const editCroppedImages = [];
+const editCropperInstances = [];
+const editCroppedImages = [];
 
-  // Fetch and display product details when edit button is clicked
-  function openEditProductModal(productId) {
-    axios
-      .get(`/admin/products/details/${productId}`)
-      .then((response) => {
-        const product = response.data;
-        document.getElementById("editProductId").value = product._id;
-        document.getElementById("editProductName").value = product.name;
-        document.getElementById("editProductDescription").value =
-          product.description;
-        document.getElementById("editProductCategory").value =
-          product.categoryId;
-        document.getElementById("editProductPrice").value = product.price;
-        document.getElementById("editProductStock").value = product.stock;
+// Fetch and display product details when edit button is clicked
+function openEditProductModal(productId) {
+  axios
+    .get(`/admin/products/details/${productId}`)
+    .then((response) => {
+      const product = response.data;
+      document.getElementById("editProductId").value = product._id;
+      document.getElementById("editProductName").value = product.name;
+      document.getElementById("editProductDescription").value =
+        product.description;
+      document.getElementById("editProductCategory").value = product.categoryId;
+      document.getElementById("editProductPrice").value = product.price;
+      document.getElementById("editProductStock").value = product.stock;
 
-        // Display existing images
-        const existingImagesContainer = document.getElementById(
-          "existingImagesContainer"
-        );
-        existingImagesContainer.innerHTML = "";
-        product.images.forEach((image) => {
-          const imgElement = document.createElement("img");
-          imgElement.src = `/public/uploads/${image}`;
-          imgElement.style.maxWidth = "100px";
-          imgElement.className = "mr-2 mb-2";
-          existingImagesContainer.appendChild(imgElement);
-        });
-
-        // Clear previous croppers
-        editCropperInstances.length = 0;
-        editCroppedImages.length = 0;
-        document.getElementById("editCropperContainers").innerHTML = "";
-        document.getElementById("imageError").textContent = "";
-        document.querySelector(
-          '#editProductForm button[type="submit"]'
-        ).disabled = false;
-
-        // Open the modal
-        $("#editProductModal").modal("show");
-      })
-      .catch((error) => {
-        console.error("Error fetching product details:", error);
-      });
-  }
-
-  // Event listener for edit buttons
-  document.querySelectorAll("#editClick").forEach((button) => {
-    button.addEventListener("click", function () {
-      const productId = this.getAttribute("data-id");
-      openEditProductModal(productId);
-    });
-  });
-
-  // Handle new file input and initialize croppers
-  document
-    .getElementById("editProductImages")
-    .addEventListener("change", function (event) {
-      const files = event.target.files;
-      const cropperContainers = document.getElementById(
-        "editCropperContainers"
+      // Display existing images
+      const existingImagesContainer = document.getElementById(
+        "existingImagesContainer"
       );
-      cropperContainers.innerHTML = ""; // Clear previous croppers
+      existingImagesContainer.innerHTML = "";
+      product.images.forEach((image) => {
+        const imgElement = document.createElement("img");
+        imgElement.src = `/public/uploads/${image}`;
+        imgElement.style.maxWidth = "100px";
+        imgElement.className = "mr-2 mb-2";
+        existingImagesContainer.appendChild(imgElement);
+      });
 
-      if (files.length > 0) {
-        document.getElementById("imageError").textContent = "";
-        document.querySelector(
-          '#editProductForm button[type="submit"]'
-        ).disabled = false;
+      // Clear previous croppers
+      editCropperInstances.length = 0;
+      editCroppedImages.length = 0;
+      document.getElementById("editCropperContainers").innerHTML = "";
+      document.getElementById("imageError").textContent = "";
+      document.querySelector(
+        '#editProductForm button[type="submit"]'
+      ).disabled = false;
 
-        for (let i = 0; i < files.length; i++) {
-          const reader = new FileReader();
-          const cropperContainerId = `edit-cropper-container-${i + 1}`;
-          const cropperImgId = `editImageCrop${i + 1}`;
-          const cropBtnId = `editCropImageBtn${i + 1}`;
+      // Open the modal
+      $("#editProductModal").modal("show");
+    })
+    .catch((error) => {
+      console.error("Error fetching product details:", error);
+    });
+}
 
-          // Create cropper container
-          const cropperContainer = document.createElement("div");
-          cropperContainer.className = "col-md-4 mb-3";
-          cropperContainer.id = cropperContainerId;
-          cropperContainer.innerHTML = `
+// Event listener for edit buttons
+document.querySelectorAll("#editClick").forEach((button) => {
+  button.addEventListener("click", function () {
+    const productId = this.getAttribute("data-id");
+    openEditProductModal(productId);
+  });
+});
+
+// Handle new file input and initialize croppers
+document
+  .getElementById("editProductImages")
+  .addEventListener("change", function (event) {
+    const files = event.target.files;
+    const cropperContainers = document.getElementById("editCropperContainers");
+    cropperContainers.innerHTML = ""; // Clear previous croppers
+
+    if (files.length > 0) {
+      document.getElementById("imageError").textContent = "";
+      document.querySelector(
+        '#editProductForm button[type="submit"]'
+      ).disabled = false;
+
+      for (let i = 0; i < files.length; i++) {
+        const reader = new FileReader();
+        const cropperContainerId = `edit-cropper-container-${i + 1}`;
+        const cropperImgId = `editImageCrop${i + 1}`;
+        const cropBtnId = `editCropImageBtn${i + 1}`;
+
+        // Create cropper container
+        const cropperContainer = document.createElement("div");
+        cropperContainer.className = "col-md-4 mb-3";
+        cropperContainer.id = cropperContainerId;
+        cropperContainer.innerHTML = `
           <label for="${cropperImgId}">Image ${i + 1}</label>
           <img id="${cropperImgId}" style="max-width: 100%;" />
           <button type="button" class="btn btn-primary mt-2" id="${cropBtnId}">Crop</button>
         `;
-          cropperContainers.appendChild(cropperContainer);
+        cropperContainers.appendChild(cropperContainer);
 
-          reader.onload = function (e) {
-            document.getElementById(cropperImgId).src = e.target.result;
+        reader.onload = function (e) {
+          document.getElementById(cropperImgId).src = e.target.result;
 
-            const cropper = new Cropper(document.getElementById(cropperImgId), {
-              aspectRatio: 1, // Change the aspect ratio as needed
-              viewMode: 2,
-            });
+          const cropper = new Cropper(document.getElementById(cropperImgId), {
+            aspectRatio: 1, // Change the aspect ratio as needed
+            viewMode: 2,
+          });
 
-            editCropperInstances.push(cropper);
-          };
-          reader.readAsDataURL(files[i]);
+          editCropperInstances.push(cropper);
+        };
+        reader.readAsDataURL(files[i]);
 
-          // Handle cropping for each image
-          document
-            .getElementById(cropBtnId)
-            .addEventListener("click", function () {
-              const cropper = editCropperInstances[i];
-              const canvas = cropper.getCroppedCanvas();
+        // Handle cropping for each image
+        document
+          .getElementById(cropBtnId)
+          .addEventListener("click", function () {
+            const cropper = editCropperInstances[i];
+            const canvas = cropper.getCroppedCanvas();
 
-              canvas.toBlob(function (blob) {
-                editCroppedImages[i] = blob;
-                alert(`Image ${i + 1} cropped and saved!`);
-              }, "image/png");
-            });
-        }
+            canvas.toBlob(function (blob) {
+              editCroppedImages[i] = blob;
+              alert(`Image ${i + 1} cropped and saved!`);
+            }, "image/png");
+          });
       }
-    });
+    }
+  });
 
-  // Handle form submission
-  document
-    .getElementById("editProductForm")
-    .addEventListener("submit", function (event) {
-      event.preventDefault();
+// Function to validate edit product form
+// Real-time validation for input fields
+document
+  .getElementById("editProductName")
+  .addEventListener("input", function () {
+    validationUtils.validateRequiredField(this, "Product name is required.");
+  });
 
-      const formData = new FormData();
-      formData.append("name", document.getElementById("editProductName").value);
-      formData.append(
-        "description",
-        document.getElementById("editProductDescription").value
-      );
-      formData.append(
-        "categoryId",
-        document.getElementById("editProductCategory").value
-      );
-      formData.append(
-        "price",
-        document.getElementById("editProductPrice").value
-      );
-      formData.append(
-        "stock",
-        document.getElementById("editProductStock").value
-      );
+document
+  .getElementById("editProductDescription")
+  .addEventListener("input", function () {
+    validationUtils.validateRequiredField(
+      this,
+      "Product description is required."
+    );
+  });
 
-      editCroppedImages.forEach((image, index) => {
-        formData.append("images", image, `croppedImage${index + 1}.png`);
+document
+  .getElementById("editProductCategory")
+  .addEventListener("change", function () {
+    validationUtils.validateSelect(this, "Please select a category.");
+  });
+
+document
+  .getElementById("editProductPrice")
+  .addEventListener("input", function () {
+    validationUtils.validateNumber(this, "Price must be greater than zero.");
+  });
+
+document
+  .getElementById("editProductStock")
+  .addEventListener("input", function () {
+    validationUtils.validateNumber(this, "Stock must be greater than zero.");
+  });
+
+// Real-time validation for product images
+// document
+//   .getElementById("editProductImages")
+//   .addEventListener("change", function () {
+//     validationUtils.validateImageCount(
+//       this,
+//       3,
+//       "Please upload at least 3 images."
+//     );
+// });
+
+// Form validation on submit for edit product form
+document
+  .getElementById("editProductForm")
+  .addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const isValid = validationUtils.validateForm("editProductForm", [
+      {
+        id: "editProductName",
+        type: "required",
+        message: "Product name is required.",
+      },
+      {
+        id: "editProductDescription",
+        type: "required",
+        message: "Product description is required.",
+      },
+      {
+        id: "editProductCategory",
+        type: "select",
+        message: "Please select a category.",
+      },
+      {
+        id: "editProductPrice",
+        type: "required",
+        message: "Price is required.",
+      },
+      {
+        id: "editProductStock",
+        type: "required",
+        message: "Stock is required.",
+      },
+      // {
+      //   id: "editProductImages",
+      //   type: "imageCount",
+      //   minCount: 3,
+      //   message: "Please upload at least 3 images.",
+      // },
+    ]);
+
+    if (isValid) {
+      // If valid, proceed to submit
+      submitEditProductForm(); // Example function for submitting the form
+    } else {
+      Swal.fire({
+        title: "Error!",
+        text: "Please correct the highlighted errors.",
+        icon: "error",
+        confirmButtonText: "OK",
       });
+    }
+  });
 
-      axios
-        .put(
-          `/admin/products/edit/${
-            document.getElementById("editProductId").value
-          }`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        )
-        .then((response) => {
-          if (response.status === 200) {
-            location.reload();
-          } else {
-            alert("Failed to update product");
-          }
-        })
-        .catch((error) => {
-          console.error("Error updating product:", error);
-          alert("Product update failed");
-        });
-    });
-});
+// Function to handle form submission
+function submitEditProductForm() {
+  // // Validate form fields
+  // if (!validateEditProductForm()) {
+  //   return; // Stop the submission if validation fails
+  // }
 
-//for unlist and list product
-function confirmAndToggleListProduct(productId, isListed) {
-  const action = isListed === "true" ? "unlist" : "list";
-  const confirmAction = confirm(
-    `Are you sure you want to ${action} this product?`
+  const formData = new FormData();
+  formData.append("name", document.getElementById("editProductName").value);
+  formData.append(
+    "description",
+    document.getElementById("editProductDescription").value
   );
-  if (confirmAction) {
-    toggleListProduct(productId, isListed);
-  }
-}
+  formData.append(
+    "categoryId",
+    document.getElementById("editProductCategory").value
+  );
+  formData.append("price", document.getElementById("editProductPrice").value);
+  formData.append("stock", document.getElementById("editProductStock").value);
 
-function toggleListProduct(productId, isListed) {
-  const newStatus = isListed === "true" ? false : true;
+  editCroppedImages.forEach((image, index) => {
+    formData.append("images", image, `croppedImage${index + 1}.png`);
+  });
+
   axios
-    .patch(`/admin/products/${productId}/unlist`, { isListed: newStatus })
+    .put(
+      `/admin/products/edit/${document.getElementById("editProductId").value}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    )
     .then((response) => {
       if (response.status === 200) {
-        const data = response.data.data;
-        const buttonElement = document.getElementById(`listButton-${data._id}`);
-        const result = data.isListed ? "Unlist" : "List";
-        const buttonClass = !data.isListed ? "btn-success" : "btn-danger";
-
-        buttonElement.className = `btn ${buttonClass}`;
-        buttonElement.innerHTML = result;
-        buttonElement.setAttribute(
-          "onclick",
-          `confirmAndToggleListProduct("${data._id}", "${data.isListed}")`
-        );
-
+        // $("#editProductModal").modal("hide");
         Swal.fire({
-          title: "Success!",
-          text: "Product updated successfully!",
+          title: "Updated",
+          text: "The Product is updated successfully",
           icon: "success",
           confirmButtonText: "OK",
         });
       } else {
-        Swal.fire({
-          title: "Error!",
-          text: "Failed to update product status.",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
+        alert("Failed to update product");
       }
     })
     .catch((error) => {
-      console.error("There was an error updating the status!", error);
-      Swal.fire({
-        title: "Error!",
-        text: "Error updating product status.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
+      console.error("Error updating product:", error);
+      alert("Product update failed");
     });
 }
 

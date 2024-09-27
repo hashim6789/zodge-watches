@@ -71,6 +71,7 @@
                           <tr>
                             <th>SI</th>
                             <th>Name</th>
+                            <th>Image</th>
                             <th>Description</th>
                             <th>Discount Value</th>
                             <th>Applicable Type</th>
@@ -86,6 +87,15 @@
                               <%= ((current - 1) * perPage) + (idx + 1) %>
                             </td>
                             <td><%= offer.name %></td>
+                            <td>
+                              <div>
+                                <img
+                                  style="width: 100px; height: 50px"
+                                  src="/public/user/offers/<%= offer.image %>"
+                                  alt="Banner"
+                                />
+                              </div>
+                            </td>
                             <td><%= offer.description %></td>
                             <td><%= offer.discountValue %>%</td>
                             <td>
@@ -112,7 +122,13 @@
                               </button> -->
                               <button
                                 class="btn btn-primary"
-                                onClick="openEditOfferModal('<%= offer._id %>')"
+                                id="editButton"
+                                data-offerId="<%= offer._id %>"
+                                data-offerImage="<%= offer.image %>"
+                                data-offerApplicableType="<%= offer.applicableType %>"
+                                data-offerName="<%= offer.name %>"
+                                data-offerDescription="<%= offer.description %>"
+                                data-discountValue="<%= offer.discountValue %>"
                               >
                                 Edit
                               </button>
@@ -183,174 +199,123 @@
     <!-- container-scroller -->
     <!-- Create Offer Modal -->
     <!-- Create Offer Modal -->
-    <!-- Create/Edit Offer Modal -->
-    <!-- Create Offer Modal -->
-    <!-- Create Offer Modal -->
     <div
       class="modal fade"
       id="createOfferModal"
       tabindex="-1"
-      role="dialog"
       aria-labelledby="createOfferModalLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog" role="document">
+      <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="createOfferModalLabel">
-              Create New Offer
-            </h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form id="offerForm">
+          <form id="offerForm" enctype="multipart/form-data">
+            <div class="modal-header">
+              <h5 class="modal-title" id="createOfferModalLabel">
+                Create New Offer
+              </h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
               <div class="form-group">
-                <label for="offerName">Offer Name</label>
+                <label for="offerName">Offer Name:</label>
                 <input
                   type="text"
-                  class="form-control"
                   id="offerName"
-                  required
+                  name="offerName"
+                  class="form-control"
                 />
+                <div class="invalid-feedback">Offer name is required.</div>
+                <div class="valid-feedback">Looks good!</div>
               </div>
               <div class="form-group">
-                <label for="offerDescription">Description</label>
+                <label for="offerDescription">Description:</label>
                 <textarea
                   class="form-control"
                   id="offerDescription"
-                  required
+                  name="offerDescription"
                 ></textarea>
+                <div class="invalid-feedback">Description is required.</div>
+                <div class="valid-feedback">Looks good!</div>
               </div>
               <div class="form-group">
-                <label for="discountValue">Discount Value (%)</label>
+                <label for="discountValue">Discount Value (%):</label>
                 <input
                   type="number"
                   class="form-control"
                   id="discountValue"
-                  required
+                  name="discountValue"
                 />
+                <div class="invalid-feedback">Discount value is required.</div>
+                <div class="valid-feedback">Looks good!</div>
               </div>
               <div class="form-group">
-                <label for="applicableType">Applicable Type</label>
-                <select class="form-control" id="applicableType">
+                <label for="applicableType">Applicable Type:</label>
+                <select
+                  class="form-control"
+                  id="applicableType"
+                  name="applicableType"
+                >
+                  <option value="" disabled selected>
+                    Select applicable type
+                  </option>
                   <option value="product">Product</option>
                   <option value="category">Category</option>
                 </select>
+                <div class="invalid-feedback">
+                  Please select an applicable type.
+                </div>
+                <div class="valid-feedback">Looks good!</div>
               </div>
               <div class="form-group" id="applicableItemsContainer">
-                <label>Applicable Items</label>
+                <label>Applicable Items:</label>
                 <div id="applicableItems"></div>
+                <div class="invalid-feedback">
+                  Applicable items are required.
+                </div>
+                <div class="valid-feedback">Looks good!</div>
               </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="createOffer()"
-            >
-              Save Offer
-            </button>
-          </div>
+
+              <!-- New Image Upload Field -->
+              <div class="form-group">
+                <label for="offerImage">Offer Image:</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="offerImage"
+                  name="offerImage"
+                  accept="image/*"
+                />
+                <div class="invalid-feedback">
+                  Please upload an offer image.
+                </div>
+                <div class="valid-feedback">Looks good!</div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                Close
+              </button>
+              <button type="submit" class="btn btn-primary">
+                Create Offer
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
 
     <script>
-      // Event listener for applicable type dropdown change
-      document
-        .getElementById("applicableType")
-        .addEventListener("change", function () {
-          const selectedType = this.value;
-          console.log(selectedType);
-          populateApplicableItemsCreate(selectedType);
-        });
-
-      // Function to fetch applicable items based on selected type
-      function populateApplicableItemsCreate(type) {
-        console.log("type = ", type);
-        axios
-          .get(`/admin/offers/api/applicable-items?type=${type}`)
-          .then((response) => {
-            const container = document.getElementById("applicableItems");
-            container.innerHTML = ""; // Clear previous items
-
-            response.data.items.forEach((item) => {
-              const checkbox = document.createElement("div");
-              checkbox.classList.add("form-check");
-              checkbox.innerHTML = `
-                <input class="form-check-input" type="checkbox" value="${item._id}" id="${item._id}">
-                <label class="form-check-label" for="${item._id}">${item.name}</label>
-              `;
-              container.appendChild(checkbox);
-            });
-          })
-          .catch((error) => {
-            console.error("Error fetching applicable items:", error);
-          });
-      }
-
-      // Function to save the offer
-      // Function to create a new offer
-      async function createOffer() {
-        const applicableType = document.getElementById("applicableType").value;
-
-        const offer = {
-          name: document.getElementById("offerName").value,
-          description: document.getElementById("offerDescription").value,
-          discountValue: document.getElementById("discountValue").value,
-          applicableType: applicableType,
-          isActive: true, // Default active status
-          categoryIds: [],
-          productIds: [],
-        };
-
-        // Collect selected IDs
-        Array.from(
-          document.querySelectorAll("#applicableItems input:checked")
-        ).forEach((input) => {
-          if (applicableType === "category") {
-            offer.categoryIds.push(input.value);
-          } else {
-            offer.productIds.push(input.value);
-          }
-        });
-
-        try {
-          const response = await axios.post("/admin/offers", offer);
-          if (response.data.success) {
-            $("#createOfferModal").modal("hide");
-            window.location.reload(); // Refresh the table or data as needed
-          } else {
-            alert("Failed to create offer: " + response.data.message);
-          }
-        } catch (error) {
-          console.error("Error creating offer:", error);
-          alert("Server error while creating offer.");
-        }
-      }
-
-      // Event listener for the Save Offer button
-      document
-        .getElementById("saveOfferButton")
-        .addEventListener("click", async () => {
-          await createOffer();
-        });
-
       // Open the modal for creating or editing offers
       function openOfferModal(offerId = null) {
         // if (offerId) {
@@ -366,45 +331,13 @@
         $("#createOfferModal").modal("show");
       }
 
-      // Fetch offer details for editing
-      async function fetchOfferDetails(offerId) {
-        try {
-          const response = await axios.get(
-            `/admin/offers/api/offers/${offerId}`
-          );
-          const offer = response.data.offer;
-
-          document.getElementById("offerId").value = offer._id;
-          document.getElementById("offerName").value = offer.name;
-          document.getElementById("offerDescription").value = offer.description;
-          document.getElementById("discountValue").value = offer.discountValue;
-          document.getElementById("applicableType").value =
-            offer.applicableType;
-
-          // Populate offer items based on applicable type
-          await populateApplicableItems(offer.applicableType);
-
-          // Select the current items
-          offer.categoryIds.forEach((itemId) => {
-            const checkbox = document.getElementById(itemId);
-            if (checkbox) {
-              checkbox.checked = true; // Check the corresponding checkbox
-            }
-          });
-
-          document.getElementById("createOfferModalLabel").textContent =
-            "Edit Offer";
-        } catch (error) {
-          console.error("Error fetching offer details:", error);
-        }
-      }
-
       // Event listener for the Save Offer button
-      document
-        .getElementById("saveOfferButton")
-        .addEventListener("click", saveOffer);
+      // document
+      //   .getElementById("saveOfferButton")
+      //   .addEventListener("click", saveOffer);
     </script>
 
+    <!-- Edit Offer Modal -->
     <!-- Edit Offer Modal -->
     <div
       class="modal fade"
@@ -412,182 +345,130 @@
       tabindex="-1"
       role="dialog"
       aria-labelledby="editOfferModalLabel"
+      aria-hidden="true"
     >
       <div class="modal-dialog" role="document">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editOfferModalLabel">Edit Offer</h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form id="offerForm">
-              <input type="hidden" id="offerId" />
+          <form id="editOfferForm" enctype="multipart/form-data">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editOfferModalLabel">Edit Offer</h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="offerId" name="offerId" />
+              <input
+                type="text"
+                id="editOfferApplicableType"
+                name="applicableType"
+              />
+
               <div class="form-group">
-                <label for="offerName">Offer Name</label>
+                <label for="editOfferName">Offer Name:</label>
                 <input
                   type="text"
                   class="form-control"
-                  id="offerName"
-                  required
+                  id="editOfferName"
+                  name="offerName"
                 />
+                <div class="invalid-feedback">Offer name is required.</div>
+                <div class="valid-feedback">Looks good!</div>
               </div>
               <div class="form-group">
-                <label for="offerDescription">Description</label>
-                <textarea class="form-control" id="offerDescription"></textarea>
+                <label for="editOfferDescription">Description:</label>
+                <textarea
+                  class="form-control"
+                  id="editOfferDescription"
+                  name="offerDescription"
+                ></textarea>
+                <div class="invalid-feedback">Description is required.</div>
+                <div class="valid-feedback">Looks good!</div>
               </div>
               <div class="form-group">
-                <label for="discountValue">Discount Value (%)</label>
+                <label for="editOfferDiscountValue">Discount Value (%):</label>
                 <input
                   type="number"
                   class="form-control"
-                  id="discountValue"
-                  required
+                  id="editOfferDiscountValue"
+                  name="discountValue"
                 />
+                <div class="invalid-feedback">Discount value is required.</div>
+                <div class="valid-feedback">Looks good!</div>
               </div>
-              <div class="form-group">
-                <label for="applicableType">Applicable Type</label>
-                <select class="form-control" id="applicableType" required>
-                  <option value="category">Category</option>
-                  <option value="product">Product</option>
-                </select>
-              </div>
+
               <div class="form-group" id="applicableItemsContainer">
-                <!-- Dynamically populate the applicable items (categories/products) -->
-                <label for="editApplicableItems">Applicable Items</label>
+                <label>Applicable Items:</label>
                 <div id="editApplicableItems"></div>
+                <div class="invalid-feedback">
+                  Applicable items are required.
+                </div>
+                <div class="valid-feedback">Looks good!</div>
               </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-            <button type="button" class="btn btn-primary" id="saveOfferButton">
-              Save changes
-            </button>
-          </div>
+
+              <!-- Existing Image Preview -->
+              <div class="form-group">
+                <label>Current Offer Image:</label>
+                <div>
+                  <img
+                    id="existingOfferImage"
+                    src=""
+                    alt="Existing Offer"
+                    width="100"
+                    height="50"
+                  />
+                </div>
+              </div>
+
+              <!-- Image Upload -->
+              <div class="form-group">
+                <label for="editOfferImage">Upload New Offer Image:</label>
+                <input
+                  type="file"
+                  id="editOfferImage"
+                  name="offerImage"
+                  class="form-control"
+                  accept="image/*"
+                />
+                <div class="invalid-feedback">
+                  Please upload an offer image.
+                </div>
+                <div class="valid-feedback">Looks good!</div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="saveEditOfferButton"
+              >
+                Save changes
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
 
     <script>
       // Open the edit modal and populate data
-      async function openEditOfferModal(offerId) {
-        try {
-          const response = await axios.get(
-            `/admin/offers/api/offers/${offerId}`
-          );
-          const { offer, categories, products } = response.data;
 
-          // console.log("",{products, categories})
-
-          // Populate the form with the offer details
-          document.getElementById("offerId").value = offer._id;
-          document.getElementById("offerName").value = offer.name;
-          document.getElementById("offerDescription").value = offer.description;
-          document.getElementById("discountValue").value = offer.discountValue;
-          document.getElementById("applicableType").value =
-            offer.applicableType;
-
-          // Populate the applicable items (categories/products)
-          populateApplicableItems(
-            offer.applicableType,
-            categories,
-            products,
-            offer
-          );
-
-          $("#editOfferModal").modal("show");
-        } catch (error) {
-          console.error("Error fetching offer details:", error);
-        }
-      }
-
-      // Populate applicable items based on the selected type and check the related ones
-      function populateApplicableItems(
-        applicableType,
-        categories,
-        products,
-        offer
-      ) {
-        const container = document.getElementById("editApplicableItems");
-        container.innerHTML = ""; // Clear previous items
-
-        const items = applicableType === "category" ? categories : products;
-        const selectedIds =
-          applicableType === "category"
-            ? offer.categoryIds.map((cat) => cat._id)
-            : offer.productIds.map((prod) => prod._id);
-        console.log(selectedIds);
-        items.forEach((item) => {
-          const isChecked = selectedIds.includes(item._id);
-          const checkbox = document.createElement("div");
-          checkbox.classList.add("form-check");
-          checkbox.innerHTML = `
-        <input class="form-check-input" type="checkbox" value="${
-          item._id
-        }" id="${item._id}" ${isChecked ? "checked" : ""}>
-        <label class="form-check-label" for="${item._id}">${item.name}</label>
-      `;
-          container.appendChild(checkbox);
-        });
-      }
-
-      // Save the edited offer
-      async function saveEditedOffer() {
-        const offerId = document.getElementById("offerId").value;
-        const applicableType = document.getElementById("applicableType").value;
-
-        const offer = {
-          name: document.getElementById("offerName").value,
-          description: document.getElementById("offerDescription").value,
-          discountValue: document.getElementById("discountValue").value,
-          applicableType: applicableType,
-          isActive: true,
-          categoryIds: [],
-          productIds: [],
-        };
-
-        // Collect selected IDs
-        Array.from(
-          document.querySelectorAll("#editApplicableItems input:checked")
-        ).forEach((input) => {
-          if (applicableType === "category") {
-            offer.categoryIds.push(input.value);
-          } else {
-            offer.productIds.push(input.value);
-          }
-        });
-
-        try {
-          const response = await axios.patch(`/admin/offers/${offerId}`, offer);
-          if (response.data.success) {
-            $("#editOfferModal").modal("hide");
-            window.location.reload(); // Refresh the table or data as needed
-          } else {
-            alert("Failed to save offer: " + response.data.message);
-          }
-        } catch (error) {
-          console.error("Error saving offer:", error);
-          alert("Server error while saving offer.");
-        }
-      }
-
-      // Event listener for saving the edited offer
-      document
-        .getElementById("saveOfferButton")
-        .addEventListener("click", saveEditedOffer);
+      // // Event listener for saving the edited offer
+      // document
+      //   .getElementById("saveOfferButton")
+      //   .addEventListener("click", saveEditedOffer);
     </script>
 
     <!-- plugins:js -->
@@ -698,5 +579,9 @@
         }
       }
     </script> -->
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="module" src="/public/user/js/validationUtils.js"></script>
+    <script type="module" src="/public/user/js/offerManagement.js"></script>
   </body>
 </html>

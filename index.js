@@ -8,7 +8,7 @@ require("./config/passport-setup");
 const session = require("express-session"); //import session
 const passport = require("passport");
 const { v4: uuidv4 } = require("uuid"); //import unique id
-const connectDB = require("./db");
+const connectDB = require("./config/db");
 const app = express();
 
 //for port number

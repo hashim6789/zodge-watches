@@ -1,6 +1,7 @@
 const WishlistModel = require("../../models/Wishlist");
 const ProductModel = require("../../models/Product");
 const OfferModel = require("../../models/Offer");
+const CartModel = require("../../models/Cart");
 
 //for adding a product into a wishlist
 const addToWishlist = async (req, res) => {
@@ -96,6 +97,81 @@ const removeFromWishlist = async (req, res) => {
   }
 };
 
+//for add to cart product fron the wishlist
+const addToCartFromWishlist = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    const productId = req.params.productId;
+
+    const product = await ProductModel.findById(productId);
+    // console.log(product);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found!",
+      });
+    }
+
+    const wishlist = await WishlistModel.findOne({ userId });
+    if (!wishlist) {
+      return res.status(404).json({
+        success: false,
+        message: "The wishlist is not found",
+      });
+    }
+
+    const index = wishlist.productIds.indexOf(productId);
+    if (index > -1) {
+      wishlist.productIds.splice(index, 1);
+    } else {
+      return res.json({
+        success: false,
+        message: "Product not found in wishlist",
+      });
+    }
+
+    wishlist.save();
+
+    let cart = await CartModel.findOne({ userId });
+    console.log(cart);
+    if (!cart) {
+      return res.status(494).json({
+        success: false,
+        message: "Cart Not found",
+      });
+    } else {
+      const cartProductIndex = cart.products.findIndex(
+        (p) => p.productId.toString() === productId
+      );
+      if (cartProductIndex !== -1) {
+        // If product is already in cart, update quantity
+        cart.products[cartProductIndex].quantity += 1;
+      } else {
+        // Else, add new product to cart
+        cart.products.push({
+          productId: productId,
+          quantity: 1,
+          price: product.price,
+        });
+      }
+    }
+    await cart.save();
+    res.status(200).json({
+      success: true,
+      message: "The product is removed from the wishlist",
+      data: {
+        wishlistLength: wishlist.productIds.length,
+        cartProductsLength: cart.products.length,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Server Error!!!",
+    });
+  }
+};
+
 const fetchWishlist = async (req, res) => {
   try {
     const userId = req.user?._id;
@@ -149,4 +225,9 @@ const fetchWishlist = async (req, res) => {
   }
 };
 
-module.exports = { addToWishlist, removeFromWishlist, fetchWishlist };
+module.exports = {
+  addToWishlist,
+  removeFromWishlist,
+  addToCartFromWishlist,
+  fetchWishlist,
+};

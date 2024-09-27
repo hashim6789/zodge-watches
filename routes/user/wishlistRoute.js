@@ -4,6 +4,7 @@ const router = express.Router();
 const {
   addToWishlist,
   removeFromWishlist,
+  addToCartFromWishlist,
   fetchWishlist,
 } = require("../../controllers/user/wishlistController");
 
@@ -38,6 +39,7 @@ router.delete(
   checkBlocked,
   removeFromWishlist
 );
+router.put("/:productId/cart", addToCartFromWishlist);
 
 router.get("/", fetchWishlist);
 
