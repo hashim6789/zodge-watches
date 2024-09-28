@@ -39,8 +39,8 @@ const {
 //   next();
 // };
 
-//get the signup page
-router.get("/signup", redirectIfAuthenticated, getSignup);
+// //get the signup page
+// router.get("/signup", redirectIfAuthenticated, getSignup);
 
 //post the signup page
 router.post("/signup", redirectIfAuthenticated, postLocalSignup);
@@ -75,8 +75,8 @@ router.post(
   resendOtp
 );
 
-//get the login page
-router.get("/login", redirectIfAuthenticated, getLogin);
+// //get the login page
+// router.get("/login", redirectIfAuthenticated, getLogin);
 
 //post the login page
 router.post("/login", redirectIfAuthenticated, postLocalLogin);

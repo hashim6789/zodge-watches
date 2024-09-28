@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
     setFeedback(
       passwordInput,
       document.getElementById("passwordFeedback"),
-      password.length >= 6,
+      password.length >= 8,
       "Password is strong!"
     );
   }
@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
     setFeedback(
       confirmPasswordInput,
       document.getElementById("confirmPasswordFeedback"),
-      confirmPassword === password && confirmPassword.length >= 6,
+      confirmPassword === password && confirmPassword.length >= 8,
       "Passwords match!"
     );
   }
@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
     setFeedback(
       loginPasswordInput,
       document.getElementById("loginPasswordFeedback"),
-      password.length >= 6,
+      password.length >= 8,
       "Password is strong!"
     );
   }

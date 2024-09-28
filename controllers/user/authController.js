@@ -395,14 +395,14 @@ const googleLogin = passport.authenticate("google-login", {
 //googleSignupCallback
 const googleSignupCallback = (req, res, next) => {
   passport.authenticate("google-signup", {
-    failureRedirect: "/?error=The user is already exist login please",
+    failureRedirect: "/",
   })(req, res, next);
 };
 
 //googleLoginCallback
 const googleLoginCallback = (req, res, next) => {
   passport.authenticate("google-login", {
-    failureRedirect: `/?error=The user is not exist or blocked!!!`,
+    failureRedirect: `/`,
   })(req, res, next);
 };
 
@@ -484,7 +484,7 @@ const googleLoginCallback = (req, res, next) => {
 const redirectToProfile = (req, res) => {
   try {
     console.log("HI", req.session.returnTo);
-    res.redirect("/?message=The user login successfully");
+    res.redirect("/");
   } catch (err) {
     res.status(500).json({
       status: "Error",

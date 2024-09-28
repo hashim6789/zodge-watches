@@ -366,7 +366,6 @@
                           type="password"
                           class="form-control"
                           id="currentPassword"
-                          required
                         />
                         <button
                           class="btn btn-outline-secondary"
@@ -382,6 +381,7 @@
                     </div>
 
                     <!-- New Password (Initially Disabled) -->
+                    <!-- New Password Field -->
                     <div class="mb-3">
                       <label for="newPassword" class="form-label"
                         >New Password</label
@@ -390,15 +390,15 @@
                         type="password"
                         class="form-control"
                         id="newPassword"
-                        required
                         disabled
                       />
+                      <div class="valid-feedback">Password is strong!</div>
                       <div class="invalid-feedback">
-                        Password must be at least 8 characters long
+                        Password must be at least 8 characters long.
                       </div>
                     </div>
 
-                    <!-- Confirm New Password (Initially Disabled) -->
+                    <!-- Confirm Password Field -->
                     <div class="mb-3">
                       <label for="confirmPassword" class="form-label"
                         >Confirm New Password</label
@@ -407,10 +407,12 @@
                         type="password"
                         class="form-control"
                         id="confirmPassword"
-                        required
                         disabled
                       />
-                      <div class="invalid-feedback">Passwords do not match</div>
+                      <div class="valid-feedback">Passwords match!</div>
+                      <div class="invalid-feedback">
+                        Passwords do not match.
+                      </div>
                     </div>
 
                     <!-- Submit Button -->
@@ -443,7 +445,7 @@
       </span>
     </div>
 
-    <!-- Edit Personal Details Modal (same as previous provided code) -->
+    <!-- Edit Personal Details Modal -->
     <div
       class="modal fade"
       id="editPersonalDetailsModal"
@@ -465,7 +467,7 @@
             ></button>
           </div>
           <div class="modal-body p-4">
-            <form id="editProfileForm">
+            <form id="editProfileForm" novalidate>
               <input
                 type="hidden"
                 id="editUserId"
@@ -483,9 +485,10 @@
                     class="form-control"
                     id="profileFirstName"
                     name="firstName"
-                    required
                     placeholder="Enter First Name"
+                    required
                   />
+                  <div class="invalid-feedback">First Name is required.</div>
                 </div>
 
                 <div class="col-md-6">
@@ -498,7 +501,9 @@
                     id="profileLastName"
                     name="lastName"
                     placeholder="Enter Last Name"
+                    required
                   />
+                  <div class="invalid-feedback">Last Name is required.</div>
                 </div>
               </div>
 
@@ -545,32 +550,34 @@
             <form id="createAddress">
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label for="firstName" class="form-label">First Name</label>
+                  <label for="addressFirstname" class="form-label"
+                    >First Name</label
+                  >
                   <input
                     type="text"
                     class="form-control rounded-pill"
-                    id="firstName"
-                    name="firstName"
-                    required
+                    id="addressFirstname"
+                    name="addressFirstname"
                   />
                 </div>
                 <div class="col-md-6">
-                  <label for="lastName" class="form-label">Last Name</label>
+                  <label for="addressLastName" class="form-label"
+                    >Last Name</label
+                  >
                   <input
                     type="text"
                     class="form-control rounded-pill"
-                    id="lastName"
-                    name="lastName"
+                    id="addressLastName"
+                    name="addressLastName"
                   />
                 </div>
                 <div class="col-md-6">
                   <label for="phoneNo" class="form-label">Phone Number</label>
                   <input
-                    type="number"
+                    type="text"
                     class="form-control rounded-pill"
                     id="phoneNo"
                     name="phoneNo"
-                    required
                   />
                 </div>
                 <div class="col-md-6">
@@ -580,7 +587,6 @@
                     class="form-control rounded-pill"
                     id="addressEmail"
                     name="addressEmail"
-                    required
                   />
                 </div>
                 <div class="col-12">
@@ -592,7 +598,6 @@
                     class="form-control rounded-pill"
                     id="addressLine"
                     name="addressLine"
-                    required
                   />
                 </div>
                 <div class="col-md-4">
@@ -602,7 +607,6 @@
                     class="form-control rounded-pill"
                     id="city"
                     name="city"
-                    required
                   />
                 </div>
                 <div class="col-md-4">
@@ -612,7 +616,6 @@
                     class="form-control rounded-pill"
                     id="state"
                     name="state"
-                    required
                   />
                 </div>
                 <div class="col-md-4">
@@ -622,7 +625,6 @@
                     class="form-control rounded-pill"
                     id="pincode"
                     name="pincode"
-                    required
                   />
                 </div>
                 <div class="col-md-6">
@@ -632,7 +634,6 @@
                     class="form-control rounded-pill"
                     id="country"
                     name="country"
-                    required
                   />
                 </div>
                 <div class="col-md-6">
@@ -696,7 +697,6 @@
                   class="form-control"
                   id="editFirstName"
                   name="firstName"
-                  required
                 />
               </div>
 
@@ -719,7 +719,6 @@
                   class="form-control"
                   id="editPhoneNo"
                   name="phoneNo"
-                  required
                 />
               </div>
 
@@ -731,7 +730,6 @@
                   class="form-control"
                   id="editAddressEmail"
                   name="addressEmail"
-                  required
                 />
               </div>
 
@@ -745,7 +743,6 @@
                   class="form-control"
                   id="editAddressLine"
                   name="addressLine"
-                  required
                 />
               </div>
 
@@ -757,7 +754,6 @@
                   class="form-control"
                   id="editPincode"
                   name="pincode"
-                  required
                 />
               </div>
 
@@ -769,7 +765,6 @@
                   class="form-control"
                   id="editState"
                   name="state"
-                  required
                 />
               </div>
 
@@ -781,7 +776,6 @@
                   class="form-control"
                   id="editCountry"
                   name="country"
-                  required
                 />
               </div>
 
@@ -793,7 +787,6 @@
                   class="form-control"
                   id="editCity"
                   name="city"
-                  required
                 />
               </div>
 
@@ -886,15 +879,49 @@
         });
     </script>
     <script>
-      document
-        .getElementById("editProfileForm")
-        .addEventListener("submit", async function (event) {
-          event.preventDefault();
-          const userId = document.getElementById("editUserId").value;
+      const form = document.getElementById("editProfileForm");
+      const firstNameInput = form.profileFirstName;
+      const lastNameInput = form.profileLastName;
 
+      // Function to validate an input field
+      function validateField(input) {
+        const feedback = input.nextElementSibling; // Get the invalid feedback div
+        if (!input.value.trim()) {
+          input.classList.add("is-invalid");
+          input.classList.remove("is-valid");
+          feedback.style.display = "block"; // Show feedback
+        } else {
+          input.classList.add("is-valid");
+          input.classList.remove("is-invalid");
+          feedback.style.display = "none"; // Hide feedback
+        }
+      }
+
+      // Real-time validation
+      firstNameInput.addEventListener("input", () =>
+        validateField(firstNameInput)
+      );
+      lastNameInput.addEventListener("input", () =>
+        validateField(lastNameInput)
+      );
+
+      // Form submission with final validation
+      form.addEventListener("submit", async function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Reset validity state
+        validateField(firstNameInput);
+        validateField(lastNameInput);
+
+        // Proceed with Axios request if the form is valid
+        if (
+          firstNameInput.classList.contains("is-valid") &&
+          lastNameInput.classList.contains("is-valid")
+        ) {
+          const userId = document.getElementById("editUserId").value;
           const data = {
-            firstName: document.getElementById("profileFirstName").value,
-            lastName: document.getElementById("profileLastName").value,
+            firstName: firstNameInput.value,
+            lastName: lastNameInput.value,
           };
 
           console.log("data = ", data);
@@ -916,57 +943,162 @@
           } catch (error) {
             Swal.fire("Error", error.response.data.message, "error");
           }
-        });
+        }
+      });
 
       // Function to handle address creation
-      document
-        .getElementById("createAddress")
-        .addEventListener("submit", function (event) {
-          event.preventDefault();
+      const createAddressForm = document.getElementById("createAddress");
+      const addressFirstnameInput = document.getElementById("addressFirstname");
+      const addressLastNameInput = document.getElementById("addressLastName");
+      const phoneNoInput = document.getElementById("phoneNo");
+      const emailInput = document.getElementById("addressEmail");
+      const addressLineInput = document.getElementById("addressLine");
+      const pincodeInput = document.getElementById("pincode");
+      const stateInput = document.getElementById("state");
+      const countryInput = document.getElementById("country");
+      // Add more input fields as necessary...
 
-          const userId = document.getElementById("editUserId").value;
-          const firstName = document.getElementById("firstName").value;
-          const lastName = document.getElementById("lastName").value;
-          const phoneNo = document.getElementById("phoneNo").value;
-          const email = document.getElementById("addressEmail").value;
-          const addressLine = document.getElementById("addressLine").value;
-          const pincode = document.getElementById("pincode").value;
-          const state = document.getElementById("state").value;
-          const country = document.getElementById("country").value;
-          const city = document.getElementById("city").value;
-          const flatNo = document.getElementById("flatNo").value;
+      // Function to validate an input field
+      function validateField(input, regex, errorMessage) {
+        if (!input.value.trim() || !regex.test(input.value.trim())) {
+          input.classList.add("is-invalid");
+          input.classList.remove("is-valid");
+          input.setCustomValidity(errorMessage); // Set the custom error message
+        } else {
+          input.classList.add("is-valid");
+          input.classList.remove("is-invalid");
+          input.setCustomValidity(""); // Clear any custom error message
+        }
+      }
 
-          const data = {
-            userId,
-            firstName,
-            lastName,
-            phoneNo,
-            email,
-            addressLine,
-            pincode,
-            state,
-            country,
-            city,
-            flatNo,
+      // Real-time validation
+      [
+        addressFirstnameInput,
+        addressLastNameInput,
+        phoneNoInput,
+        emailInput,
+        addressLineInput,
+        pincodeInput,
+        stateInput,
+        countryInput,
+      ].forEach((input) => {
+        input.addEventListener("input", () => {
+          // Define regex patterns and error messages for each field
+          const patterns = {
+            addressFirstname: {
+              regex: /^[a-zA-Z\s]+$/,
+              errorMessage: "First name can only contain letters and spaces.",
+            },
+            addressLastName: {
+              regex: /^[a-zA-Z\s]*$/, // Optional
+              errorMessage: "Last name can only contain letters and spaces.",
+            },
+            phoneNo: {
+              regex: /^[0-9]{10}$/, // 10 digits
+              errorMessage: "Phone number must be exactly 10 digits.",
+            },
+            email: {
+              regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              errorMessage: "Please enter a valid email address.",
+            },
+            addressLine: {
+              regex: /.+/,
+              errorMessage: "Address line is required.",
+            },
+            pincode: {
+              regex: /^[0-9]{6}$/, // Assuming 6 digits
+              errorMessage: "Pincode must be exactly 6 digits.",
+            },
+            state: {
+              regex: /.+/,
+              errorMessage: "State is required.",
+            },
+            country: {
+              regex: /.+/,
+              errorMessage: "Country is required.",
+            },
           };
 
-          axios
-            .post("/profile/address", data)
-            .then((response) => {
-              if (response.status === 201) {
-                Swal.fire("Success", response.data.message, "success").then(
-                  () => {
-                    location.reload();
-                  }
-                );
-              } else {
-                Swal.fire("Error", "Failed to create address", "error");
-              }
-            })
-            .catch((error) => {
-              Swal.fire("Error", error.response.data.message, "error");
-            });
+          // Validate the field based on its ID
+          const fieldName = input.id;
+          if (patterns[fieldName]) {
+            validateField(
+              input,
+              patterns[fieldName].regex,
+              patterns[fieldName].errorMessage
+            );
+          }
         });
+      });
+
+      // Form submission with final validation
+      createAddressForm.addEventListener("submit", async function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Validate all fields before submission
+        [
+          addressFirstnameInput,
+          addressLastNameInput,
+          phoneNoInput,
+          emailInput,
+          addressLineInput,
+          pincodeInput,
+          stateInput,
+          countryInput,
+        ].forEach((input) => {
+          const fieldName = input.id;
+          if (patterns[fieldName]) {
+            validateField(
+              input,
+              patterns[fieldName].regex,
+              patterns[fieldName].errorMessage
+            );
+          }
+        });
+
+        // Proceed with Axios request if all fields are valid
+        const allValid = [
+          addressFirstnameInput,
+          addressLastNameInput,
+          phoneNoInput,
+          emailInput,
+          addressLineInput,
+          pincodeInput,
+          stateInput,
+          countryInput,
+        ].every((input) => input.classList.contains("is-valid"));
+
+        if (allValid) {
+          const userId = document.getElementById("editUserId").value;
+          const data = {
+            userId,
+            addressFirstname: addressFirstnameInput.value,
+            addressLastName: addressLastNameInput.value,
+            phoneNo: phoneNoInput.value,
+            email: emailInput.value,
+            addressLine: addressLineInput.value,
+            pincode: pincodeInput.value,
+            state: stateInput.value,
+            country: countryInput.value,
+            // Add additional fields here...
+          };
+
+          try {
+            const response = await axios.post("/profile/address", data);
+            if (response.status === 201) {
+              Swal.fire("Success", response.data.message, "success").then(
+                () => {
+                  location.reload();
+                }
+              );
+            } else {
+              Swal.fire("Error", "Failed to create address", "error");
+            }
+          } catch (error) {
+            Swal.fire("Error", error.response.data.message, "error");
+          }
+        }
+      });
 
       // // Function to handle address editing
       // document
@@ -1373,29 +1505,11 @@
         const changePasswordButton = document.getElementById(
           "changePasswordButton"
         );
-        const togglePasswordButtons =
-          document.querySelectorAll(".toggle-password");
+        const checkPasswordButton = document.getElementById(
+          "checkPasswordButton"
+        );
 
         const userId = "<%= user._id %>"; // User's ID
-
-        // Toggle password visibility
-        togglePasswordButtons.forEach((button) => {
-          button.addEventListener("click", function () {
-            const targetId = this.getAttribute("data-target");
-            const targetInput = document.getElementById(targetId);
-            const icon = this.querySelector("i");
-
-            if (targetInput.type === "password") {
-              targetInput.type = "text";
-              icon.classList.remove("bi-eye");
-              icon.classList.add("bi-eye-slash");
-            } else {
-              targetInput.type = "password";
-              icon.classList.remove("bi-eye-slash");
-              icon.classList.add("bi-eye");
-            }
-          });
-        });
 
         // Enable or disable new password fields
         function enableNewPasswordFields(enable) {
@@ -1404,10 +1518,28 @@
           changePasswordButton.disabled = !enable;
         }
 
+        // Validate Current Password when Check button is clicked
+        checkPasswordButton.addEventListener("click", function () {
+          validateCurrentPassword()
+            .then((isValid) => {
+              if (isValid) {
+                Swal.fire("Success", "Current password is valid", "success");
+              }
+            })
+            .catch((error) => {
+              Swal.fire("Error", "Invalid current password", "error");
+            });
+        });
+
         // Validate Current Password
         function validateCurrentPassword() {
           return new Promise((resolve, reject) => {
             const currentPassword = currentPasswordInput.value;
+
+            if (currentPassword.length === 0) {
+              currentPasswordInput.classList.add("is-invalid");
+              reject(false);
+            }
 
             axios
               .post("/auth/validate-password", { userId, currentPassword })
@@ -1422,7 +1554,11 @@
                 }
               })
               .catch((error) => {
-                Swal.fire("Error", error.response.data.message, "error");
+                Swal.fire(
+                  "Error",
+                  error.response?.data?.message || "Invalid current password",
+                  "error"
+                );
                 currentPasswordInput.classList.remove("is-valid");
                 currentPasswordInput.classList.add("is-invalid");
                 enableNewPasswordFields(false); // Keep new password fields disabled
@@ -1431,31 +1567,42 @@
           });
         }
 
-        // Validate New Password
-        function validateNewPassword() {
-          const newPassword = newPasswordInput.value;
-          const isValid = newPassword.length >= 8; // Example validation: password should be 8 chars or longer
-          updateValidationUI(newPasswordInput, isValid);
-          return isValid;
-        }
-
-        // Validate Confirm Password
-        function validateConfirmPassword() {
-          const confirmPassword = confirmPasswordInput.value;
-          const newPassword = newPasswordInput.value;
-          const isValid = confirmPassword === newPassword;
-          updateValidationUI(confirmPasswordInput, isValid);
-          return isValid;
-        }
-
         // Update validation UI
         function updateValidationUI(input, isValid) {
+          const feedbackContainer = input.parentElement; // Assuming input and feedback are within the same parent container
+          const invalidFeedback =
+            feedbackContainer.querySelector(".invalid-feedback"); // Find invalid feedback within the same container
+          const validFeedback =
+            feedbackContainer.querySelector(".valid-feedback"); // Find valid feedback within the same container
+
           if (isValid) {
+            // Add 'is-valid' class and remove 'is-invalid'
             input.classList.remove("is-invalid");
             input.classList.add("is-valid");
+
+            // Hide invalid feedback if it exists
+            if (invalidFeedback) {
+              invalidFeedback.style.display = "none";
+            }
+
+            // Show valid feedback if it exists
+            if (validFeedback) {
+              validFeedback.style.display = "block";
+            }
           } else {
+            // Add 'is-invalid' class and remove 'is-valid'
             input.classList.remove("is-valid");
             input.classList.add("is-invalid");
+
+            // Show invalid feedback if it exists
+            if (invalidFeedback) {
+              invalidFeedback.style.display = "block";
+            }
+
+            // Hide valid feedback if it exists
+            if (validFeedback) {
+              validFeedback.style.display = "none";
+            }
           }
         }
 
@@ -1472,8 +1619,57 @@
           });
         }
 
-        // Attach event listeners
-        currentPasswordInput.addEventListener("blur", validateCurrentPassword);
+        // // Update validation UI for both valid and invalid feedback
+        // function updateValidationUI(input, isValid) {
+        //   const feedback = input.nextElementSibling; // Get the next sibling (invalid-feedback)
+
+        //   if (isValid) {
+        //     input.classList.remove("is-invalid");
+        //     input.classList.add("is-valid");
+        //     if (feedback && feedback.classList.contains("invalid-feedback")) {
+        //       feedback.style.display = "none"; // Hide invalid feedback
+        //     }
+        //   } else {
+        //     input.classList.remove("is-valid");
+        //     input.classList.add("is-invalid");
+        //     if (feedback && feedback.classList.contains("invalid-feedback")) {
+        //       feedback.style.display = "block"; // Show invalid feedback
+        //     }
+        //   }
+        // }
+
+        // Validate New Password
+        function validateNewPassword() {
+          const newPassword = newPasswordInput.value;
+
+          // Password must be at least 8 characters long
+          const isValid = newPassword.length >= 8;
+
+          updateValidationUI(newPasswordInput, isValid);
+
+          // If new password is valid, check confirm password as well
+          if (isValid) {
+            validateConfirmPassword(); // To keep confirm password in sync
+          }
+
+          return isValid;
+        }
+
+        // Validate Confirm Password
+        function validateConfirmPassword() {
+          const newPassword = newPasswordInput.value;
+          const confirmPassword = confirmPasswordInput.value;
+
+          // Check if both passwords match
+          const isValid =
+            newPassword === confirmPassword && confirmPassword.length > 0;
+
+          updateValidationUI(confirmPasswordInput, isValid);
+
+          return isValid;
+        }
+
+        // Attach event listeners for new and confirm password validation
         newPasswordInput.addEventListener("input", validateNewPassword);
         confirmPasswordInput.addEventListener("input", validateConfirmPassword);
 

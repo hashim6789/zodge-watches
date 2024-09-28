@@ -17,12 +17,34 @@
             My Account
           </a>
           <a
-            href="/auth/logout"
+            href="#"
             id="logoutLink"
             class="flex-c-m trans-04 p-lr-25"
+            onclick="confirmLogout();"
           >
             Logout
           </a>
+
+          <script>
+            function confirmLogout() {
+              Swal.fire({
+                title: "Are you sure?",
+                text: "You will be logged out!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, log out!",
+                cancelButtonText: "Cancel",
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  // Proceed with logout
+                  window.location.href = "/auth/logout";
+                }
+              });
+            }
+          </script>
+
           <% } else { %>
           <!-- If user is not logged in -->
           <a

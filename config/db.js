@@ -1,8 +1,11 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 
-//for mongodb URI
+// MongoDB URI from .env file
 const mongoDbUri = process.env.mongoDbUri;
+
+// Log the URI to verify it's correct
+console.log("MongoDB URI:", mongoDbUri);
 
 const connectDB = async () => {
   try {
