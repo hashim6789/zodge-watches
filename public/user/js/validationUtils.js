@@ -119,6 +119,20 @@ const validationUtils = (() => {
     return true;
   };
 
+  // validationUtils.js
+
+  const validateReportType = (reportType) => {
+    reportType.classList.remove("is-invalid", "is-valid");
+
+    if (reportType.value === "default") {
+      reportType.classList.add("is-invalid");
+      return false;
+    } else {
+      reportType.classList.add("is-valid");
+      return true;
+    }
+  };
+
   // Generic form validator that accepts dynamic validation rules
   const validateForm = (formId, validationRules) => {
     const form = document.getElementById(formId);
@@ -166,6 +180,7 @@ const validationUtils = (() => {
     validateSelect,
     validateNumber,
     validateImageCount,
+    validateReportType,
     validateForm,
   };
 })();

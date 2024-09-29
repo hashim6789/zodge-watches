@@ -1,3 +1,55 @@
+import validationUtils from "./validationUtils.js";
+
+// Real-time validation for category name in create and edit forms
+document
+  .getElementById("newCategoryName")
+  .addEventListener("input", function () {
+    validationUtils.validateRequiredField(this, "Category name is required.");
+  });
+
+document
+  .getElementById("editCategoryName")
+  .addEventListener("input", function () {
+    validationUtils.validateRequiredField(this, "Category name is required.");
+  });
+
+// Form validation on submit
+document
+  .getElementById("createCategoryForm")
+  .addEventListener("submit", function (e) {
+    e.preventDefault();
+    const isValid = validationUtils.validateForm("createCategoryForm", [
+      {
+        id: "newCategoryName",
+        type: "required",
+        message: "Category name is required.",
+      },
+    ]);
+
+    if (isValid) {
+      // Form is valid, you can proceed to submit or further actions
+      createCategory();
+    }
+  });
+
+document
+  .getElementById("editCategoryForm")
+  .addEventListener("submit", function (e) {
+    e.preventDefault();
+    const isValid = validationUtils.validateForm("editCategoryForm", [
+      {
+        id: "editCategoryName",
+        type: "required",
+        message: "Category name is required.",
+      },
+    ]);
+
+    if (isValid) {
+      // Form is valid, you can proceed to submit or further actions
+      editCategory();
+    }
+  });
+
 //for create category
 function createCategory() {
   event.preventDefault();
