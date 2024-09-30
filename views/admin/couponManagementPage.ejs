@@ -103,7 +103,7 @@
                                 data-target="#editCouponModal"
                                 data-id="<%= coupon._id %>"
                                 data-name="<%= coupon.name %>"
-                                onclick="populateEditCouponModal('<%= coupon._id %>', '<%= coupon.name %>')"
+                                onclick="populateEditCouponModal('<%= coupon._id %>')"
                               >
                                 Edit
                               </button>
@@ -183,20 +183,22 @@
                   <div class="modal-body">
                     <div class="form-group">
                       <label for="couponCode">Coupon Code</label>
-                      <input
-                        type="text"
-                        id="couponCode"
-                        class="form-control"
-                        required
-                      />
+                      <input type="text" id="couponCode" class="form-control" />
+                      <div class="invalid-feedback">
+                        Coupon code is required.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
                     <div class="form-group">
                       <label for="description">Description</label>
                       <textarea
                         id="description"
                         class="form-control"
-                        required
                       ></textarea>
+                      <div class="invalid-feedback">
+                        Description is required.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
                     <div class="form-group">
                       <label for="discountPercentage">Discount %</label>
@@ -204,17 +206,19 @@
                         type="number"
                         id="discountPercentage"
                         class="form-control"
-                        required
                       />
+                      <div class="invalid-feedback">
+                        Discount percentage must be greater than zero.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
                     <div class="form-group">
                       <label for="expiryDate">Expiry Date</label>
-                      <input
-                        type="date"
-                        id="expiryDate"
-                        class="form-control"
-                        required
-                      />
+                      <input type="date" id="expiryDate" class="form-control" />
+                      <div class="invalid-feedback">
+                        Expiry date is required.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
                     <div class="form-group">
                       <label for="minimumPurchase"
@@ -224,8 +228,11 @@
                         type="number"
                         id="minimumPurchase"
                         class="form-control"
-                        required
                       />
+                      <div class="invalid-feedback">
+                        Minimum purchase amount must be zero or greater.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
                     <div class="form-group">
                       <label for="maximumDiscount"
@@ -235,18 +242,23 @@
                         type="number"
                         id="maximumDiscount"
                         class="form-control"
-                        required
                       />
+                      <div class="invalid-feedback">
+                        Maximum discount amount must be zero or greater.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
-
                     <div class="form-group">
                       <label for="usageLimit">Usage Limit</label>
                       <input
                         type="number"
                         id="usageLimit"
                         class="form-control"
-                        required
                       />
+                      <div class="invalid-feedback">
+                        Usage limit must be greater than zero.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
                   </div>
                   <div class="modal-footer">
@@ -299,8 +311,11 @@
                         type="text"
                         id="editCouponCode"
                         class="form-control"
-                        required
                       />
+                      <div class="invalid-feedback">
+                        Coupon code is required.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
 
                     <div class="form-group">
@@ -309,17 +324,24 @@
                         type="number"
                         id="editCouponDiscount"
                         class="form-control"
-                        required
                       />
+                      <div class="invalid-feedback">
+                        Discount value must be greater than zero.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
+
                     <div class="form-group">
                       <label for="editCouponExpiry">Expiry Date</label>
                       <input
                         type="date"
                         id="editCouponExpiry"
                         class="form-control"
-                        required
                       />
+                      <div class="invalid-feedback">
+                        Expiry date is required.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
 
                     <div class="form-group">
@@ -327,8 +349,11 @@
                       <textarea
                         id="editCouponDescription"
                         class="form-control"
-                        required
                       ></textarea>
+                      <div class="invalid-feedback">
+                        Description is required.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
 
                     <div class="form-group">
@@ -339,17 +364,24 @@
                         type="number"
                         id="editCouponMinPurchase"
                         class="form-control"
-                        required
                       />
+                      <div class="invalid-feedback">
+                        Minimum purchase must be zero or greater.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
+
                     <div class="form-group">
-                      <label for="editMaximumDiscount">Maximum discount</label>
+                      <label for="editMaximumDiscount">Maximum Discount</label>
                       <input
                         type="number"
                         id="editMaximumDiscount"
                         class="form-control"
-                        required
                       />
+                      <div class="invalid-feedback">
+                        Maximum discount must be zero or greater.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
 
                     <div class="form-group">
@@ -358,8 +390,11 @@
                         type="number"
                         id="editCouponUsageLimit"
                         class="form-control"
-                        required
                       />
+                      <div class="invalid-feedback">
+                        Usage limit must be greater than zero.
+                      </div>
+                      <div class="valid-feedback">Looks good!</div>
                     </div>
                   </div>
                   <div class="modal-footer">
@@ -414,73 +449,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-    <script>
-      // Coupon creation form submission
-      document
-        .getElementById("createCouponForm")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-
-          // Accessing form values
-          const code = document.getElementById("couponCode").value;
-          const expiryDate = document.getElementById("expiryDate").value;
-          const description = document.getElementById("description").value;
-          const discountPercentage =
-            document.getElementById("discountPercentage").value;
-
-          const minPurchaseAmount =
-            document.getElementById("minimumPurchase").value;
-          const maxDiscountAmount =
-            document.getElementById("maximumDiscount").value;
-          const usageLimit = document.getElementById("usageLimit").value;
-
-          console.log(
-            code,
-            expiryDate,
-            description,
-            discountPercentage,
-            minPurchaseAmount,
-            maxDiscountAmount,
-            usageLimit
-          );
-
-          // Axios POST request
-          axios
-            .post("/admin/coupons", {
-              code: code.toUpperCase(),
-              expiryDate,
-              description,
-              discountPercentage,
-              minPurchaseAmount,
-              maxDiscountAmount,
-              usageLimit,
-            })
-            .then((response) => {
-              if (response.data.success) {
-                Swal.fire(
-                  "Coupon Created",
-                  "The coupon has been created successfully.",
-                  "success"
-                ).then(() => {
-                  // Close modal and reset form
-                  $("#createCouponModal").modal("hide");
-                  document.getElementById("createCouponForm").reset();
-                  window.location.reload(); // Reload the page to see the edit coupon
-                });
-              } else {
-                Swal.fire(
-                  "Error",
-                  "There was a problem creating the coupon.",
-                  "error"
-                );
-              }
-            })
-            .catch((error) => {
-              Swal.fire("Error", "A server error occurred.", "error");
-            });
-        });
-    </script>
+    <script type="module" src="/public/user/js/couponManagement.js"></script>
+    <script type="module" src="/public/user/js/validationUtils.js"></script>
 
     <script>
       function confirmAndToggleListCoupon(id, isListed) {
@@ -543,8 +513,6 @@
     </script>
 
     <script>
-      // Function to populate edit coupon modal with existing data
-      // Function to populate edit coupon modal with existing data
       function populateEditCouponModal(couponId) {
         // Get the table row element that corresponds to this coupon
         const row = document
@@ -580,84 +548,6 @@
       function formatDateForInput(dateString) {
         const date = new Date(dateString);
         return date.toISOString().split("T")[0]; // Format the date into 'YYYY-MM-DD'
-      }
-
-      // Function to handle the form submission for editing the coupon
-      document
-        .getElementById("editCouponForm")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-
-          // Get the updated coupon data from the form
-          const couponId = document.getElementById("editCouponId").value;
-          const updatedCouponCode =
-            document.getElementById("editCouponCode").value;
-          const updatedCouponExpiry =
-            document.getElementById("editCouponExpiry").value;
-          const updatedCouponDescription = document.getElementById(
-            "editCouponDescription"
-          ).value;
-          const updatedCouponDiscount =
-            document.getElementById("editCouponDiscount").value;
-          // const updatedCouponMaxPurchase = document.getElementById(
-          //   "editCouponMaximumPurchase"
-          // ).value;
-          // console.log(updatedCouponMaxPurchase);
-          const updatedCouponMinPurchase = document.getElementById(
-            "editCouponMinPurchase"
-          ).value;
-          const updatedCouponUsageLimit = document.getElementById(
-            "editCouponUsageLimit"
-          ).value;
-          console.log("code = ", {
-            code: updatedCouponCode.toUpperCase(),
-            expiryDate: updatedCouponExpiry,
-            description: updatedCouponDescription,
-            discountPercentage: updatedCouponDiscount,
-            minimumPurchase: updatedCouponMinPurchase,
-            usageLimit: updatedCouponUsageLimit,
-          });
-
-          // Axios PUT request to update the coupon
-          axios
-            .put("/admin/coupons/" + couponId, {
-              code: updatedCouponCode.toUpperCase(),
-              expiryDate: updatedCouponExpiry,
-              description: updatedCouponDescription,
-              discountPercentage: updatedCouponDiscount,
-              minimumPurchase: updatedCouponMinPurchase,
-              usageLimit: updatedCouponUsageLimit,
-            })
-            .then((response) => {
-              if (response.data.updatedCoupon) {
-                Swal.fire(
-                  "Coupon Updated",
-                  "The coupon has been updated successfully.",
-                  "success"
-                ).then(() => {
-                  // Close the modal and refresh the page to show updated data
-                  $("#editCouponModal").modal("hide");
-                  window.location.reload();
-                });
-              } else {
-                Swal.fire(
-                  "Error",
-                  "There was a problem updating the coupon.",
-                  "error"
-                );
-              }
-            })
-            .catch((error) => {
-              Swal.fire("Error", "A server error occurred.", "error");
-            });
-        });
-
-      // Delete coupon function
-      function deleteCoupon(id) {
-        if (confirm("Are you sure you want to delete this coupon?")) {
-          // Add your delete functionality here
-          console.log("Coupon deleted: ", id);
-        }
       }
     </script>
   </body>

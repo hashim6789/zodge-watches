@@ -79,6 +79,23 @@ const validationUtils = (() => {
     return true;
   };
 
+  // Validate that the selected date is greater than today
+  const validateFutureDate = (
+    dateElement,
+    message = "The date must be greater than today."
+  ) => {
+    const selectedDate = new Date(dateElement.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set today's time to 00:00:00 for accurate comparison
+
+    if (selectedDate <= today || !dateElement.value) {
+      showInvalidFeedback(dateElement, message);
+      return false;
+    }
+    clearInvalidFeedback(dateElement);
+    return true;
+  };
+
   // Validate select dropdown (ensure an option is selected)
   const validateSelect = (
     selectElement,
@@ -154,6 +171,9 @@ const validationUtils = (() => {
         case "select":
           if (!validateSelect(element, rule.message)) isValid = false;
           break;
+        case "futureDate":
+          if (!validateFutureDate(element, rule.message)) isValid = false;
+          break;
         case "dateRange":
           const endElement = document.getElementById(rule.endId);
           if (!validateDateRange(element, endElement, rule.message))
@@ -161,6 +181,10 @@ const validationUtils = (() => {
           break;
         case "imageCount":
           if (!validateImageCount(element, rule.minCount, rule.message))
+            isValid = false;
+          break;
+        case "nonNegative":
+          if (!validateNumber(element, rule.minCount, rule.message))
             isValid = false;
           break;
         default:

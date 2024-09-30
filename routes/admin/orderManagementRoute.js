@@ -30,35 +30,35 @@ const {
 // //get - /admin/orders/
 router.get(
   "/",
-  // isAuthenticatedAdmin,
-  // authorizeAdmin,
-  // authorizeAdminForModule("orderManagement"),
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("orderManagement"),
   getOrders
 );
 
 // //get - /admin/orders/:id
 router.get(
   "/:orderId",
-  // isAuthenticatedAdmin,
-  // authorizeAdmin,
-  // authorizeAdminForModule("orderManagement"),
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("orderManagement"),
   getOrderDetails
 );
 
 // //patch - `/admin/orders/:orderId`
 router.patch(
   "/change-status/:id",
-  // isAuthenticatedAdmin,
-  // authorizeAdmin,
-  // authorizeAdminForModule("orderManagement"),
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("orderManagement"),
   updateOrderStatus
 );
 
 router.patch(
   "/handle-return/:orderId",
-  // isAuthenticatedAdmin,
-  // authorizeAdmin,
-  // authorizeAdminForModule("orderManagement"),
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("orderManagement"),
   handleReturnRequest
 );
 

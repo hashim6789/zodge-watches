@@ -37,7 +37,6 @@ function createOffer() {
     }
   });
 
-  axios;
   axios
     .post("/admin/offers", formData, {
       headers: {
@@ -47,14 +46,36 @@ function createOffer() {
     .then(function (response) {
       if (response.data.success) {
         $("#createOfferModal").modal("hide");
-        window.location.reload(); // Refresh the table or data as needed
+
+        // Use SweetAlert for success notification
+        Swal.fire({
+          title: "Success!",
+          text: "Offer created successfully.",
+          icon: "success",
+          confirmButtonText: "Okay",
+        }).then(() => {
+          window.location.reload(); // Refresh the table or data after closing the alert
+        });
       } else {
-        alert("Failed to create offer: " + response.data.message);
+        // Use SweetAlert for error notification
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to create offer: " + response.data.message,
+          icon: "error",
+          confirmButtonText: "Okay",
+        });
       }
     })
     .catch(function (error) {
       console.error("Error creating offer:", error);
-      alert("Server error while creating offer.");
+
+      // Use SweetAlert for server error notification
+      Swal.fire({
+        title: "Server Error!",
+        text: "There was an error while creating the offer.",
+        icon: "error",
+        confirmButtonText: "Okay",
+      });
     });
 }
 
@@ -102,6 +123,11 @@ document.getElementById("offerForm").addEventListener("submit", function (e) {
     {
       id: "discountValue",
       type: "required",
+      message: "Discount value is required.",
+    },
+    {
+      id: "discountValue",
+      type: "nonNegative",
       message: "Discount value is required.",
     },
     {
@@ -154,212 +180,6 @@ function populateApplicableItemsCreate(type) {
       console.error("Error fetching applicable items:", error);
     });
 }
-
-// Add event listeners for input fields in the Edit Offer Modal
-// document.getElementById("editOfferName").addEventListener("input", function () {
-//   validationUtils.validateRequiredField(this, "Offer name is required.");
-// });
-
-// document
-//   .getElementById("editOfferDescription")
-//   .addEventListener("input", function () {
-//     validationUtils.validateRequiredField(
-//       this,
-//       "Offer description is required."
-//     );
-//   });
-
-// document
-//   .getElementById("editOfferDiscountValue")
-//   .addEventListener("input", function () {
-//     validationUtils.validateNumber(
-//       this,
-//       "Discount value must be greater than zero."
-//     );
-//   });
-
-// // Form validation on submit
-// document
-//   .getElementById("saveEditOfferButton")
-//   .addEventListener("click", function (e) {
-//     e.preventDefault();
-
-//     const isValid = validationUtils.validateForm("editOfferForm", [
-//       {
-//         id: "editOfferName",
-//         type: "required",
-//         message: "Offer name is required.",
-//       },
-//       {
-//         id: "editOfferDescription",
-//         type: "required",
-//         message: "Offer description is required.",
-//       },
-//       {
-//         id: "editOfferDiscountValue",
-//         type: "required",
-//         message: "Discount value is required.",
-//       },
-//     ]);
-
-//     if (isValid) {
-//       // Form is valid, proceed to submit or further actions
-//       saveEditedOffer(); // Example function for submitting the form
-//     } else {
-//       Swal.fire({
-//         title: "Error!",
-//         text: "Please correct the highlighted errors.",
-//         icon: "error",
-//         confirmButtonText: "OK",
-//       });
-//     }
-//   });
-
-// Fetch offer details for editing
-// async function fetchOfferDetails(offerId) {
-//   try {
-//     const response = await axios.get(`/admin/offers/api/offers/${offerId}`);
-//     const offer = response.data.offer;
-
-//     document.getElementById("offerId").value = offer._id;
-//     document.getElementById("offerName").value = offer.name;
-//     document.getElementById("offerDescription").value = offer.description;
-//     document.getElementById("discountValue").value = offer.discountValue;
-//     document.getElementById("applicableType").value = offer.applicableType;
-
-//     // Populate offer items based on applicable type
-//     await populateApplicableItems(offer.applicableType);
-
-//     // Select the current items
-//     offer.categoryIds.forEach((itemId) => {
-//       const checkbox = document.getElementById(itemId);
-//       if (checkbox) {
-//         checkbox.checked = true; // Check the corresponding checkbox
-//       }
-//     });
-
-//     document.getElementById("createOfferModalLabel").textContent = "Edit Offer";
-//   } catch (error) {
-//     console.error("Error fetching offer details:", error);
-//   }
-// }
-
-// // Populate applicable items based on the selected type and check the related ones
-// function populateApplicableItems(applicableType, categories, products, offer) {
-//   const container = document.getElementById("editApplicableItems");
-//   container.innerHTML = ""; // Clear previous items
-
-//   const items = applicableType === "category" ? categories : products;
-//   const selectedIds =
-//     applicableType === "category"
-//       ? offer.categoryIds.map((cat) => cat._id)
-//       : offer.productIds.map((prod) => prod._id);
-//   console.log(selectedIds);
-//   items.forEach((item) => {
-//     const isChecked = selectedIds.includes(item._id);
-//     const checkbox = document.createElement("div");
-//     checkbox.classList.add("form-check");
-//     checkbox.innerHTML = `
-//     <input class="form-check-input" type="checkbox" value="${item._id}" id="${
-//       item._id
-//     }" ${isChecked ? "checked" : ""}>
-//     <label class="form-check-label" for="${item._id}">${item.name}</label>
-//   `;
-//     container.appendChild(checkbox);
-//   });
-// }
-
-// function openEditOfferModal(offerId) {
-//   axios
-//     .get(`/admin/offers/api/offers/${offerId}`)
-//     .then((response) => {
-//       const { offer, categories, products } = response.data;
-
-//       // Populate the form with the offer details
-//       document.getElementById("offerId").value = offer._id;
-//       document.getElementById("editOfferName").value = offer.name;
-//       document
-//         .getElementById("existingOfferImage")
-//         .setAttribute("src", `/public/user/offers/${offer.image}`);
-//       document.getElementById("editOfferDescription").value = offer.description;
-//       document.getElementById("editOfferDiscountValue").value =
-//         offer.discountValue;
-
-//       console.log(offer.name);
-
-//       // Populate the applicable items (categories/products)
-//       populateApplicableItems(
-//         offer.applicableType,
-//         categories,
-//         products,
-//         offer
-//       );
-
-//       // Show the modal
-//       $("#editOfferModal").modal("show");
-//     })
-//     .catch((error) => {
-//       console.error("Error fetching offer details:", error);
-//     });
-// }
-
-// // Save the edited offer
-// // Save the edited offer
-// function saveEditedOffer() {
-//   const offerId = document.getElementById("offerId").value;
-//   const applicableType = document.getElementById("applicableType").value;
-
-//   const offer = {
-//     name: document.getElementById("offerName").value,
-//     description: document.getElementById("offerDescription").value,
-//     discountValue: document.getElementById("discountValue").value,
-//     applicableType: applicableType,
-//     isActive: true,
-//     categoryIds: [],
-//     productIds: [],
-//   };
-
-//   // Collect selected IDs
-//   Array.from(
-//     document.querySelectorAll("#editApplicableItems input:checked")
-//   ).forEach((input) => {
-//     if (applicableType === "category") {
-//       offer.categoryIds.push(input.value);
-//     } else {
-//       offer.productIds.push(input.value);
-//     }
-//   });
-
-//   // Make the API call to save the edited offer
-//   axios
-//     .patch(`/admin/offers/${offerId}`, offer)
-//     .then((response) => {
-//       if (response.data.success) {
-//         $("#editOfferModal").modal("hide");
-//         window.location.reload(); // Refresh the table or data as needed
-//       } else {
-//         alert("Failed to save offer: " + response.data.message);
-//       }
-//     })
-//     .catch((error) => {
-//       console.error("Error saving offer:", error);
-//       alert("Server error while saving offer.");
-//     });
-// }
-
-// document.getElementById("editButton").addEventListener("click", (e) => {
-//   e.preventDefault();
-//   const editButton = document.getElementById("editButton");
-//   const offerId = editButton.getAttribute("data-offerId");
-//   const offerApplicableType = editButton.getAttribute(
-//     "data-offerApplicableType"
-//   );
-//   const offerName = editButton.getAttribute("data-offerName");
-//   const offerDescription = editButton.getAttribute("data-offerDescription");
-//   const offerDiscountValue = editButton.getAttribute("data-offerDiscountValue");
-//   const offerImage = editButton.getAttribute("data-offerImage");
-//   openEditOfferModal(offerId);
-// });
 
 // Wait for the DOM to load
 document.addEventListener("DOMContentLoaded", function () {
@@ -574,14 +394,36 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(function (response) {
         if (response.data.success) {
           $("#editOfferModal").modal("hide");
-          window.location.reload(); // Optionally refresh the page
+
+          // Use SweetAlert for success notification
+          Swal.fire({
+            title: "Success!",
+            text: "Offer updated successfully.",
+            icon: "success",
+            confirmButtonText: "Okay",
+          }).then(() => {
+            window.location.reload(); // Refresh the page after closing the alert
+          });
         } else {
-          alert("Failed to update offer: " + response.data.message);
+          // Use SweetAlert for error notification
+          Swal.fire({
+            title: "Error!",
+            text: "Failed to update offer: " + response.data.message,
+            icon: "error",
+            confirmButtonText: "Okay",
+          });
         }
       })
       .catch(function (error) {
         console.error("Error updating offer:", error);
-        alert("Server error while updating offer.");
+
+        // Use SweetAlert for server error notification
+        Swal.fire({
+          title: "Server Error!",
+          text: "There was an error while updating the offer.",
+          icon: "error",
+          confirmButtonText: "Okay",
+        });
       });
   }
 });

@@ -126,11 +126,11 @@ const updatePersonalInfo = async (req, res) => {
 const createAddress = async (req, res) => {
   try {
     const addressData = req.body;
-    const email = addressData.email;
+    console.log(req.body);
 
     console.log(addressData);
 
-    let address = await AddressModel.findOne({ email });
+    let address = await AddressModel.findOne({ email: addressData.email });
     if (!address) {
       address = new AddressModel(addressData);
       console.log(address);
@@ -248,6 +248,30 @@ const cancelOrder = async (req, res) => {
     return res
       .status(404)
       .json({ success: false, message: "The order is not found!!!" });
+  }
+
+  if (order.orderStatus === "cancelled" && order.paymentMethod !== "cod") {
+    let wallet = await WalletModel.findOne({ userId: order.userId });
+
+    if (!wallet) {
+      wallet = new WalletModel({
+        userId: order.userId,
+        balance: 0,
+        transactions: [],
+      });
+    }
+
+    const refundAmount = order.totalPrice;
+    wallet.balance += refundAmount;
+
+    wallet.transactions.push({
+      type: "credit",
+      amount: refundAmount,
+      description: `Refund for order #${order.orderId}`,
+      date: new Date(),
+    });
+
+    await wallet.save();
   }
 
   res.status(200).json({

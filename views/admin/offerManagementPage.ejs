@@ -73,7 +73,7 @@
                             <th>Name</th>
                             <th>Image</th>
                             <th>Description</th>
-                            <th>Discount Value</th>
+                            <th>Discount Value(₹)</th>
                             <th>Applicable Type</th>
                             <th>Items</th>
                             <!-- <th>Active Status</th> -->
@@ -97,7 +97,7 @@
                               </div>
                             </td>
                             <td><%= offer.description %></td>
-                            <td><%= offer.discountValue %>%</td>
+                            <td><%= offer.discountValue %></td>
                             <td>
                               <%= offer.applicableType.charAt(0).toUpperCase() +
                               offer.applicableType.slice(1) %>
@@ -245,7 +245,7 @@
                 <div class="valid-feedback">Looks good!</div>
               </div>
               <div class="form-group">
-                <label for="discountValue">Discount Value (%):</label>
+                <label for="discountValue">Discount Value (₹):</label>
                 <input
                   type="number"
                   class="form-control"
@@ -364,7 +364,7 @@
             <div class="modal-body">
               <input type="hidden" id="offerId" name="offerId" />
               <input
-                type="text"
+                type="hidden"
                 id="editOfferApplicableType"
                 name="applicableType"
               />
@@ -391,7 +391,7 @@
                 <div class="valid-feedback">Looks good!</div>
               </div>
               <div class="form-group">
-                <label for="editOfferDiscountValue">Discount Value (%):</label>
+                <label for="editOfferDiscountValue">Discount Value (₹):</label>
                 <input
                   type="number"
                   class="form-control"

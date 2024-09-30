@@ -127,15 +127,23 @@ function addToCartFromWishlist(productId) {
   axios
     .put(`/wishlist/${productId}/cart`, { quantity, productId })
     .then((response) => {
-      const product = response.data.product;
-      const originalCart = response.data.cart;
-      const productPrice = product.discountedPrice || product.price;
+      const product = response.data.data.product;
+      const originalCart = response.data.data.cart;
+      const productPrice = product.price;
 
+      // console.log(product, originalCart, productPrice);
+
+      fetchWishlist();
       // Retrieve the cart from local storage or initialize it
       let cart = JSON.parse(localStorage.getItem("cart")) || {
         products: [],
         totalPrice: 0,
-        coupon: null,
+        coupon: {
+          code: null,
+          discountPercentage: null,
+          discountAmount: null,
+          maxDiscountAmount: null,
+        },
         address: null,
       };
 
@@ -146,7 +154,7 @@ function addToCartFromWishlist(productId) {
 
       if (existingProductIndex !== -1) {
         // Update the quantity of the existing product in localStorage
-        cart.products[existingProductIndex].quantity = quantity;
+        cart.products[existingProductIndex].quantity += quantity; // Incrementing quantity if already present
       } else {
         // Add the new product to the cart
         cart.products.push({
@@ -170,14 +178,19 @@ function addToCartFromWishlist(productId) {
         showConfirmButton: false,
         timer: 2000,
       }).then(() => {
+        // Update cart icon's notification count
         const cartIcon = document.getElementById("cartIcon");
         if (cartIcon) {
           cartIcon.setAttribute("data-notify", cart.products.length);
         }
 
+        // Update wishlist icon's notification count
         const wishlistIcon = document.getElementById("wishlistIcon");
         if (wishlistIcon) {
-          wishlistIcon.setAttribute("data-notify", data.wishlistLength);
+          wishlistIcon.setAttribute(
+            "data-notify",
+            response.data.data.wishlistLength
+          ); // Make sure 'wishlistLength' is available in the response
         }
       });
     })
@@ -186,7 +199,7 @@ function addToCartFromWishlist(productId) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.response.data.message,
+        text: error.response?.data?.message || "Something went wrong.",
         showConfirmButton: true,
       });
     });

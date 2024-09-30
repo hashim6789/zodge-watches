@@ -1,7 +1,6 @@
 const OrderModel = require("../../models/Order");
 const WalletModel = require("../../models/Wallet");
 const UserModel = require("../../models/User");
-
 const getOrders = async (req, res) => {
   try {
     const query = req.query.query || "";
@@ -87,6 +86,33 @@ const updateOrderStatus = async (req, res) => {
     if (updatedOrder.orderStatus === "delivered") {
       updatedOrder.paymentStatus = "successful";
       await updatedOrder.save();
+    }
+
+    if (
+      updatedOrder.orderStatus === "cancelled" &&
+      updatedOrder.paymentMethod !== "cod"
+    ) {
+      let wallet = await WalletModel.findOne({ userId: updatedOrder.userId });
+
+      if (!wallet) {
+        wallet = new WalletModel({
+          userId: updatedOrder.userId,
+          balance: 0,
+          transactions: [],
+        });
+      }
+
+      const refundAmount = updatedOrder.totalPrice;
+      wallet.balance += refundAmount;
+
+      wallet.transactions.push({
+        type: "credit",
+        amount: refundAmount,
+        description: `Refund for order #${updatedOrder.orderId}`,
+        date: new Date(),
+      });
+
+      await wallet.save();
     }
 
     res.json({ status: updatedOrder.orderStatus });

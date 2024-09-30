@@ -52,6 +52,8 @@ const createCoupon = async (req, res) => {
       usageLimit,
     } = req.body;
 
+    console.log(req.body);
+
     const couponCode = code.toUpperCase();
 
     const existingCoupon = await CouponModel.findOne({ code: couponCode });
@@ -166,129 +168,9 @@ const unlistCoupon = async (req, res) => {
   }
 };
 
-// const applyCoupon = async (req, res) => {
-//   try {
-//     const { couponCode } = req.body;
-//     const userId = req.user?._id;
-
-//     console.log(couponCode, userId);
-
-//     const coupon = await CouponModel.findOne({
-//       code: couponCode,
-//       isListed: true,
-//     });
-
-//     if (!coupon) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Coupon not found or inactive." });
-//     }
-
-//     if (coupon.expiryDate < new Date()) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "Coupon has expired." });
-//     }
-
-//     const cart = await CartModel.findOne({ userId });
-
-//     if (!cart) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Cart not found." });
-//     }
-//     console.log(cart.totalPrice, coupon.minPurchaseAmount);
-
-//     if (cart.totalPrice < coupon.minPurchaseAmount) {
-//       return res.status(400).json({
-//         success: false,
-//         message: `Minimum purchase amount for this coupon is ₹${coupon.minPurchaseAmount}.`,
-//       });
-//     }
-
-//     let discountAmount = (cart.totalPrice * coupon.discountPercentage) / 100;
-
-//     if (
-//       coupon.maxDiscountAmount > 0 &&
-//       discountAmount > coupon.maxDiscountAmount
-//     ) {
-//       discountAmount = coupon.maxDiscountAmount;
-//     }
-
-//     cart.coupon = {
-//       code: coupon.code,
-//       discountAmount: discountAmount,
-//       discountPercentage: coupon.discountPercentage,
-//       maxDiscountAmount: coupon.maxDiscountAmount,
-//     };
-
-//     cart.totalPrice -= discountAmount;
-
-//     await cart.save();
-
-//     coupon.usedCount += 1;
-//     await coupon.save();
-
-//     return res.status(200).json({
-//       success: true,
-//       message: "Coupon applied successfully!",
-//       cart,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     return res
-//       .status(500)
-//       .json({ success: false, message: "Internal server error" });
-//   }
-// };
-
-// const removeCoupon = async (req, res) => {
-//   try {
-//     const userId = req.user?._id;
-
-//     const cart = await CartModel.findOne({ userId });
-//     if (!cart) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Cart not found." });
-//     }
-
-//     if (!cart.coupon || !cart.coupon.code) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "No coupon applied to the cart." });
-//     }
-
-//     const discountAmount = cart.coupon.discountAmount;
-//     cart.totalPrice += discountAmount;
-
-//     cart.coupon = {
-//       discountAmount: null,
-//       code: null,
-//       discountPercentage: null,
-//       maxDiscountAmount: null,
-//     };
-
-//     await cart.save();
-
-//     return res.status(200).json({
-//       success: true,
-//       message: "Coupon removed successfully!",
-//       cart,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     return res
-//       .status(500)
-//       .json({ success: false, message: "Internal server error" });
-//   }
-// };
-
 module.exports = {
   getCoupons,
   createCoupon,
   updateCoupon,
   unlistCoupon,
-  // applyCoupon,
-  // removeCoupon,
 };

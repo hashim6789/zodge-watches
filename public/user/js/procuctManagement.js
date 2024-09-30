@@ -141,9 +141,19 @@ document
         message: "Price is required.",
       },
       {
+        id: "createProductPrice",
+        type: "nonNegative",
+        message: "Price must be greater than zero.",
+      },
+      {
         id: "createProductStock",
         type: "required",
         message: "Stock is required.",
+      },
+      {
+        id: "createProductStock",
+        type: "nonNegative",
+        message: "Stock must be greater than zero.",
       },
       {
         id: "createProductImages",
@@ -422,9 +432,19 @@ document
         message: "Price is required.",
       },
       {
+        id: "editProductPrice",
+        type: "nonNegative",
+        message: "Price must be greater than zero.",
+      },
+      {
         id: "editProductStock",
         type: "required",
         message: "Stock is required.",
+      },
+      {
+        id: "editProductStock",
+        type: "nonNegative",
+        message: "Stock must be greater than zero.",
       },
       // {
       //   id: "editProductImages",

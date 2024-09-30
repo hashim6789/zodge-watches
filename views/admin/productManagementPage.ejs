@@ -544,12 +544,19 @@
       //for unlist and list product
       function confirmAndToggleListProduct(productId, isListed) {
         const action = isListed === "true" ? "unlist" : "list";
-        const confirmAction = confirm(
-          `Are you sure you want to ${action} this product?`
-        );
-        if (confirmAction) {
-          toggleListProduct(productId, isListed);
-        }
+
+        // Use SweetAlert2 for confirmation dialog
+        Swal.fire({
+          text: `Are you sure you want to ${action} this product?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, proceed!",
+          cancelButtonText: "No, cancel!",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            toggleListProduct(productId, isListed);
+          }
+        });
       }
 
       function toggleListProduct(productId, isListed) {

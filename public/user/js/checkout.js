@@ -62,30 +62,114 @@ function getTotalCartPrice() {
   return totalPrice;
 }
 
-function checkAddressFields() {
-  const firstName = document.getElementById("firstName").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const phoneNo = document.getElementById("phoneNo").value.trim();
-  const addressLine = document.getElementById("addressLine").value.trim();
-  const pincode = document.getElementById("pincode").value.trim();
-  const city = document.getElementById("city").value.trim();
-  const state = document.getElementById("state").value.trim();
-  const country = document.getElementById("country").value.trim();
+// Define regex patterns for each field
+const patterns = {
+  firstName: {
+    regex: /^[a-zA-Z\s]+$/,
+    errorMessage: "First name can only contain letters and spaces.",
+  },
+  lastName: {
+    regex: /^[a-zA-Z\s]*$/, // Optional
+    errorMessage: "Last name can only contain letters and spaces.",
+  },
+  email: {
+    regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    errorMessage: "Please enter a valid email address.",
+  },
+  phoneNo: {
+    regex: /^[0-9]{10}$/,
+    errorMessage: "Phone number must be exactly 10 digits.",
+  },
+  addressLine: {
+    regex: /.+/,
+    errorMessage: "Address line is required.",
+  },
+  pincode: {
+    regex: /^[0-9]{6}$/,
+    errorMessage: "Pincode must be exactly 6 digits.",
+  },
+  city: {
+    regex: /^[a-zA-Z\s]+$/,
+    errorMessage: "City can only contain letters and spaces.",
+  },
+  state: {
+    regex: /.+/,
+    errorMessage: "State is required.",
+  },
+  country: {
+    regex: /.+/,
+    errorMessage: "Country is required.",
+  },
+};
 
-  if (
-    firstName &&
-    email &&
-    phoneNo &&
-    addressLine &&
-    pincode &&
-    city &&
-    state &&
-    country
-  ) {
-    document.getElementById("confirmAddress").disabled = false;
+// Function to validate each field
+function validateField(input, regex, errorMessage) {
+  if (!input.value.trim() || !regex.test(input.value.trim())) {
+    input.classList.add("is-invalid");
+    input.classList.remove("is-valid");
+    input.setCustomValidity(errorMessage);
   } else {
-    document.getElementById("confirmAddress").disabled = true;
+    input.classList.add("is-valid");
+    input.classList.remove("is-invalid");
+    input.setCustomValidity("");
   }
+}
+
+// Enhanced checkAddressFields with validation
+function checkAddressFields() {
+  const firstNameInput = document.getElementById("firstName");
+  const emailInput = document.getElementById("email");
+  const phoneNoInput = document.getElementById("phoneNo");
+  const addressLineInput = document.getElementById("addressLine");
+  const pincodeInput = document.getElementById("pincode");
+  const cityInput = document.getElementById("city");
+  const stateInput = document.getElementById("state");
+  const countryInput = document.getElementById("country");
+
+  // Validate each field
+  validateField(
+    firstNameInput,
+    patterns.firstName.regex,
+    patterns.firstName.errorMessage
+  );
+  validateField(emailInput, patterns.email.regex, patterns.email.errorMessage);
+  validateField(
+    phoneNoInput,
+    patterns.phoneNo.regex,
+    patterns.phoneNo.errorMessage
+  );
+  validateField(
+    addressLineInput,
+    patterns.addressLine.regex,
+    patterns.addressLine.errorMessage
+  );
+  validateField(
+    pincodeInput,
+    patterns.pincode.regex,
+    patterns.pincode.errorMessage
+  );
+  validateField(cityInput, patterns.city.regex, patterns.city.errorMessage);
+  validateField(stateInput, patterns.state.regex, patterns.state.errorMessage);
+  validateField(
+    countryInput,
+    patterns.country.regex,
+    patterns.country.errorMessage
+  );
+
+  // Check if all fields are valid
+  const allValid = [
+    firstNameInput,
+    emailInput,
+    phoneNoInput,
+    addressLineInput,
+    pincodeInput,
+    cityInput,
+    stateInput,
+    countryInput,
+  ].every((input) => input.classList.contains("is-valid"));
+
+  // Enable or disable the confirm address checkbox based on validation
+  document.getElementById("confirmAddress").disabled = !allValid;
 }
 
 // Add event listener to the address dropdown to call checkAddressFields
