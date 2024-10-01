@@ -55,29 +55,29 @@ const uploadBanner = multer({
 // //get - admin/categories/
 router.get(
   "/",
-  //   isAuthenticatedAdmin,
-  //   authorizeAdmin,
-  //   authorizeAdminForModule("bannerManagement"),
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("bannerManagement"),
   getBanners
 );
 
 // //post - admin/categories/create
 router.post(
   "/",
-  //   isAuthenticatedAdmin,
-  //   authorizeAdmin,
-  //   authorizeAdminForModule('bannerManagement'),
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("bannerManagement"),
   uploadBanner,
-  //   validateBannerUpload,
+  // validateBannerUpload,
   createBanner
 );
 
 // //put - admin/categories/edit/:id
 router.put(
   "/:bannerId",
-  //   isAuthenticatedAdmin,
-  //   authorizeAdmin,
-  //   authorizeAdminForModule("bannerManagement"),
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("bannerManagement"),
 
   uploadBanner, // Handle the file upload
   //   validateBannerUpload, // Ensure the file was uploaded
@@ -88,9 +88,9 @@ router.put(
 
 router.put(
   "/:bannerId/toggle",
-  //   isAuthenticatedAdmin,
-  //   authorizeAdmin,
-  //   authorizeAdminForModule("offerManagement"),
+  isAuthenticatedAdmin,
+  authorizeAdmin,
+  authorizeAdminForModule("offerManagement"),
   toggleBanner
 );
 
