@@ -192,9 +192,14 @@
               name="email"
               id="forgotPasswordEmail"
               placeholder="Enter your registered email"
-              required
             />
-            <div id="forgotPasswordFeedback" class="feedback"></div>
+            <div id="forgotEmailFeedback" class="invalid-feedback">
+              The email is invalid!
+            </div>
+            <div id="forgotEmailFeedback" class="valid-feedback">
+              Looks good!
+            </div>
+            <!-- Feedback id and class updated -->
           </div>
           <button type="submit" class="btn btn-primary btn-block">
             Submit

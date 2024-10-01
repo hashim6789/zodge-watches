@@ -407,7 +407,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  const loginForm = document.getElementById("loginForm");
   const forgotPasswordForm = document.getElementById("forgotPasswordForm");
   const forgotPasswordLink = document.getElementById("forgotPasswordLink");
 
@@ -422,14 +421,22 @@ document.addEventListener("DOMContentLoaded", function () {
   forgotPasswordForm.addEventListener("submit", function (event) {
     event.preventDefault();
 
-    const email = document.getElementById("forgotEmail").value;
+    const emailInput = document.getElementById("forgotPasswordEmail");
     const emailFeedback = document.getElementById("forgotEmailFeedback");
 
-    // Basic email validation (you might want to add more robust validation here)
+    // Basic email validation pattern
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    const email = emailInput.value;
 
     if (emailPattern.test(email)) {
-      // Mock sending request (replace with actual AJAX request)
+      // Valid email: Show valid feedback
+      emailInput.classList.remove("is-invalid");
+      emailInput.classList.add("is-valid");
+      emailFeedback.classList.remove("invalid-feedback");
+      emailFeedback.classList.add("valid-feedback");
+      emailFeedback.textContent = "Email looks good!";
+
+      // Proceed with AJAX request (replace with actual request)
       $("#forgotPasswordModal").modal("hide"); // Hide the forgot password modal
       axios
         .post("/auth/forgot-password", { email })
@@ -442,7 +449,6 @@ document.addEventListener("DOMContentLoaded", function () {
               icon: "success",
               confirmButtonText: "OK",
             }).then(() => {
-              // $("#forgotPasswordModal").modal("hide"); // Hide the forgot password modal
               $("#loginModal").modal("show"); // Show the login modal again
             });
           }
@@ -453,14 +459,16 @@ document.addEventListener("DOMContentLoaded", function () {
             title: "Error",
             text: `${err.response.data.message}`,
           }).then(() => {
-            // $("#forgotPasswordModal").modal("hide"); // Hide the forgot password modal
             $("#loginModal").modal("show"); // Show the login modal again
           });
         });
     } else {
-      // Show error feedback
-      emailFeedback.textContent = "Please enter a valid email address.";
+      // Invalid email: Show invalid feedback
+      emailInput.classList.remove("is-valid");
+      emailInput.classList.add("is-invalid");
+      emailFeedback.classList.remove("valid-feedback");
       emailFeedback.classList.add("invalid-feedback");
+      emailFeedback.textContent = "Please enter a valid email address.";
     }
   });
 });

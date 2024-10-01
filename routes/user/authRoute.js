@@ -106,11 +106,11 @@ router.get(
 //post - /auth/forgot-password
 router.post("/forgot-password", forgotPassword);
 
-// //post - /auth/reset-password
-// router.get("/reset-password/:token", getResetPasswordPage);
+//post - /auth/reset-password
+router.get("/reset-password/:token", getResetPasswordPage);
 
-// //post - /auth/verify-password
-// router.post("/change-password", changePassword);
+//post - /auth/verify-password
+router.post("/change-password", changePassword);
 
 router.post(
   "/validate-password",
