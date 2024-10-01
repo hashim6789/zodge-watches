@@ -91,6 +91,7 @@
                             <th>Action</th>
                           </tr>
                         </thead>
+                        <% if(products.length > 0 ){%>
                         <tbody>
                           <% products.forEach((product, idx) => { %>
                           <tr>
@@ -110,18 +111,18 @@
                             <td><%= product.stock %></td>
                             <td>
                               <!-- <button
-                                class="btn btn-info"
-                                data-toggle="modal"
-                                data-target="#detailsProductModal"
-                                data-id="<%= product._id %>"
-                                data-name="<%= product.name %>"
-                                data-description="<%= product.description %>"
-                                data-category="<%= product.category %>"
-                                data-price="<%= product.price %>"
-                                data-stock="<%= product.stock %>"
+                              class="btn btn-info"
+                              data-toggle="modal"
+                              data-target="#detailsProductModal"
+                              data-id="<%= product._id %>"
+                              data-name="<%= product.name %>"
+                              data-description="<%= product.description %>"
+                              data-category="<%= product.category %>"
+                              data-price="<%= product.price %>"
+                              data-stock="<%= product.stock %>"
                               >
-                                Details
-                              </button> -->
+                              Details
+                            </button> -->
                               <button
                                 id="editClick"
                                 class="btn btn-primary"
@@ -148,6 +149,7 @@
 
                           <% }) %>
                         </tbody>
+                        <% } %>
                       </table>
                     </div>
                   </div>
