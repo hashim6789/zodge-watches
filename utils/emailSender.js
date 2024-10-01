@@ -120,7 +120,7 @@ const sendForgotPasswordMail = async (user, email) => {
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Password Reset",
-      text: `Click the following link to reset your password: http://localhost:3000/auth/reset-password/${token}`,
+      text: `Click the following link to reset your password: ${process.env.DOMAIN_NAME}/auth/reset-password/${token}`,
     };
     user.save();
 

@@ -189,7 +189,7 @@ const getProductDetails = async (req, res) => {
     }
 
     // Render the product details page
-    res.render("user/quickview", {
+    res.render("user/quickView", {
       product,
       discountedPrice,
       averageRating: 4, // Placeholder for average rating

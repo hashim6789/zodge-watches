@@ -13,6 +13,7 @@ const app = express();
 
 //for port number
 const port = process.env.PORT || 3000;
+const domain = process.env.DOMAIN_NAME;
 
 // connect with mongoDB
 connectDB();
@@ -69,5 +70,5 @@ app.use((req, res, next) => {
 
 //server listener
 app.listen(port, () => {
-  console.log(`The server started at http://localhost:${port}`);
+  console.log(`The server started at ${domain}:${port}`);
 });
