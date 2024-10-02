@@ -142,7 +142,7 @@
   <div class="wrap-header-mobile">
     <!-- Logo moblie -->
     <div class="logo-mobile">
-      <a href="index.html">
+      <a href="/">
         <img src="/public/user/images/icons/logo-01.png" alt="IMG-LOGO" />
       </a>
     </div>
@@ -157,7 +157,9 @@
 
       <!-- Check if cart exists and has products -->
       <div
-        class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti js-show-cart"
+        href="/cart"
+        id="cartIcon"
+        class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti"
         data-notify="<%= cart && cart.products ? cart.products.length : 0 %>"
       >
         <i class="zmdi zmdi-shopping-cart"></i>
@@ -166,7 +168,8 @@
       <!-- Check if wishlist exists and has productIds -->
       <a
         href="#"
-        class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti"
+        id="wishlistIcon"
+        class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart"
         data-notify="<%= wishlist && wishlist.productIds ? wishlist.productIds.length : 0 %>"
       >
         <i class="zmdi zmdi-favorite-outline"></i>
@@ -230,22 +233,22 @@
 
     <ul class="main-menu-m">
       <li>
-        <a href="/auth/home">Home</a>
-        <ul class="sub-menu-m">
+        <a href="/">Home</a>
+        <!-- <ul class="sub-menu-m">
           <li><a href="index.html">Homepage 1</a></li>
           <li><a href="home-02.html">Homepage 2</a></li>
           <li><a href="home-03.html">Homepage 3</a></li>
-        </ul>
+        </ul> -->
         <span class="arrow-main-menu-m">
           <i class="fa fa-angle-right" aria-hidden="true"></i>
         </span>
       </li>
 
       <li>
-        <a href="product.html">Shop</a>
+        <a href="/shop">Shop</a>
       </li>
 
-      <li>
+      <!-- <li>
         <a href="shoping-cart.html" class="label1 rs1" data-label1="hot"
           >Features</a
         >
@@ -261,7 +264,7 @@
 
       <li>
         <a href="contact.html">Contact</a>
-      </li>
+      </li> -->
     </ul>
   </div>
 
