@@ -55,7 +55,9 @@ const getProducts = async (req, res) => {
       .limit(perPage);
     let categories = await CategoryModel.find({ isListed: true });
 
-    if (products) {
+    console.log("products", products);
+
+    if (!products) {
       return res.render("admin/productManagementPage", {
         products: null,
         categories,

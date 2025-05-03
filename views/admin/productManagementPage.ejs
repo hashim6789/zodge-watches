@@ -31,13 +31,22 @@
     <!-- End layout styles -->
     <link rel="shortcut icon" href="/public/assets/images/favicon.png" />
     <!-- for crop the images -->
-    <!-- Included Cropper.js CSS -->
+    <!-- Cropper CSS -->
     <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"
+    />
+
+    <!-- Cropper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <!-- Included Cropper.js CSS -->
+    <!-- <link
       href="https://unpkg.com/cropperjs/dist/cropper.css"
       rel="stylesheet"
-    />
+    /> -->
     <!-- Included Cropper.js JS -->
-    <script src="https://unpkg.com/cropperjs/dist/cropper.js"></script>
+    <!-- <script src="https://unpkg.com/cropperjs/dist/cropper.js"></script> -->
   </head>
   <body>
     <div class="container-scroller">
@@ -92,7 +101,8 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <% products && products.forEach((product, idx) => { %>
+                          <%= console.log("hello",products); %> <% products &&
+                          products.forEach((product, idx) => { %>
                           <tr>
                             <td>
                               <%= ((current - 1) * perPage) + (idx + 1) %>
