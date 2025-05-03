@@ -92,7 +92,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <% products.forEach((product, idx) => { %>
+                          <% products && products.forEach((product, idx) => { %>
                           <tr>
                             <td>
                               <%= ((current - 1) * perPage) + (idx + 1) %>

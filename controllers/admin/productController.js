@@ -55,10 +55,12 @@ const getProducts = async (req, res) => {
       .limit(perPage);
     let categories = await CategoryModel.find({ isListed: true });
 
-    if (products.length < 1) {
+    if (products) {
       return res.render("admin/productManagementPage", {
         products: null,
         categories,
+        current: page,
+        pages: null,
       });
     }
     const count = await ProductModel.countDocuments({
@@ -76,7 +78,7 @@ const getProducts = async (req, res) => {
     //   message: "The page rendered successfully",
     // });
   } catch (err) {
-    res.status(500).json({ status: "Success", message: "Server error!!!" });
+    res.status(500).json({ status: "Error", message: "Server error!!!" });
   }
 };
 
