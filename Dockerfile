@@ -10,5 +10,4 @@ COPY . .
 
 EXPOSE 3000
 
-# CMD [ "ls" ]
 CMD [ "node", "index.js" ]
