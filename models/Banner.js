@@ -16,7 +16,7 @@ const bannerSchema = new mongoose.Schema(
 
     isActive: {
       type: Boolean,
-      default: true, // To control whether the banner is active or not
+      default: true,
     },
   },
   { timestamps: true }
@@ -25,12 +25,3 @@ const bannerSchema = new mongoose.Schema(
 const Banners = mongoose.model("Banners", bannerSchema);
 
 module.exports = Banners;
-
-//   linkUrl: {
-//     type: String,
-//     required: true,
-//   },
-//   displayOrder: {
-//     type: Number,
-//     default: 1, // To control the display order
-//   },

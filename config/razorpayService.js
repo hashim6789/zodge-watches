@@ -4,11 +4,12 @@ const OrderModel = require("../models/Order");
 const ProductModel = require("../models/Product");
 
 const { sendOrderConfirmationEmail } = require("../utils/emailSender");
+const { ENV } = require("./env.config");
 
 // Initialize Razorpay instance
 const razorpayInstance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
+  key_id: ENV.RAZORPAY_KEY_ID,
+  key_secret: ENV.RAZORPAY_KEY_SECRET,
 });
 
 // Function to verify payment signature
@@ -24,7 +25,7 @@ const verifyPayment = async (req, res) => {
     }
 
     const generatedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .createHmac("sha256", ENV.RAZORPAY_KEY_SECRET)
       .update(`${razorpayOrderId}|${paymentId}`)
       .digest("hex");
 

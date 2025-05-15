@@ -1,20 +1,23 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
+const { ENV } = require("./env.config");
 
-// MongoDB URI from .env file
-const mongoDbUri =
-  process.env.mongoDbUri || "mongodb://localhost:27017/zodgeDB";
-
-// Log the URI to verify it's correct
-console.log("MongoDB URI:", mongoDbUri);
-
-const connectDB = async () => {
+/**
+ * Connects to the MongoDB database.
+ * Logs detailed messages in development, minimal logs in production.
+ */
+export const connectDB = async () => {
   try {
-    await mongoose.connect(mongoDbUri);
-    console.log("MongoDB connected");
-  } catch (err) {
-    console.error("Error connecting to MongoDB:", err.message);
-    process.exit(1);
+    await mongoose.connect(ENV.MONGO_URI);
+
+    if (ENV.NODE_ENV === "development") {
+      console.log("[MongoDB] ✅ Connected to:", ENV.MONGO_URI);
+    } else {
+      console.log("[MongoDB] ✅ Connected");
+    }
+  } catch (error) {
+    console.error("[MongoDB] ❌ Connection error:", error);
+    process.exit(1); // Exit process with failure
   }
 };
 

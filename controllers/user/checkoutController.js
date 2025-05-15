@@ -29,7 +29,6 @@ const getCheckout = async (req, res) => {
 
     const addresses = await AddressModel.find({ userId });
 
-    // const cartProducts = await ProductModel.find({ _id: { $in: productIds } });
     res.render("user/checkoutPage", { cart, user, wishlist, addresses });
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });
@@ -175,10 +174,8 @@ const removeCoupon = async (req, res) => {
 //proceed to payment or cod or wallet
 const postCheckout = async (req, res) => {
   try {
-    // console.log(req.body);
     const { userId, products, coupon, address, paymentMethod } = req.body;
 
-    // console.log(userId, products, address, paymentMethod);
     if (
       !userId ||
       !address.addressLine ||
@@ -201,7 +198,7 @@ const postCheckout = async (req, res) => {
     for (const product of products) {
       const foundProduct = await ProductModel.findById(
         product.productId
-      ).populate("offers"); // Fetch all offer details linked to this product
+      ).populate("offers");
 
       if (!foundProduct || foundProduct.stock < product.quantity) {
         return res.status(400).json({
@@ -209,14 +206,12 @@ const postCheckout = async (req, res) => {
         });
       }
 
-      // Check if there are any active offers for this product
       let discountValue = 0;
       if (foundProduct.offers.length > 0) {
         const activeOffers = foundProduct.offers.filter(
           (offer) => offer.isActive
         );
 
-        // Find the highest discount from the active offers
         if (activeOffers.length > 0) {
           const highestOffer = activeOffers.reduce((maxOffer, currentOffer) => {
             return currentOffer.discountValue > maxOffer.discountValue
@@ -228,23 +223,19 @@ const postCheckout = async (req, res) => {
         }
       }
 
-      // Apply the highest discount to the product price
       const discountedPrice = Math.max(foundProduct.price - discountValue, 0); // Ensure price is not negative
 
-      // Calculate total price for this product (with quantity)
       const productTotal = discountedPrice * product.quantity;
       totalPrice += productTotal;
 
-      // Inventory management
       foundProduct.stock -= product.quantity;
       foundProduct.reservedStock += product.quantity;
       await foundProduct.save();
 
-      // Add the product details to the order
       orderProducts.push({
         productId: product.productId,
         quantity: product.quantity,
-        price: discountedPrice, // Save the discounted price
+        price: discountedPrice,
       });
     }
 
@@ -254,12 +245,9 @@ const postCheckout = async (req, res) => {
       couponDiscount = coupon.discountAmount;
     }
 
-    //for decreasing the delivery charge
     const deliveryCharge = 50;
     totalPrice += deliveryCharge;
     console.log("Total = ", totalPrice);
-    // console.log("ordered products = ", orderProducts);
-    // console.log("method = ", paymentMethod);
     let newOrder = new OrderModel({
       orderId: generateOrderId(),
       userId,
@@ -273,7 +261,6 @@ const postCheckout = async (req, res) => {
 
     await newOrder.save();
     req.session.order = newOrder;
-    // console.log(req.session.order);
 
     const cart = await CartModel.findOne({ userId });
     cart.products = [];
@@ -282,7 +269,6 @@ const postCheckout = async (req, res) => {
 
     await cart.save();
     delete req.session.cart;
-    // console.log("order = ", newOrder);
 
     if (paymentMethod === "cod") {
       newOrder.orderStatus = "placed";
@@ -335,7 +321,6 @@ const postCheckout = async (req, res) => {
         receipt: newOrder.orderId,
       };
 
-      // Create Razorpay order
       const razorpayOrder = await createOrder(options);
       console.log(razorpayOrder, "ttttt");
 
@@ -351,8 +336,6 @@ const postCheckout = async (req, res) => {
         key_id: process.env.RAZORPAY_KEY_ID,
       });
     }
-    // req.session.order = newOrder;
-    // console.log(req.session.order);
   } catch (err) {
     res.status(500).json({ success: false, message: "Server Error!!!" });
   }
@@ -362,21 +345,18 @@ const retryPayment = async (req, res) => {
   try {
     const { orderId } = req.body;
 
-    // Find the order in the database
     const order = await OrderModel.findById(orderId);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found." });
     }
 
-    // Check if the order's payment status is failed or pending
     if (order.paymentStatus !== "pending") {
       return res.status(400).json({
         message: "Payment for this order cannot be retried.",
       });
     }
 
-    // Generate a new Razorpay order for retry
     const options = {
       amount: order.totalPrice,
       currency: "INR",
@@ -386,12 +366,10 @@ const retryPayment = async (req, res) => {
     const razorpayOrder = await createOrder(options);
     console.log(razorpayOrder);
 
-    // Update the order with the new Razorpay order ID
     order.razorpayOrderId = razorpayOrder.id;
-    order.paymentStatus = "pending"; // Reset payment status for retry
+    order.paymentStatus = "pending";
     await order.save();
 
-    // Send the new order details to the frontend
     return res.status(200).json({
       success: true,
       message: "Payment retry initiated. Proceed to payment.",
@@ -432,7 +410,6 @@ const getOrderConfirmation = async (req, res) => {
       cart,
       orderId: order.orderId,
     });
-    // res.render("user/orderConfirmation", { order, user, wishlist, cart });
   } catch (error) {
     console.error("Error fetching order:", error);
     res.status(500).json({ success: false, message: "Server Error!!!" });
@@ -455,7 +432,6 @@ const getPaymentRetryPage = (req, res) => {
 function generateOrderId() {
   const prefix = "ORD";
 
-  // Get the current timestamp in YYYYMMDDHHMMSS format
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -465,7 +441,6 @@ function generateOrderId() {
   const seconds = String(now.getSeconds()).padStart(2, "0");
   const timestamp = `${year}${month}${day}${hours}${minutes}${seconds}`;
 
-  // Generate a UUID and extract the first 4 alphanumeric characters
   const uuidSegment = uuidv4()
     .replace(/[^a-zA-Z0-9]/g, "")
     .substring(0, 4)
@@ -479,7 +454,6 @@ const finalizeStockReduction = async (orderProducts) => {
     const foundProduct = await ProductModel.findById(product.productId);
     if (foundProduct) {
       foundProduct.reservedStock -= product.quantity;
-      // Stock has already been reduced during reservation, so no need to reduce further
       await foundProduct.save();
     }
   }

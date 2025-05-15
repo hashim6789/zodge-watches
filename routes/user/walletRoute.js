@@ -8,8 +8,6 @@ const {
 //for Authentication
 const {
   isAuthenticatedUser,
-  redirectIfAuthenticated,
-  checkBlocked,
 } = require("../../middlewares/authenticationMiddlewares");
 
 //for Authorization

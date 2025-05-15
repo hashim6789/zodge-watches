@@ -1,12 +1,13 @@
+const { ENV } = require("../../config/env.config");
 const OrderModel = require("../../models/Order");
 
 require("dotenv").config();
 
 const admin = {
-  email: process.env.ADMIN_EMAIL,
-  password: process.env.ADMIN_PASSWORD,
-  role: process.env.ADMIN_ROLE,
-  permissions: process.env.ADMIN_PERMISSIONS.split(","),
+  email: ENV.ADMIN_EMAIL,
+  password: ENV.ADMIN_PASSWORD,
+  role: ENV.ADMIN_ROLE,
+  permissions: ENV.ADMIN_PERMISSIONS.split(","),
 };
 
 /**---------------------------admin login------------------------ */
@@ -19,26 +20,16 @@ const postLogin = (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    if (
-      email === process.env.ADMIN_EMAIL &&
-      password === process.env.ADMIN_PASSWORD
-    ) {
+    if (email === ENV.ADMIN_EMAIL && password === ENV.ADMIN_PASSWORD) {
       // Set session
       req.session.admin = {
         email,
         role: "Admin",
 
-        permissions: process.env.ADMIN_PERMISSIONS.split(","),
+        permissions: ENV.ADMIN_PERMISSIONS.split(","),
       };
-      // console.log(req.session);
-      // res
-      //   .status(200)
-      //   .json({ status: "success", message: "the user is login successfully" });
       res.redirect("/admin/dashboard");
     } else {
-      // res
-      //   .status(404)
-      //   .json({ status: "failure", message: "the username or email incorrect" });
       res.redirect("/admin/login?error=Invalid email or password");
     }
   } catch (err) {
@@ -64,53 +55,6 @@ const getDashboard = async (req, res) => {
 
     console.log(monthlySales);
 
-    // // Fetch top selling watches
-    // const topSellingWatches = await OrderModel.aggregate([
-    //   { $unwind: "$items" },
-    //   {
-    //     $group: {
-    //       _id: "$items.watch",
-    //       totalSold: { $sum: "$items.quantity" },
-    //     },
-    //   },
-    //   { $sort: { totalSold: -1 } },
-    //   { $limit: 5 },
-    //   {
-    //     $lookup: {
-    //       from: "watches",
-    //       localField: "_id",
-    //       foreignField: "_id",
-    //       as: "watchDetails",
-    //     },
-    //   },
-    //   { $unwind: "$watchDetails" },
-    //   {
-    //     $project: {
-    //       name: "$watchDetails.name",
-    //       totalSold: 1,
-    //     },
-    //   },
-    // ]);
-
-    // // Fetch customer segmentation data
-    // const customerSegmentation = await OrderModel.aggregate([
-    //   {
-    //     $lookup: {
-    //       from: "watches",
-    //       localField: "items.watch",
-    //       foreignField: "_id",
-    //       as: "watchDetails",
-    //     },
-    //   },
-    //   { $unwind: "$watchDetails" },
-    //   {
-    //     $group: {
-    //       _id: "$watchDetails.category",
-    //       count: { $sum: 1 },
-    //     },
-    //   },
-    // ]);
-    // Fetch top 5 best-selling products
     const topProducts = await OrderModel.aggregate([
       { $unwind: "$products" },
       {
@@ -138,8 +82,6 @@ const getDashboard = async (req, res) => {
         },
       },
     ]);
-
-    // console.log(topProducts);
 
     // Fetch top 10 best-selling categories
     const topCategories = await OrderModel.aggregate([
@@ -179,9 +121,6 @@ const getDashboard = async (req, res) => {
       },
     ]);
 
-    // console.log(topCategories);
-
-    // res.status(200).json({ status: "success", message: "Its, dashboard" });
     res.render("admin/adminDashboard", {
       pageType: null,
       monthlySales,

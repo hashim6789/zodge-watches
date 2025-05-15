@@ -19,39 +19,25 @@ const {
   getBanners,
   createBanner,
   editBanner,
-  toggleBanner, // searc,
-  // getAllBannersAPI,
+  toggleBanner,
 } = require("../../controllers/admin/bannerController");
-
-// //for testing purpose
-// // const test = (req, res, next) => {
-// //   console.log(req.url);
-// //   next();
-// // };
 
 // Multer configuration for banner image
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../../public/user/banners")); // Path for banner uploads
+    cb(null, path.join(__dirname, "../../public/user/banners"));
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname); // Add timestamp to avoid duplicate filenames
+    cb(null, Date.now() + "-" + file.originalname);
   },
 });
 
 // Validate that only one image is uploaded
 const uploadBanner = multer({
   storage: storage,
-  limits: { fileSize: 1024 * 1024 * 2 }, // Limit file size to 2MB
-}).single("bannerImage"); // Accept only one file with the field name 'bannerImage'
+  limits: { fileSize: 1024 * 1024 * 2 },
+}).single("bannerImage");
 
-// Middleware to check if an image is uploaded
-// const validateBannerUpload = (req, res, next) => {
-//   if (!req.file) {
-//     return res.status(400).json({ message: "Please upload an image." });
-//   }
-//   next();
-// };
 // //get - admin/categories/
 router.get(
   "/",
@@ -68,7 +54,6 @@ router.post(
   authorizeAdmin,
   authorizeAdminForModule("bannerManagement"),
   uploadBanner,
-  // validateBannerUpload,
   createBanner
 );
 
@@ -78,13 +63,9 @@ router.put(
   isAuthenticatedAdmin,
   authorizeAdmin,
   authorizeAdminForModule("bannerManagement"),
-
-  uploadBanner, // Handle the file upload
-  //   validateBannerUpload, // Ensure the file was uploaded
+  uploadBanner,
   editBanner
 );
-
-// // //patch - admin/categories/unlist/:id
 
 router.put(
   "/:bannerId/toggle",
@@ -93,11 +74,5 @@ router.put(
   authorizeAdminForModule("offerManagement"),
   toggleBanner
 );
-
-// //an api for getting all the banner
-// router.get("/api/get-categories", getAllBannersAPI);
-
-// // //get - /admin/categories/search
-// router.get("/search", searchBanners);
 
 module.exports = router;

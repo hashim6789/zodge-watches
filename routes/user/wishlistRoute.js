@@ -12,18 +12,10 @@ const {
 const {
   isAuthenticatedUser,
   checkBlocked,
-  trackPreviousPage,
-  isVerifiedUser,
 } = require("../../middlewares/authenticationMiddlewares");
 
 //for Authorization
 const { authorizeUser } = require("../../middlewares/authorizationMiddlewares");
-
-// for testing purpose
-// const test = (req, res, next) => {
-//   console.log(req.url, "dsfsd");
-//   next();
-// };
 
 router.post(
   "/add",

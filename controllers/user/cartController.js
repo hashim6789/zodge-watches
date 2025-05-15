@@ -9,11 +9,10 @@ const getCart = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await UserModel.findById(userId);
-    const cart = await CartModel.findOne({ userId }) // Find cart by user ID
-      .populate({
-        path: "products.productId", // Populate the productId field in products array
-        select: "_id name images stock", // Specify which fields to include from Products
-      });
+    const cart = await CartModel.findOne({ userId }).populate({
+      path: "products.productId",
+      select: "_id name images stock",
+    });
     const wishlist = await WishlistModel.findOne({ userId }).populate(
       "productIds",
       "name price images"
@@ -31,7 +30,6 @@ const addToCart = async (req, res) => {
     const userId = req.user?._id;
     const { quantity, productId } = req.body;
 
-    // Fetch the product along with the offers
     const product = await ProductModel.findById(productId).populate("offers");
 
     if (!product) {
@@ -42,19 +40,16 @@ const addToCart = async (req, res) => {
 
     let discountedPrice = product.price;
 
-    // If the product has associated offers, apply the highest discount
     if (product.offers && product.offers.length > 0) {
       const activeOffers = product.offers.filter((offer) => offer.isActive);
 
       if (activeOffers.length > 0) {
-        // Get the highest discount value from the offers
         const highestOffer = activeOffers.reduce((max, offer) =>
           offer.discountValue > max.discountValue ? offer : max
         );
 
-        // Apply the discount from the highest offer
         discountedPrice = product.price - highestOffer.discountValue;
-        discountedPrice = Math.max(discountedPrice, 0); // Ensure the price is not negative
+        discountedPrice = Math.max(discountedPrice, 0);
       }
     }
 
@@ -68,29 +63,25 @@ const addToCart = async (req, res) => {
       });
     }
 
-    // Update the cart with the new product or update the quantity of an existing product
     const existingProductIndex = cart.products.findIndex(
       (p) => p.productId.toString() === productId
     );
 
     if (existingProductIndex > -1) {
-      // If the product is already in the cart, update the quantity and adjust the total price
       const previousQuantity = cart.products[existingProductIndex].quantity;
       cart.products[existingProductIndex].quantity = quantity;
       cart.totalPrice += discountedPrice * (quantity - previousQuantity);
     } else {
-      // If the product is not in the cart, add it and update the total price
       cart.products.push({
         productId: productId,
         quantity: quantity,
-        price: discountedPrice, // Save the discounted price
+        price: discountedPrice,
       });
       cart.totalPrice += discountedPrice * quantity;
     }
 
     console.log(cart.totalPrice);
 
-    // Save the updated cart
     await cart.save();
     req.session.cart = cart;
 
@@ -99,7 +90,7 @@ const addToCart = async (req, res) => {
       success: true,
       message: "Product added to cart!",
       cart,
-      product: { ...product.toObject(), discountedPrice }, // Include the discounted price in the response
+      product: { ...product.toObject(), discountedPrice },
     });
   } catch (err) {
     console.error("Error in addToCart:", err);
@@ -112,7 +103,6 @@ const updateQuantity = async (req, res) => {
     const { productId, changeQuantity } = req.body;
     const userId = req.user?._id;
 
-    // Fetch the user's cart
     const cart = await CartModel.findOne({ userId });
     if (!cart) {
       return res
@@ -120,7 +110,6 @@ const updateQuantity = async (req, res) => {
         .json({ status: "Failed", message: "Cart not found" });
     }
 
-    // Find the product in the cart
     const productIdx = cart.products.findIndex(
       (p) => p.productId.toString() === productId
     );
@@ -130,10 +119,8 @@ const updateQuantity = async (req, res) => {
         .json({ status: "Failed", message: "Product not found in the cart" });
     }
 
-    // Calculate new quantity
     const newQuantity = cart.products[productIdx].quantity + changeQuantity;
 
-    // Fetch the product along with its offers
     const product = await ProductModel.findById(productId).populate("offers");
     if (!product) {
       return res
@@ -141,7 +128,6 @@ const updateQuantity = async (req, res) => {
         .json({ status: "Failed", message: "Product not found" });
     }
 
-    // Determine discounted price based on active offers
     let discountedPrice = product.price;
     if (product.offers && product.offers.length > 0) {
       const activeOffers = product.offers.filter((offer) => offer.isActive);
@@ -150,23 +136,16 @@ const updateQuantity = async (req, res) => {
           offer.discountValue > max.discountValue ? offer : max
         );
         discountedPrice = product.price - highestOffer.discountValue;
-        discountedPrice = Math.max(discountedPrice, 0); // Ensure the price is not negative
+        discountedPrice = Math.max(discountedPrice, 0);
       }
     }
-
-    // Recalculate total price for the cart
-    // cart.totalPrice =
-    //   cart.totalPrice -
-    //   cart.products[productIdx].price * cart.products[productIdx].quantity +
-    //   discountedPrice * cart.products[productIdx].quantity;
-    // cart.products[productIdx].price = discountedPrice; // Update price in the cart
 
     cart.totalPrice =
       cart.totalPrice -
       discountedPrice * cart.products[productIdx].quantity +
       discountedPrice * newQuantity;
     if (newQuantity <= 0) {
-      cart.products[productIdx].quantity = 1; // Set to minimum 1 if quantity is <= 0
+      cart.products[productIdx].quantity = 1;
     } else {
       cart.products[productIdx].quantity = newQuantity;
     }
@@ -192,7 +171,6 @@ const deleteCartProduct = async (req, res) => {
     const productId = req.params.productId;
     const userId = req.user?._id;
 
-    // Fetch the user's cart
     const cart = await CartModel.findOne({ userId });
     if (!cart) {
       return res
@@ -200,7 +178,6 @@ const deleteCartProduct = async (req, res) => {
         .json({ status: "Failed", message: "The cart is not found" });
     }
 
-    // Filter out the product to be deleted
     const productToDelete = cart.products.find(
       (product) => product.productId.toString() === productId
     );
@@ -210,12 +187,10 @@ const deleteCartProduct = async (req, res) => {
         .json({ status: "Failed", message: "Product not found in the cart" });
     }
 
-    // Remove the product from the cart
     cart.products = cart.products.filter(
       (product) => product.productId.toString() !== productId
     );
 
-    // Recalculate total price for the cart
     let total = 0;
     for (const currProduct of cart.products) {
       const product = await ProductModel.findById(
@@ -225,7 +200,6 @@ const deleteCartProduct = async (req, res) => {
         throw new Error(`Product with ID ${currProduct.productId} not found`);
       }
 
-      // Determine discounted price based on active offers
       let discountedPrice = product.price;
       if (product.offers && product.offers.length > 0) {
         const activeOffers = product.offers.filter((offer) => offer.isActive);
@@ -234,7 +208,7 @@ const deleteCartProduct = async (req, res) => {
             offer.discountValue > max.discountValue ? offer : max
           );
           discountedPrice = product.price - highestOffer.discountValue;
-          discountedPrice = Math.max(discountedPrice, 0); // Ensure the price is not negative
+          discountedPrice = Math.max(discountedPrice, 0);
         }
       }
 
@@ -243,10 +217,8 @@ const deleteCartProduct = async (req, res) => {
 
     console.log("total = ", total);
 
-    // Update cart details
     cart.totalPrice = total;
 
-    // Save the updated cart
     await cart.save();
     req.session.cart = cart;
 
@@ -265,32 +237,8 @@ const deleteCartProduct = async (req, res) => {
 const postCart = async (req, res) => {
   try {
     const userId = req.user?._id;
-    // console.log(userId);
     const cart = await CartModel.findOne({ userId });
-    // .populate("products.productId", "_id name images price stock")
-    // .exec();
-    // console.log(cart);
-
-    // After populating, you may need to map over `cart.products` to construct the desired structure:
-    // const cartProducts = cart.products.map((product) => ({
-    //   name: product.productId.name,
-    //   images: product.productId.images,
-    //   _id: product.productId._id,
-    //   price: product.productId.price,
-    //   quantity: product.quantity,
-    //   stock: product.productId.stock,
-    // }));
-
-    // req.session.cartProducts = [...cartProducts];
     req.session.cart = cart;
-    console.log("session = ", req.session.cart.products);
-    // if (!req.session.steps) {
-    //   req.session.steps = [];
-    // }
-    // if (!req.session.steps.includes("cart")) {
-    //   req.session.steps.push("cart");
-    // }
-
     res.redirect("/checkout");
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server Error!!!" });

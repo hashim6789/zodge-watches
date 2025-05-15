@@ -19,10 +19,6 @@ const getCategory = async (req, res) => {
         current: page,
         pages: null,
       });
-      //return res.status(200).json({
-      //   status: "Success",
-      //   message: "The page rendered successfully",
-      // });
     }
     const count = await CategoryModel.countDocuments({
       name: new RegExp(query, "i"),

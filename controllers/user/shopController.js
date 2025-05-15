@@ -21,23 +21,19 @@ const getShop = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const perPage = 8;
 
-    // Fetch active offers
     const activeOffers = await OfferModel.find({
       isActive: true,
       expiryDate: { $gte: new Date() },
     }).populate("categoryId", "name");
 
-    // Fetch products
     const products = await ProductModel.find({ isListed: true })
       .populate("categoryId", "name")
       .skip((page - 1) * perPage)
       .limit(perPage);
 
-    // Fetch categories
     const categories = await CategoryModel.find({ isListed: true });
     const count = await ProductModel.countDocuments();
 
-    // Apply offers to products (generate discountedPrice dynamically)
     const productsWithDiscount = products.map((product) => {
       let discountedPrice = product.price;
       const applicableOffers = activeOffers.filter((offer) =>
@@ -56,18 +52,14 @@ const getShop = async (req, res) => {
           discountedPrice = product.price - highestOffer.discountValue;
         }
 
-        // Ensure discountedPrice is not negative
         discountedPrice = Math.max(discountedPrice, 0);
       }
 
-      // Add discountedPrice to product object temporarily
       return {
         ...product.toObject(),
-        discountedPrice, // Add this property without modifying the original schema
+        discountedPrice,
       };
     });
-
-    // console.log(productsWithDiscount);
 
     let cart = null;
     let wishlist = null;
@@ -100,9 +92,8 @@ const getShop = async (req, res) => {
       }
     }
 
-    // Render the shop page with products that have calculated discounted prices
     res.render("user/shop", {
-      products: productsWithDiscount, // Send products with dynamically calculated discounted prices
+      products: productsWithDiscount,
       categories,
       current: page,
       user,
@@ -120,39 +111,14 @@ const getShop = async (req, res) => {
   }
 };
 
-// //for rendering the quick view (Product details page);
-// const getProductDetails = async (req, res) => {
-//   try {
-//     const productId = req.params.productId;
-//     const userId = req.user?._id;
-//     let user = null;
-//     let cart = null;
-//     let wishlist = null;
-//     if (userId) {
-//       user = await UserModel.findById(userId);
-//       cart = await CartModel.findOne({ userId });
-//       wishlist = await WishlistModel.findOne({ userId }).populate(
-//         "productIds",
-//         "name price images"
-//       );
-//     }
-//     const product = await ProductModel.findById(productId);
-//     res.render("user/quickview", { product, ratings: 4, user, wishlist, cart });
-//   } catch (error) {
-//     console.error("Error fetching product:", error);
-//     res.status(500).send("Server error");
-//   }
-// };
-
 const getProductDetails = async (req, res) => {
   try {
     const productId = req.params.productId;
     const userId = req.user?._id;
 
-    // Fetch product details along with offers using populate
     const product = await ProductModel.findById(productId).populate({
-      path: "offers", // Populate the offers field
-      match: { isActive: true }, // Only active offers
+      path: "offers",
+      match: { isActive: true },
     });
 
     if (!product) {
@@ -161,23 +127,18 @@ const getProductDetails = async (req, res) => {
 
     let discountedPrice = product.price;
 
-    // Check if there are any active offers in the populated offers array
     if (product.offers.length > 0) {
-      // Find the offer with the highest discount value
       const highestOffer = product.offers.reduce((max, offer) =>
         offer.discountValue > max.discountValue ? offer : max
       );
 
-      // Apply the discount from the highest offer
       discountedPrice -= highestOffer.discountValue;
 
-      // Ensure discountedPrice is not negative
       discountedPrice = Math.max(discountedPrice, 0);
     }
 
     console.log("Discounted price = ", discountedPrice);
 
-    // Fetch user-specific data if logged in
     let userData = { user: null, cart: null, wishlist: null };
     if (userId) {
       userData.user = await UserModel.findById(userId);
@@ -188,12 +149,11 @@ const getProductDetails = async (req, res) => {
       );
     }
 
-    // Render the product details page
     res.render("user/quickView", {
       product,
       discountedPrice,
-      averageRating: 4, // Placeholder for average rating
-      ratings: 4, // Placeholder for total ratings
+      averageRating: 4,
+      ratings: 4,
       ...userData,
     });
   } catch (error) {
@@ -202,7 +162,6 @@ const getProductDetails = async (req, res) => {
   }
 };
 
-//for get the images of the corresponding products
 const getImage = async (req, res) => {
   try {
     const index = parseInt(req.query.index, 10);

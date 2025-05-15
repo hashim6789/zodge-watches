@@ -20,12 +20,6 @@ const {
 
 const router = express.Router();
 
-//for testing purpose
-// const test = (req, res, next) => {
-//   console.log(req.url);
-//   next();
-// };
-
 // get - /admin/login
 router.get("/login", redirectIfAuthenticated, getLogin);
 // post - /admin/login

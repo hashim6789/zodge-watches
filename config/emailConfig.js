@@ -1,3 +1,5 @@
+const { ENV } = require("./env.config");
+
 require("dotenv").config();
 
 // config/emailConfig.js
@@ -6,8 +8,8 @@ const confirmationMailSettings = {
   port: 587, // Use port 587 for TLS
   secure: false, // Use TLS (not SSL)
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: ENV.EMAIL_USER,
+    pass: ENV.EMAIL_PASS,
   },
   tls: {
     rejectUnauthorized: false, // Disable certificate validation
@@ -17,8 +19,8 @@ const confirmationMailSettings = {
 const otpMailSettings = {
   service: "Gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: ENV.EMAIL_USER,
+    pass: ENV.EMAIL_PASS,
   },
   tls: {
     rejectUnauthorized: false,

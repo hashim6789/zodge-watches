@@ -10,12 +10,11 @@ const getOffers = async (req, res) => {
     const perPage = 6;
 
     const categories = await CategoryModel.find({ isListed: true });
-    // const products = await ProductModel.find({ isListed: true });
 
     let offers = [];
     offers = await OfferModel.find({ name: new RegExp(query, "i") })
-      .populate("categoryIds", "name") // Populates 'name' from the Category model
-      .populate("productIds", "name") // Populates 'name' from the Product model
+      .populate("categoryIds", "name")
+      .populate("productIds", "name")
       .sort({ createdAt: -1 })
       .skip((page - 1) * perPage)
       .limit(perPage);
@@ -26,15 +25,10 @@ const getOffers = async (req, res) => {
         current: page,
         pages: null,
       });
-      //return res.status(200).json({
-      //   status: "Success",
-      //   message: "The page rendered successfully",
-      // });
     }
     const count = await OfferModel.countDocuments({
       name: new RegExp(query, "i"),
     });
-    // console.log(categories);
     res.render("admin/offerManagementPage", {
       offers,
       categories,
@@ -54,7 +48,6 @@ const createOffer = async (req, res) => {
     console.log(image);
     console.log(offerData);
 
-    // Check if the offer already exists
     const existingOffer = await OfferModel.findOne({ name: offerData.name });
     if (existingOffer) {
       return res
@@ -62,7 +55,6 @@ const createOffer = async (req, res) => {
         .json({ success: false, message: "The offer already exists" });
     }
 
-    // Validate applicable type
     if (!["product", "category"].includes(offerData.applicableType)) {
       return res
         .status(400)
@@ -71,19 +63,15 @@ const createOffer = async (req, res) => {
 
     console.log({ ...offerData, image });
 
-    // Create and save the new offer
     const newOffer = new OfferModel({ ...offerData, image });
     await newOffer.save();
 
-    // Find and update products based on applicable type
     if (offerData.applicableType === "product") {
-      // Update products by their IDs
       await ProductModel.updateMany(
         { _id: { $in: offerData.productIds } },
         { $addToSet: { offers: newOffer._id } }
       );
     } else if (offerData.applicableType === "category") {
-      // Update products by category IDs
       await ProductModel.updateMany(
         { categoryId: { $in: offerData.categoryIds } },
         { $addToSet: { offers: newOffer._id } }
@@ -123,7 +111,6 @@ const editOffer = async (req, res) => {
       offerData.productIds = [];
     }
 
-    // Find the existing offer
     const existingOffer = await OfferModel.findById(offerId);
     if (!existingOffer) {
       return res
@@ -131,7 +118,6 @@ const editOffer = async (req, res) => {
         .json({ success: false, message: "Offer not found" });
     }
 
-    // Update the offer
     const updatedOffer = await OfferModel.findByIdAndUpdate(
       offerId,
       offerData,
@@ -139,7 +125,6 @@ const editOffer = async (req, res) => {
     );
     console.log(updatedOffer);
 
-    // Remove the offer ID from products that are no longer part of the offer
     if (existingOffer.applicableType === "product") {
       await ProductModel.updateMany(
         { _id: { $in: existingOffer.productIds } },
@@ -152,16 +137,15 @@ const editOffer = async (req, res) => {
       );
     }
 
-    // Add the offer ID to the newly updated products or categories
     if (offerData.applicableType === "product") {
       await ProductModel.updateMany(
         { _id: { $in: offerData.productIds } },
-        { $addToSet: { offers: updatedOffer._id } } // Use $addToSet to avoid duplicates
+        { $addToSet: { offers: updatedOffer._id } }
       );
     } else if (offerData.applicableType === "category") {
       await ProductModel.updateMany(
         { categoryId: { $in: offerData.categoryIds } },
-        { $addToSet: { offers: updatedOffer._id } } // Use $addToSet to avoid duplicates
+        { $addToSet: { offers: updatedOffer._id } }
       );
     }
 
@@ -254,7 +238,6 @@ const getOffer = async (req, res) => {
   try {
     const { offerId } = req.params;
 
-    // Validate the offerId
     if (!mongoose.Types.ObjectId.isValid(offerId)) {
       return res.status(400).json({
         success: false,
@@ -262,7 +245,6 @@ const getOffer = async (req, res) => {
       });
     }
 
-    // Find the offer by ID and populate category details if necessary
     const offer = await OfferModel.findById(offerId).populate(
       "categoryId",
       "name"
@@ -275,7 +257,6 @@ const getOffer = async (req, res) => {
       });
     }
 
-    // Return the offer details
     return res.status(200).json({
       success: true,
       offer,

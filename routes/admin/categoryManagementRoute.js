@@ -22,12 +22,6 @@ const {
   getAllCategoriesAPI,
 } = require("../../controllers/admin/categoryController");
 
-// //for testing purpose
-// // const test = (req, res, next) => {
-// //   console.log(req.url);
-// //   next();
-// // };
-
 // //get - admin/categories/
 router.get(
   "/",

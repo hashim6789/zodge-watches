@@ -64,18 +64,14 @@ const getHome = async (req, res) => {
     const offers = await OfferModel.find({ isActive: true });
     const coupons = await CouponModel.find({ isListed: true });
 
-    // Render the home page with updated product prices
     res.render("user/home", {
-      // products: productsWithDiscount, // Send products with discounted prices
       categories,
-      // current: page,
       user,
       banners,
       offers,
       coupons,
       wishlist,
       currentCategory: "all",
-      // pages: Math.ceil(count / perPage),
       cart,
     });
   } catch (err) {
@@ -105,7 +101,6 @@ const getProductsByPages = async (req, res) => {
     }
 
     let sortCriteria = {};
-    // Sorting logic
     switch (sortOption) {
       case "priceLowToHigh":
         sortCriteria = { price: 1 };
@@ -123,11 +118,10 @@ const getProductsByPages = async (req, res) => {
         sortCriteria = { soldCount: -1 };
         break;
       default:
-        sortCriteria = { createdAt: -1 }; // Default to new arrivals
+        sortCriteria = { createdAt: -1 };
         break;
     }
 
-    // Fetch active offers
     const activeOffers = await OfferModel.find({ isActive: true });
 
     const products = await ProductModel.find(query)
@@ -141,12 +135,10 @@ const getProductsByPages = async (req, res) => {
 
     const wishlist = await WishlistModel.findOne({ userId: req.user?._id });
 
-    // Calculate the discounted price for each product based on active offers
     const updatedProducts = products.map((product) => {
-      let discountedPrice = product.price; // Default to original price
-      let highestDiscountValue = 0; // To track the highest discount value
+      let discountedPrice = product.price;
+      let highestDiscountValue = 0;
 
-      // Find applicable offers for the product
       const applicableOffers = activeOffers.filter((offer) => {
         const isCategoryApplicable =
           offer.applicableType === "category" &&
@@ -157,17 +149,14 @@ const getProductsByPages = async (req, res) => {
         return isCategoryApplicable || isProductApplicable;
       });
 
-      // Determine the highest discount value among applicable offers
       applicableOffers.forEach((offer) => {
         if (offer.discountValue > highestDiscountValue) {
-          highestDiscountValue = offer.discountValue; // Track the highest discount value
+          highestDiscountValue = offer.discountValue;
         }
       });
 
-      // Calculate the discounted price if there is a discount
       if (highestDiscountValue > 0) {
-        discountedPrice = product.price - highestDiscountValue; // Apply the highest flat discount
-        // Ensure discountedPrice is not negative
+        discountedPrice = product.price - highestDiscountValue;
         discountedPrice = Math.max(discountedPrice, 0);
       }
 
@@ -175,7 +164,7 @@ const getProductsByPages = async (req, res) => {
         ...product,
         discountedPrice:
           discountedPrice < product.price ? discountedPrice : product.price,
-        highestDiscountValue, // Include the highest discount value for display
+        highestDiscountValue,
       };
     });
 

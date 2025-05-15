@@ -28,30 +28,14 @@ const postLocalLogin = async (req, res, next) => {
       }
 
       try {
-        // Fetch wishlist and cart from the database for the user
         const wishlist = await WishlistModel.findOne({ userId: user._id });
         const cart = await CartModel.findOne({ userId: user._id });
 
-        // Send wishlist and cart data along with success response
-        // return res.status(200).json({
-        //   success: true,
-        //   message: "User login successfully",
-        //   wishlist: wishlist ? wishlist.productIds : [], // Return array of product IDs from wishlist
-        //   cart: cart
-        //     ? cart.products.map((item) => ({
-        //         productId: item.productId,
-        //         quantity: item.quantity,
-        //         price: item.price,
-        //       }))
-        //     : [], // Return array of products with productId, quantity, and price
-        //   totalPrice: cart ? cart.totalPrice : 0, // Return total price of cart
-        // });
         return res.status(200).json({
           success: true,
           message: "User login successfully",
-          wishlist: wishlist ? wishlist.productIds : [], // Return array of product IDs from wishlist
-          cart, // Return array of products with productId, quantity, and price
-          // totalPrice: cart ? cart.totalPrice : 0, // Return total price of cart
+          wishlist: wishlist ? wishlist.productIds : [],
+          cart,
         });
       } catch (dbError) {
         return next(dbError);
@@ -75,26 +59,24 @@ const postLocalSignup = async (req, res, next) => {
       }
 
       try {
-        // Optionally send a verification email
         await sendVerificationMail(user, res);
 
-        // Initialize empty wishlist and cart for the new user
         const wishlist = await WishlistModel.create({
           userId: user._id,
-          productIds: [], // Start with an empty productIds array
+          productIds: [],
         });
 
         const cart = await CartModel.create({
           userId: user._id,
-          products: [], // Start with an empty products array
-          totalPrice: 0, // Total price set to 0 initially
+          products: [],
+          totalPrice: 0,
         });
 
         return res.status(200).json({
           success: true,
           message: "User signup successful",
-          wishlist: wishlist.productIds, // Return an empty wishlist array
-          cart, // Return an empty cart array
+          wishlist: wishlist.productIds,
+          cart,
         });
       } catch (dbError) {
         return next(dbError);
@@ -103,65 +85,12 @@ const postLocalSignup = async (req, res, next) => {
   })(req, res, next);
 };
 
-// const postLocalLogin = async (req, res, next) => {
-//   passport.authenticate("local-login", (err, user, info) => {
-//     if (err) {
-//       return next(err);
-//     }
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: info.message });
-//       // return res.redirect("/auth/login?error=" + info.message);
-//     }
-
-//     req.logIn(user, (err) => {
-//       if (err) {
-//         return next(err);
-//       }
-
-//       return res
-//         .status(200)
-//         .json({ success: true, message: "user login successfully" });
-
-//       // const returnTo = req.session.returnTo || "/";
-//       // delete req.session.returnTo;
-//       // return res.redirect(`${returnTo}?message=The user login successfully.`);
-//     });
-//   })(req, res, next);
-// };
-
-// const postLocalSignup = async (req, res, next) => {
-//   passport.authenticate("local-signup", (err, user, info) => {
-//     if (err) {
-//       return next(err);
-//     }
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: info.message });
-
-//       // return res.redirect("/auth/signup?error=" + info.message);
-//     }
-//     console.log(req.user);
-//     req.logIn(user, async (err) => {
-//       if (err) {
-//         return next(err);
-//       }
-//       console.log(user);
-
-//       // Optionally, send verification email
-//       await sendVerificationMail(user, res);
-//     });
-//   })(req, res, next);
-
-//   // return res.redirect(`/auth/otp`);
-// };
-
 const verifyOtp = async (req, res) => {
   try {
     const userId = req.user?._id;
     const email = req.user?.email;
     const { otp } = req.body;
     console.log(otp);
-    // const otp = `${otp1}${otp2}${otp3}${otp4}`;
-    // Find the user by ID
     const user = await UserModel.findById(userId);
     if (!user) {
       return res
@@ -169,38 +98,25 @@ const verifyOtp = async (req, res) => {
         .json({ succes: false, message: "User not found." });
     }
 
-    // Check if OTP is expired
     if (user.otpExpires < Date.now()) {
       return res
         .status(400)
         .json({ success: false, message: "OTP has expired." });
-      // return res.redirect("/auth/otp?message=OTP has expired.");
-      // return res
-      //   .status(400)
-      //   .json({ message: "OTP has expired. Please request a new one." });
     }
 
-    // Verify the OTP
     const isOtpValid = await bcrypt.compare(otp, user.otp);
     if (!isOtpValid) {
       return res.status(400).json({ success: false, message: "Invalid OTP" });
-      // return res.status(400).redirect("/auth/otp?message=Invalid OTP");
-      // return res
-      //   .status(400)
-      //   .json({ message: "Invalid OTP. Please try again." });
     }
 
-    // Mark the user as verified and clear OTP fields
     user.isVerified = true;
-    user.otp = undefined; // Clear OTP after verification
-    user.otpExpires = undefined; // Clear OTP expiration
+    user.otp = undefined;
+    user.otpExpires = undefined;
     await user.save();
 
     res
       .status(200)
       .json({ success: true, message: "the user verified successful" });
-    // res.status(200).redirect("/");
-    // res.status(200).json({ message: "User verified successfully." });
   } catch (error) {
     console.error("Error in verifyOtp:", error);
     res.status(500).json({ message: "Server error. Please try again later." });
@@ -220,40 +136,6 @@ const getSignup = (req, res) => {
   }
 };
 
-// // For post signup
-// const postSignup = async (req, res) => {
-//   try {
-//     const { firstName, lastName, email, password } = req.body;
-
-//     let user = await UserModel.findOne({ email });
-//     if (!user) {
-//       const hashPassword = await bcrypt.hash(password, 10);
-
-//       user = new UserModel({
-//         firstName,
-//         lastName,
-//         email,
-//         password: hashPassword,
-//         isVerified: false,
-//       });
-
-//       await user.save();
-
-//       req.session.user = user;
-//       sendVerificationMail(user, res);
-//       return res.redirect(`/auth/verify-otp?userId=${user._id}&email=${email}`);
-//     } else {
-//       res.redirect("/auth/signup?error=The user already exists!!!");
-//     }
-//   } catch (error) {
-//     console.error("Signup error:", error);
-//     return res.status(500).json({
-//       status: "error",
-//       message: "Signup failed. Please try again later.",
-//     });
-//   }
-// };
-
 //get the otp page
 const getOtpPage = (req, res) => {
   try {
@@ -267,58 +149,6 @@ const getOtpPage = (req, res) => {
     });
   }
 };
-
-//post the otp (verifying)
-// const postOtp = async (req, res) => {
-//   try {
-//     const { otp1, otp2, otp3, otp4, userId, email } = req.body;
-//     const otp = `${otp1}${otp2}${otp3}${otp4}`;
-
-//     const otpRecord = await OtpModel.findOne({ userId });
-//     console.log(req.body);
-
-//     if (otpRecord && Date.now() < otpRecord.expiresAt) {
-//       const isValidOtp = await bcrypt.compare(otp, otpRecord.otp);
-
-//       if (isValidOtp) {
-//         await UserModel.findByIdAndUpdate(
-//           userId,
-//           { isVerified: true },
-//           { new: true }
-//         );
-
-//         res.redirect("/");
-//       } else {
-//         res.redirect(
-//           `/auth/verify-otp?userId=${userId}&email=${email}&message=Invalid otp`
-//         );
-//       }
-//     } else {
-//       res.render("user/otpGeneratePage", {
-//         email,
-//         userId,
-//         msg: "OTP expired or not found",
-//       });
-//     }
-//   } catch (error) {
-//     res.status(500).json({
-//       status: "Failed",
-//       message: error.message,
-//     });
-//   }
-// };
-
-// //for resend the sending otp
-// const resendOTP = async (req, res) => {
-//   try {
-//     sendVerificationMail(req.user, res);
-//   } catch (err) {
-//     res.status(500).json({
-//       status: "Error",
-//       message: "The server error",
-//     });
-//   }
-// };
 
 //for resend otp
 const resendOtp = async (req, res) => {
@@ -354,34 +184,6 @@ const getLogin = (req, res) => {
   }
 };
 
-//for post Login
-// const postLogin = async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-//     let user = await UserModel.findOne({ email });
-//     if (
-//       user &&
-//       (await bcrypt.compare(password, user.password)) &&
-//       user.isBlocked === false
-//     ) {
-//       req.session.user = user;
-//       const returnTo = req.session.returnTo || "/";
-//       delete req.session.returnTo;
-//       res.redirect(returnTo);
-//       // res.status(200).json({ message: "user login successfully" });
-//     } else {
-//       res.redirect(
-//         "/auth/login?error=username or password is incorrect or the user blocked"
-//       );
-//       // res
-//       //   .status(404)
-//       //   .json({ message: "No user found the database or blocked the user!!!" });
-//     }
-//   } catch (err) {
-//     res.status(500).json({ message: "server error!!!" });
-//   }
-// };
-
 /**-----------------google signup and login--------------- */
 
 const googleSignup = passport.authenticate("google-signup", {
@@ -406,80 +208,6 @@ const googleLoginCallback = (req, res, next) => {
   })(req, res, next);
 };
 
-//googleSignupCallback
-// const googleSignupCallback = async (req, res, next) => {
-//   passport.authenticate("google-signup", async (err, user, info) => {
-//     if (err) {
-//       return next(err);
-//     }
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: info.message });
-//     }
-
-//     req.logIn(user, async (err) => {
-//       if (err) {
-//         return next(err);
-//       }
-
-//       try {
-//         // Initialize empty wishlist and cart for the new user
-//         const wishlist = await WishlistModel.create({
-//           userId: user._id,
-//           productIds: [], // Start with an empty productIds array
-//         });
-
-//         const cart = await CartModel.create({
-//           userId: user._id,
-//           products: [], // Start with an empty products array
-//           totalPrice: 0, // Total price set to 0 initially
-//         });
-
-//         // Redirect to profile/home page after successful signup
-//         redirectToProfile(req, res);
-//       } catch (dbError) {
-//         return next(dbError);
-//       }
-//     });
-//   })(req, res, next);
-// };
-
-// //googleLoginCallback
-// const googleLoginCallback = async (req, res, next) => {
-//   passport.authenticate("google-login", async (err, user, info) => {
-//     if (err) {
-//       return next(err);
-//     }
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: info.message });
-//     }
-
-//     req.logIn(user, async (err) => {
-//       if (err) {
-//         return next(err);
-//       }
-
-//       try {
-//         // Fetch wishlist and cart from the database for the user
-//         const wishlist = await WishlistModel.findOne({ userId: user._id });
-//         const cart = await CartModel.findOne({ userId: user._id });
-
-//         // Send wishlist and cart data along with success response
-//         res.status(200).json({
-//           success: true,
-//           message: "User login successfully",
-//           wishlist: wishlist ? wishlist.productIds : [], // Return array of product IDs from wishlist
-//           cart: cart || { products: [], totalPrice: 0 }, // Return existing cart or a new one
-//         });
-
-//         // Redirect to profile/home page after successful login
-//         redirectToProfile(req, res);
-//       } catch (dbError) {
-//         return next(dbError);
-//       }
-//     });
-//   })(req, res, next);
-// };
-
 //for redirect the home page after google login and google signup
 const redirectToProfile = (req, res) => {
   try {
@@ -492,73 +220,6 @@ const redirectToProfile = (req, res) => {
     });
   }
 };
-
-//for get the home page
-// const getHome = async (req, res) => {
-//   try {
-//     const userId = req.session?.user?._id || req.session?.passport?.user?.id;
-//     let user = null;
-//     if (userId) {
-//       user = await UserModel.findById(userId);
-//     }
-//     // console.log(req.user);
-//     const page = req.query.page || 1;
-//     const perPage = 8;
-//     const products = await ProductModel.find()
-//       .skip((page - 1) * perPage)
-//       .limit(perPage);
-//     const categories = await CategoryModel.find({ isListed: true });
-//     const count = await ProductModel.countDocuments();
-
-//     let cart = null;
-//     let wishlist = null;
-//     if (userId) {
-//       cart = await CartModel.findOne({ userId });
-//       if (!cart) {
-//         cart = new CartModel({
-//           userId,
-//           products: [],
-//           totalPrice: 0,
-//           createdAt: Date.now(),
-//           updatedAt: Date.now(),
-//         });
-//         cart.save();
-//       }
-//       wishlist = await WishlistModel.findOne({ userId }).populate(
-//         "productIds",
-//         "name price images"
-//       );
-//       // console.log(wishlist);
-//       if (!wishlist) {
-//         wishlist = new WishlistModel({
-//           userId,
-//           productIds: [],
-//           createdAt: Date.now(),
-//           updatedAt: Date.now(),
-//         });
-//         wishlist.save();
-//       }
-//     }
-//     console.log(cart);
-
-//     res.render("user/home", {
-//       products,
-//       categories,
-//       current: page,
-//       user,
-//       wishlist,
-//       pages: Math.ceil(count / perPage),
-//       cart,
-//     });
-//   } catch (err) {
-//     res.status(500).json({
-//       status: "Error",
-//       message: "The server error",
-//     });
-//   }
-// };
-
-/**The user can reset the password */
 
 //reset password
 const forgotPassword = async (req, res) => {
@@ -611,10 +272,6 @@ const changePassword = async (req, res) => {
       await user.save();
 
       res.render("user/password_success");
-
-      // res
-      //   .status(200)
-      //   .json({ status: "Success", message: "Password updated successfully" });
     } else {
       res.status(404).json({ status: "Failure", message: "User not found" });
     }
@@ -631,7 +288,6 @@ const validateCurrentPassword = async (req, res) => {
   try {
     const { userId, currentPassword } = req.body;
 
-    // Find user by email
     const user = await UserModel.findById(userId);
 
     if (!user) {
@@ -640,7 +296,6 @@ const validateCurrentPassword = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    // Compare entered current password with the stored hashed password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
 
     if (isMatch) {
@@ -661,17 +316,14 @@ const changeUserPassword = async (req, res) => {
   try {
     const { userId, newPassword } = req.body;
 
-    // Find the user by email
     const user = await UserModel.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Hash the new password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Update the password in the database
     user.password = hashedPassword;
     await user.save();
 

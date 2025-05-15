@@ -23,11 +23,6 @@ const getUsers = async (req, res) => {
       perPage,
       pages: Math.ceil(count / 6),
     });
-    // return res.status(200).json({
-    //   status: "Success",
-    //   message: "The page rendered successfully",
-    //   data: usersList,
-    // });
   } catch (err) {
     return res.status(500).json({
       status: "error",

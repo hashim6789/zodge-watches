@@ -36,7 +36,6 @@ const test = (req, res, next) => {
 };
 
 //get - /account
-// router.get("/", checkBlocked, isAuthenticatedUser, authorizeUser, getAccount);
 router.get("/:userId", test, getAccountPage);
 
 router.get("/api/personal-info", getPersonalInfo);

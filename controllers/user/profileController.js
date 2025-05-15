@@ -9,8 +9,8 @@ const WalletModel = require("../../models/Wallet");
 const getAccountPage = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = 3; // Default to 6 orders per page
+    const page = parseInt(req.query.page) || 1;
+    const limit = 3;
     const skip = (page - 1) * limit;
 
     const user = await UserModel.findById(userId);
@@ -160,15 +160,6 @@ const updateAddress = async (req, res) => {
   try {
     const addressId = req.params.addressId;
     const addressDate = req.body;
-    // const userId = req.session?.user?._id || req.session?.passport.user.id;
-    // let user = null;
-    // if (userId) {
-    //   user = await UserModel.findById(userId);
-    //   if (!user) {
-    //     return res
-    //       .status(404)
-    //       .json({ status: "Failed", message: "the user is not found" });
-    //   }
     const address = await AddressModel.findByIdAndUpdate(
       addressId,
       addressDate,
@@ -185,10 +176,6 @@ const updateAddress = async (req, res) => {
       message: "the addresses of the user is got successfully",
       address,
     });
-    // }
-    // res
-    //   .status(404)
-    //   .json({ status: "Failed", message: "The user is not found" });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -201,15 +188,6 @@ const updateAddress = async (req, res) => {
 const deleteAddress = async (req, res) => {
   try {
     const addressId = req.params.addressId;
-    // const userId = req.session?.user?._id || req.session?.passport.user.id;
-    // let user = null;
-    // if (userId) {
-    //   user = await UserModel.findById(userId);
-    //   if (!user) {
-    //     return res
-    //       .status(404)
-    //       .json({ status: "Failed", message: "the user is not found" });
-    //   }
     const deletedAddress = await AddressModel.findByIdAndDelete(addressId);
     if (!deletedAddress) {
       return res.status(404).json({
@@ -222,10 +200,6 @@ const deleteAddress = async (req, res) => {
       message: "the addresses of the user is got successfully",
       deletedAddress,
     });
-    // }
-    // res
-    //   .status(404)
-    //   .json({ status: "Failed", message: "The user is not found" });
   } catch (error) {
     return res.status(500).json({
       success: false,

@@ -5,7 +5,6 @@ const getSalesReport = async (req, res) => {
   try {
     const { reportType, startDate, endDate } = req.query;
 
-    //match stage setting matchStage = {orderStatus , createdAt}
     let matchStage = {
       orderStatus: { $in: ["placed", "shipped", "delivered"] },
     };
@@ -39,7 +38,6 @@ const getSalesReport = async (req, res) => {
     }
     console.log("match = ", matchStage);
 
-    //for setting the aggregation pipeline
     const aggregationPipeline = [
       { $match: matchStage },
       {
@@ -67,11 +65,6 @@ const getSalesReport = async (req, res) => {
       },
       { $sort: { _id: 1 } },
     ];
-
-    console.log("pipeline = ", aggregationPipeline);
-
-    // const orders = await OrderModel.find({ createdAt: { $exists: true } });
-    // console.log(orders);
 
     //for aggregated result
     const results = await OrderModel.aggregate(aggregationPipeline);

@@ -17,10 +17,7 @@ const {
   postLocalLogin,
   postLocalSignup,
   verifyOtp,
-  getSignup,
-  getOtpPage,
   resendOtp,
-  getLogin,
   googleSignup,
   googleLogin,
   googleSignupCallback,
@@ -34,19 +31,8 @@ const {
   logout,
 } = require("../../controllers/user/authController");
 
-// const test = (req, res, next) => {
-//   console.log(req.url);
-//   next();
-// };
-
-// //get the signup page
-// router.get("/signup", redirectIfAuthenticated, getSignup);
-
 //post the signup page
 router.post("/signup", redirectIfAuthenticated, postLocalSignup);
-
-//get otp entering page
-// router.get("/otp", getOtpPage);
 
 //post otp resend
 router.post(
@@ -74,9 +60,6 @@ router.post(
   checkBlocked,
   resendOtp
 );
-
-// //get the login page
-// router.get("/login", redirectIfAuthenticated, getLogin);
 
 //post the login page
 router.post("/login", redirectIfAuthenticated, postLocalLogin);

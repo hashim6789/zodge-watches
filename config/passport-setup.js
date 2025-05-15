@@ -4,6 +4,7 @@ const LocalStrategy = require("passport-local").Strategy;
 const User = require("../models/User");
 const authRoute = require("../routes/user/authRoute");
 const bcrypt = require("bcrypt");
+const { ENV } = require("./env.config");
 require("dotenv").config();
 
 /**----------------------USER SERIALIZERS------------------ */
@@ -24,8 +25,8 @@ passport.use(
   "google-signup",
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientID: ENV.GOOGLE_CLIENT_ID,
+      clientSecret: ENV.GOOGLE_CLIENT_SECRET,
       callbackURL: "/auth/google/signup/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -80,8 +81,8 @@ passport.use(
   "google-login",
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientID: ENV.GOOGLE_CLIENT_ID,
+      clientSecret: ENV.GOOGLE_CLIENT_SECRET,
       callbackURL: "/auth/google/login/callback",
     },
     async (accessToken, refreshToken, profile, done) => {

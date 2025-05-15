@@ -103,7 +103,6 @@ const addToCartFromWishlist = async (req, res) => {
     const userId = req.user?._id;
     const productId = req.params.productId;
 
-    // Fetch the product along with the offers
     const product = await ProductModel.findById(productId).populate("offers");
 
     if (!product) {
@@ -121,7 +120,6 @@ const addToCartFromWishlist = async (req, res) => {
       });
     }
 
-    // Remove the product from wishlist
     const index = wishlist.productIds.indexOf(productId);
     if (index > -1) {
       wishlist.productIds.splice(index, 1);
@@ -133,7 +131,6 @@ const addToCartFromWishlist = async (req, res) => {
       });
     }
 
-    // Calculate the discounted price if applicable
     let discountedPrice = product.price;
 
     if (product.offers && product.offers.length > 0) {
@@ -143,17 +140,15 @@ const addToCartFromWishlist = async (req, res) => {
           offer.discountValue > max.discountValue ? offer : max
         );
         discountedPrice = product.price - highestOffer.discountValue;
-        discountedPrice = Math.max(discountedPrice, 0); // Ensure the price isn't negative
+        discountedPrice = Math.max(discountedPrice, 0);
       }
     }
 
-    // Fetch or create the user's cart
     let cart = await CartModel.findOne({ userId });
     if (!cart) {
       cart = new CartModel({ userId, products: [], totalPrice: 0 });
     }
 
-    // Add or update the product in the cart
     const cartProductIndex = cart.products.findIndex(
       (p) => p.productId.toString() === productId
     );
@@ -167,7 +162,6 @@ const addToCartFromWishlist = async (req, res) => {
       });
     }
 
-    // Update the total price of the cart
     cart.totalPrice += discountedPrice;
     await cart.save();
 
@@ -175,7 +169,7 @@ const addToCartFromWishlist = async (req, res) => {
       success: true,
       message: "The product is removed from the wishlist and added to the cart",
       data: {
-        product: { ...product.toObject(), discountedPrice }, // Include discounted price in response
+        product: { ...product.toObject(), discountedPrice },
         cart,
         wishlistLength: wishlist.productIds.length,
         cartProductsLength: cart.products.length,
@@ -194,13 +188,12 @@ const fetchWishlist = async (req, res) => {
   try {
     const userId = req.user?._id;
 
-    // Populate productIds first, then populate offers for each product
     const wishlist = await WishlistModel.findOne({ userId }).populate({
       path: "productIds",
-      select: "name price images offers categoryId", // Select the fields you need
+      select: "name price images offers categoryId",
       populate: {
-        path: "offers", // Populate offers inside each product
-        select: "discountValue isActive", // Select the relevant fields from offers
+        path: "offers",
+        select: "discountValue isActive",
       },
     });
 
@@ -209,22 +202,18 @@ const fetchWishlist = async (req, res) => {
     }
 
     const productsWithDiscounts = wishlist.productIds.map((product) => {
-      // Determine discounted price based on active offers
       let discountedPrice = product.price;
 
       if (product.offers && product.offers.length > 0) {
-        // Filter for active offers
         const activeOffers = product.offers.filter((offer) => offer.isActive);
 
         if (activeOffers.length > 0) {
-          // Find the highest offer
           const highestOffer = activeOffers.reduce((max, offer) =>
             offer.discountValue > max.discountValue ? offer : max
           );
 
-          // Calculate discounted price
           discountedPrice -= highestOffer.discountValue;
-          discountedPrice = Math.max(discountedPrice, 0); // Ensure not negative
+          discountedPrice = Math.max(discountedPrice, 0);
         }
       }
 

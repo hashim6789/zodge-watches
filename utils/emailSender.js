@@ -10,6 +10,7 @@ const {
   confirmationMailSettings,
   otpMailSettings,
 } = require("../config/emailConfig");
+const { ENV } = require("../config/env.config");
 
 // Create the email transporter using the config
 const transporter = nodemailer.createTransport(confirmationMailSettings);
@@ -47,43 +48,27 @@ async function sendOrderConfirmationEmail(order) {
 
 /**--------------------for mail activities------------------ */
 
-// //for creating a nodemail transporter
-// const transporter = nodemailer.createTransport({
-//   service: "Gmail",
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS,
-//   },
-//   tls: {
-//     rejectUnauthorized: false,
-//   },
-// });
-
 //for sending the verification mail or otp
 const sendVerificationMail = async ({ _id, email }, res) => {
   try {
     console.log(_id, email);
-    // Generate a 4-digit OTP
     const otp = `${Math.floor(100000 + Math.random() * 900000)}`;
 
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: ENV.EMAIL_USER,
       to: email,
       subject: "Verify your Email",
       html: `<p>Enter <b>${otp}</b> in the app to verify your email and complete the signup process. This code <b>expires in 1 hour</b>.</p>`,
     };
 
-    // Hash the OTP
     const hashedOtp = await bcrypt.hash(otp, 10);
 
-    // Update the user's OTP fields directly in the Users collection
     await UserModel.findByIdAndUpdate(_id, {
       otp: hashedOtp,
-      otpExpires: Date.now() + 1000 * 60 * 10, // OTP expires in 10 minutes
+      otpExpires: Date.now() + 1000 * 60 * 10,
       updatedAt: Date.now(),
     });
 
-    // Send the email
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
         console.log(error);
@@ -117,10 +102,10 @@ const sendForgotPasswordMail = async (user, email) => {
     user.resetPasswordExpires = Date.now() + 60 * 10 * 1000;
 
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: ENV.EMAIL_USER,
       to: email,
       subject: "Password Reset",
-      text: `Click the following link to reset your password: ${process.env.DOMAIN_NAME}/auth/reset-password/${token}`,
+      text: `Click the following link to reset your password: ${ENV.DOMAIN_NAME}/auth/reset-password/${token}`,
     };
     user.save();
 

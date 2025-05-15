@@ -21,12 +21,6 @@ const {
   searchOrders,
 } = require("../../controllers/admin/orderController");
 
-// // //for testing purpose
-// const test = (req, res, next) => {
-//   console.log(req.url);
-//   next();
-// };
-
 // //get - /admin/orders/
 router.get(
   "/",

@@ -21,9 +21,3 @@ const OfferSchema = new Schema(
 
 const Offer = mongoose.model("Offers", OfferSchema);
 module.exports = Offer;
-
-// discountType: {
-//   type: String,
-//   enum: ["percentage", "fixed"],
-//   required: true,
-// },

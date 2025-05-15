@@ -11,7 +11,6 @@ const couponManagementRouter = require("./couponManagementRoute");
 const bannerManagementRouter = require("./bannerManagementRoute");
 
 const router = express.Router();
-//admin modules
 
 router.use("/", authRouter);
 router.use("/reports", reportRouter);

@@ -75,10 +75,6 @@ const getProducts = async (req, res) => {
       perPage,
       pages: Math.ceil(count / perPage),
     });
-    //return res.status(200).json({
-    //   status: "Success",
-    //   message: "The page rendered successfully",
-    // });
   } catch (err) {
     res.status(500).json({ status: "Error", message: "Server error!!!" });
   }

@@ -37,12 +37,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// // for testing purposes
-// // const test = (req, res, next) => {
-// //   console.log(req.url);
-// //   next();
-// // };
-
 // //validate the image count at least 3
 const validateImageCount = (req, res, next) => {
   if (req.files.length < 3) {
