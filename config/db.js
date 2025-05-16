@@ -6,7 +6,7 @@ const { ENV } = require("./env.config");
  * Connects to the MongoDB database.
  * Logs detailed messages in development, minimal logs in production.
  */
-export const connectDB = async () => {
+const connectDB = async () => {
   try {
     await mongoose.connect(ENV.MONGO_URI);
 

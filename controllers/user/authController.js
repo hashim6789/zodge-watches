@@ -14,6 +14,7 @@ require("dotenv").config();
 
 /**-------------for traditional signup and login-------------------- */
 const postLocalLogin = async (req, res, next) => {
+  console.log("signup");
   passport.authenticate("local-login", async (err, user, info) => {
     if (err) {
       return next(err);
