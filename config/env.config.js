@@ -23,15 +23,8 @@ const ENV = {
   ADMIN_PASSWORD: getEnvVariable("ADMIN_PASSWORD"),
   ADMIN_ROLE: getEnvVariable("ADMIN_ROLE"),
   ADMIN_PERMISSIONS: getEnvVariable("ADMIN_PERMISSIONS"),
-
-  // PORT: parseInt(getEnvVariable("PORT"), 10),
-  // JWT_SECRET: getEnvVariable("JWT_SECRET"),
-  // IS_PRODUCTION: getEnvVariable("NODE_ENV") === "production",
-  // DOMAIN: getEnvVariable("DOMAIN"),
-  // FRONTEND_URL: getEnvVariable("FRONTEND_URL"),
-  // CLOUDINARY_CLOUD_NAME: getEnvVariable("CLOUDINARY_CLOUD_NAME"),
-  // CLOUDINARY_API_KEY: getEnvVariable("CLOUDINARY_API_KEY"),
-  // CLOUDINARY_API_SECRET: getEnvVariable("CLOUDINARY_API_SECRET"),
+  CALLBACK_URL_LOGIN: getEnvVariable("CALLBACK_URL_LOGIN"),
+  CALLBACK_URL_SIGNUP: getEnvVariable("CALLBACK_URL_SIGNUP"),
 };
 
 module.exports = { ENV };

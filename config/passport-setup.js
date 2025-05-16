@@ -27,7 +27,7 @@ passport.use(
     {
       clientID: ENV.GOOGLE_CLIENT_ID,
       clientSecret: ENV.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/signup/callback",
+      callbackURL: ENV.CALLBACK_URL_SIGNUP,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -83,7 +83,7 @@ passport.use(
     {
       clientID: ENV.GOOGLE_CLIENT_ID,
       clientSecret: ENV.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/login/callback",
+      callbackURL: ENV.CALLBACK_URL_LOGIN,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
