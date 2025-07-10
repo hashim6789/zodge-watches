@@ -75,7 +75,7 @@ const getHome = async (req, res) => {
       cart,
     });
   } catch (err) {
-    res.status(500).json({
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       status: "Error",
       message: "The server error",
     });
@@ -177,7 +177,9 @@ const getProductsByPages = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching products:", error);
-    res.status(500).json({ error: "Failed to fetch products" });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch products" });
   }
 };
 

@@ -1,3 +1,5 @@
+const HttpResponseMessage = require("../../constants/httpResponseMessage");
+const HttpStatusCode = require("../../constants/httpStatusCode");
 const OrderModel = require("../../models/Order");
 const UserModel = require("../../models/User");
 
@@ -36,7 +38,7 @@ const getSalesReport = async (req, res) => {
           break;
       }
     }
-    console.log("match = ", matchStage);
+    // console.log("match = ", matchStage);
 
     const aggregationPipeline = [
       { $match: matchStage },
@@ -68,7 +70,7 @@ const getSalesReport = async (req, res) => {
 
     //for aggregated result
     const results = await OrderModel.aggregate(aggregationPipeline);
-    console.log(results);
+    // console.log(results);
 
     const salesData = {
       labels: results.map((r) => r._id),
@@ -109,10 +111,11 @@ const getSalesReport = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error generating report:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Error generating report" });
+    // console.error("Error generating report:", error);
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: HttpResponseMessage.ERROR.REPORT_GENERATE,
+    });
   }
 };
 
@@ -120,7 +123,7 @@ const getSalesReport = async (req, res) => {
 const getSalesChart = async (req, res) => {
   try {
     const { range } = req.query;
-    console.log("range = ", range);
+    // console.log("range = ", range);
     let startDate, groupBy, dateFormat;
 
     switch (range) {
@@ -175,8 +178,10 @@ const getSalesChart = async (req, res) => {
 
     res.json({ labels, values });
   } catch (error) {
-    console.error("Error fetching sales data:", error);
-    res.status(500).json({ error: "Internal server error" });
+    // console.error("Error fetching sales data:", error);
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ error: HttpResponseMessage.ERROR.SERVER_ERROR });
   }
 };
 
@@ -200,7 +205,9 @@ const getOrdersStatusChart = async (req, res) => {
     res.json({ labels, values });
   } catch (error) {
     console.error("Error fetching order status data:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ error: HttpResponseMessage.ERROR.SERVER_ERROR });
   }
 };
 
@@ -271,12 +278,14 @@ const getUserGrowth = async (req, res) => {
       values.push(cumulativeCount);
     });
 
-    console.log("user = ", { labels, values });
+    // console.log("user = ", { labels, values });
 
     res.json({ labels, values });
   } catch (error) {
-    console.error("Error fetching user count data:", error);
-    res.status(500).json({ error: "Internal server error" });
+    // console.error("Error fetching user count data:", error);
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ error: HttpResponseMessage.ERROR.SERVER_ERROR });
   }
 };
 

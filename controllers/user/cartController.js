@@ -3,6 +3,9 @@ const UserModel = require("../../models/User");
 const ProductModel = require("../../models/Product");
 const WishlistModel = require("../../models/Wishlist");
 const OfferModel = require("../../models/Offer");
+const HttpStatusCode = require("../../constants/httpStatusCode");
+const HttpStatus = require("../../constants/httpStatus");
+const HttpResponseMessage = require("../../constants/httpResponseMessage");
 
 //for user cart page
 const getCart = async (req, res) => {
@@ -19,7 +22,12 @@ const getCart = async (req, res) => {
     );
     res.render("user/cartPage", { cart, user, wishlist });
   } catch (err) {
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({
+        status: HttpStatus.ERROR,
+        message: HttpResponseMessage.ERROR.SERVER_ERROR,
+      });
   }
 };
 
@@ -34,8 +42,11 @@ const addToCart = async (req, res) => {
 
     if (!product) {
       return res
-        .status(404)
-        .json({ success: false, message: "Product not found!" });
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({
+          success: false,
+          message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND,
+        });
     }
 
     let discountedPrice = product.price;
@@ -80,21 +91,26 @@ const addToCart = async (req, res) => {
       cart.totalPrice += discountedPrice * quantity;
     }
 
-    console.log(cart.totalPrice);
+    // console.log(cart.totalPrice);
 
     await cart.save();
     req.session.cart = cart;
 
-    console.log("Product added to cart successfully");
-    res.status(200).json({
+    // console.log("Product added to cart successfully");
+    res.status(HttpStatusCode.OK).json({
       success: true,
-      message: "Product added to cart!",
+      message: HttpResponseMessage.SUCCESS.PRODUCT_ADDED_TO_CART,
       cart,
       product: { ...product.toObject(), discountedPrice },
     });
   } catch (err) {
-    console.error("Error in addToCart:", err);
-    res.status(500).json({ success: false, message: "Server Error!" });
+    // console.error("Error in addToCart:", err);
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({
+        success: false,
+        message: HttpResponseMessage.ERROR.SERVER_ERROR,
+      });
   }
 };
 
@@ -106,8 +122,11 @@ const updateQuantity = async (req, res) => {
     const cart = await CartModel.findOne({ userId });
     if (!cart) {
       return res
-        .status(404)
-        .json({ status: "Failed", message: "Cart not found" });
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({
+          status: HttpStatus.FAILED,
+          message: HttpResponseMessage.ERROR.CART_NOT_FOUND,
+        });
     }
 
     const productIdx = cart.products.findIndex(
@@ -115,8 +134,11 @@ const updateQuantity = async (req, res) => {
     );
     if (productIdx === -1) {
       return res
-        .status(404)
-        .json({ status: "Failed", message: "Product not found in the cart" });
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({
+          status: HttpStatus.FAILED,
+          message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND_ON_CART,
+        });
     }
 
     const newQuantity = cart.products[productIdx].quantity + changeQuantity;
@@ -124,8 +146,11 @@ const updateQuantity = async (req, res) => {
     const product = await ProductModel.findById(productId).populate("offers");
     if (!product) {
       return res
-        .status(404)
-        .json({ status: "Failed", message: "Product not found" });
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({
+          status: HttpStatus.FAILED,
+          message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND,
+        });
     }
 
     let discountedPrice = product.price;
@@ -149,20 +174,25 @@ const updateQuantity = async (req, res) => {
     } else {
       cart.products[productIdx].quantity = newQuantity;
     }
-    console.log("quantity = ", newQuantity);
+    // console.log("quantity = ", newQuantity);
 
-    console.log("total = ", cart.totalPrice);
+    // console.log("total = ", cart.totalPrice);
     await cart.save();
 
-    return res.status(200).json({
-      status: "Success",
-      message: "Quantity updated successfully",
+    return res.status(HttpStatusCode.OK).json({
+      status: HttpStatus.SUCCESS,
+      message: HttpResponseMessage.SUCCESS.PRODUCT_QUANTITY_UPDATE,
       product: cart.products[productIdx],
       cartTotal: cart.totalPrice,
     });
   } catch (err) {
-    console.error("Error updating quantity:", err);
-    res.status(500).json({ status: "Error", message: "Server Error!" });
+    // console.error("Error updating quantity:", err);
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({
+        status: HttpStatus.ERROR,
+        message: HttpResponseMessage.ERROR.SERVER_ERROR,
+      });
   }
 };
 
@@ -174,8 +204,11 @@ const deleteCartProduct = async (req, res) => {
     const cart = await CartModel.findOne({ userId });
     if (!cart) {
       return res
-        .status(404)
-        .json({ status: "Failed", message: "The cart is not found" });
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({
+          status: HttpStatus.FAILED,
+          message: HttpResponseMessage.ERROR.CART_NOT_FOUND,
+        });
     }
 
     const productToDelete = cart.products.find(
@@ -183,8 +216,11 @@ const deleteCartProduct = async (req, res) => {
     );
     if (!productToDelete) {
       return res
-        .status(404)
-        .json({ status: "Failed", message: "Product not found in the cart" });
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({
+          status: HttpStatus.FAILED,
+          message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND_ON_CART,
+        });
     }
 
     cart.products = cart.products.filter(
@@ -215,21 +251,26 @@ const deleteCartProduct = async (req, res) => {
       total += discountedPrice * currProduct.quantity;
     }
 
-    console.log("total = ", total);
+    // console.log("total = ", total);
 
     cart.totalPrice = total;
 
     await cart.save();
     req.session.cart = cart;
 
-    return res.status(200).json({
-      status: "Success",
-      message: "The product is deleted from the cart",
+    return res.status(HttpStatusCode.OK).json({
+      status: HttpStatus.SUCCESS,
+      message: HttpResponseMessage.SUCCESS.PRODUCT_DELETED_FROM_CART,
       cart,
     });
   } catch (err) {
-    console.error("Error deleting product from cart:", err);
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+    // console.error("Error deleting product from cart:", err);
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({
+        status: HttpStatus.ERROR,
+        message: HttpResponseMessage.ERROR.SERVER_ERROR,
+      });
   }
 };
 
@@ -241,7 +282,12 @@ const postCart = async (req, res) => {
     req.session.cart = cart;
     res.redirect("/checkout");
   } catch (err) {
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({
+        status: HttpStatus.ERROR,
+        message: HttpResponseMessage.ERROR.SERVER_ERROR,
+      });
   }
 };
 

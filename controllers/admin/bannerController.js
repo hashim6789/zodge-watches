@@ -1,3 +1,6 @@
+const HttpResponseMessage = require("../../constants/httpResponseMessage");
+const HttpStatus = require("../../constants/httpStatus");
+const HttpStatusCode = require("../../constants/httpStatusCode");
 const BannerModel = require("../../models/Banner");
 
 //get all banners with pagination
@@ -29,7 +32,10 @@ const getBanners = async (req, res) => {
       pages: Math.ceil(count / perPage),
     });
   } catch (err) {
-    res.status(404).json({ status: "Success", message: "Server error!!!" });
+    res.status(HttpStatusCode.NOT_FOUND).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.SERVER_ERROR,
+    });
   }
 };
 
@@ -43,8 +49,11 @@ const createBanner = async (req, res) => {
     let banner = await BannerModel.findOne({ title: bannerTitle });
     if (banner) {
       return res
-        .status(400)
-        .json({ success: false, message: "The banner is already exist!" });
+        .status(HttpStatusCode.BAD_REQUEST)
+        .json({
+          success: false,
+          message: HttpResponseMessage.ERROR.BANNER_EXIST,
+        });
     }
 
     banner = new BannerModel({
@@ -54,15 +63,15 @@ const createBanner = async (req, res) => {
     });
     banner.save();
 
-    return res.status(200).json({
+    return res.status(HttpStatusCode.OK).json({
       success: true,
-      message: "banner created successfully",
+      message: HttpResponseMessage.SUCCESS.BANNER_CREATION,
       banner,
     });
   } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: "Error creating the banner",
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.BANNER_CREATION,
     });
   }
 };
@@ -82,17 +91,25 @@ const editBanner = async (req, res) => {
 
     if (!banner) {
       return res
-        .status(404)
-        .json({ success: false, message: "The banner is not found !" });
+        .status(HttpStatusCode.BAD_REQUEST)
+        .json({
+          success: false,
+          message: HttpResponseMessage.ERROR.BANNER_NOT_FOUND,
+        });
     }
 
     res.json({
       success: true,
-      message: "Banner updated successfully",
+      message: HttpResponseMessage.SUCCESS.BANNER_UPDATE,
       banner,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error updating banner" });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({
+        success: false,
+        message: HttpResponseMessage.ERROR.BANNER_UPDATE,
+      });
   }
 };
 
@@ -114,7 +131,9 @@ const toggleBanner = async (req, res) => {
       return res.json({ success: false });
     }
   } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
+    return res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, error: error.message });
   }
 };
 

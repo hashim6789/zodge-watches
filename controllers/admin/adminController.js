@@ -1,4 +1,7 @@
 const { ENV } = require("../../config/env.config");
+const HttpResponseMessage = require("../../constants/httpResponseMessage");
+const HttpStatus = require("../../constants/httpStatus");
+const HttpStatusCode = require("../../constants/httpStatusCode");
 const OrderModel = require("../../models/Order");
 
 require("dotenv").config();
@@ -33,9 +36,9 @@ const postLogin = (req, res, next) => {
       res.redirect("/admin/login?error=Invalid email or password");
     }
   } catch (err) {
-    res.status(500).json({
-      status: "Error",
-      message: "The server error",
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
     });
   }
 };
@@ -128,9 +131,9 @@ const getDashboard = async (req, res) => {
       topProducts,
     });
   } catch (err) {
-    res.status(500).json({
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "The server Error",
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
     });
   }
 };
@@ -148,9 +151,9 @@ const getLogout = (req, res) => {
       res.redirect("/admin/login");
     });
   } catch (err) {
-    res.status(500).json({
-      status: "Error",
-      message: "The server error",
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.ERROR.SERVER_ERROR,
     });
   }
 };

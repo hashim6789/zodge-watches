@@ -1,16 +1,22 @@
 const Wallet = require("../../models/Wallet");
 const User = require("../../models/User");
 const mongoose = require("mongoose");
+const HttpStatusCode = require("../../constants/httpStatusCode");
 
 // Get wallet balance
 const getWalletBalance = async (req, res) => {
   try {
     const wallet = await Wallet.findOne({ user: req.user._id });
-    if (!wallet) return res.status(404).json({ message: "Wallet not found" });
+    if (!wallet)
+      return res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({ message: "Wallet not found" });
 
-    res.status(200).json({ balance: wallet.balance });
+    res.status(HttpStatusCode.OK).json({ balance: wallet.balance });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -18,7 +24,10 @@ const getWalletBalance = async (req, res) => {
 const addFundsToWallet = async (req, res) => {
   try {
     const { amount } = req.body;
-    if (amount <= 0) return res.status(400).json({ message: "Invalid amount" });
+    if (amount <= 0)
+      return res
+        .status(HttpStatusCode.BAD_REQUEST)
+        .json({ message: "Invalid amount" });
 
     const wallet = await Wallet.findOne({ user: req.user._id });
     wallet.balance += amount;
@@ -31,10 +40,12 @@ const addFundsToWallet = async (req, res) => {
 
     await wallet.save();
     res
-      .status(200)
+      .status(HttpStatusCode.OK)
       .json({ message: "Funds added successfully", balance: wallet.balance });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -45,7 +56,9 @@ const deductFromWallet = async (req, res) => {
 
     const wallet = await Wallet.findOne({ user: req.user._id });
     if (!wallet || wallet.balance < amount) {
-      return res.status(400).json({ message: "Insufficient wallet balance" });
+      return res
+        .status(HttpStatusCode.BAD_REQUEST)
+        .json({ message: "Insufficient wallet balance" });
     }
 
     wallet.balance -= amount;
@@ -58,10 +71,12 @@ const deductFromWallet = async (req, res) => {
 
     await wallet.save();
     res
-      .status(200)
+      .status(HttpStatusCode.OK)
       .json({ message: "Purchase successful", balance: wallet.balance });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -88,11 +103,16 @@ const getTransactionHistory = async (req, res) => {
     ]);
 
     console.log(wallet);
-    if (!wallet) return res.status(404).json({ message: "Wallet not found" });
+    if (!wallet)
+      return res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({ message: "Wallet not found" });
 
-    res.status(200).json(wallet.transactions);
+    res.status(HttpStatusCode.OK).json(wallet.transactions);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 

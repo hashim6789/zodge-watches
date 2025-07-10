@@ -2,6 +2,9 @@ const OfferModel = require("../../models/Offer");
 const CategoryModel = require("../../models/Category");
 const ProductModel = require("../../models/Product");
 const mongoose = require("mongoose");
+const HttpStatusCode = require("../../constants/httpStatusCode");
+const HttpStatus = require("../../constants/httpStatus");
+const HttpResponseMessage = require("../../constants/httpResponseMessage");
 
 const getOffers = async (req, res) => {
   try {
@@ -37,7 +40,12 @@ const getOffers = async (req, res) => {
       pages: Math.ceil(count / perPage),
     });
   } catch (err) {
-    res.status(404).json({ success: false, message: "Server error!!!" });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({
+        success: false,
+        message: HttpResponseMessage.ERROR.SERVER_ERROR,
+      });
   }
 };
 
@@ -51,14 +59,20 @@ const createOffer = async (req, res) => {
     const existingOffer = await OfferModel.findOne({ name: offerData.name });
     if (existingOffer) {
       return res
-        .status(400)
-        .json({ success: false, message: "The offer already exists" });
+        .status(HttpStatusCode.BAD_REQUEST)
+        .json({
+          success: false,
+          message: HttpResponseMessage.ERROR.OFFER_EXIST,
+        });
     }
 
     if (!["product", "category"].includes(offerData.applicableType)) {
       return res
-        .status(400)
-        .json({ success: false, message: "Invalid applicable type" });
+        .status(HttpStatusCode.BAD_REQUEST)
+        .json({
+          success: false,
+          message: HttpResponseMessage.ERROR.OFFER_TYPE,
+        });
     }
 
     console.log({ ...offerData, image });
@@ -78,16 +92,16 @@ const createOffer = async (req, res) => {
       );
     }
 
-    return res.status(201).json({
+    return res.status(HttpStatusCode.CREATED).json({
       success: true,
-      message: "The offer is created successfully and added to the products",
+      message: HttpResponseMessage.SUCCESS.OFFER_CREATION,
       newOffer,
     });
   } catch (err) {
-    console.error("Error creating offer:", err.message);
+    // console.error("Error creating offer:", err.message);
     return res
-      .status(500)
-      .json({ success: false, message: "Server error!!!", error: err.message });
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: HttpStatus.ERROR, error: err.message });
   }
 };
 
@@ -101,7 +115,7 @@ const editOffer = async (req, res) => {
       offerData.image = image;
     }
 
-    console.log(offerData);
+    // console.log(offerData);
 
     if (offerData.applicableType === "category" && !offerData.categoryIds) {
       offerData.categoryIds = [];
@@ -114,8 +128,11 @@ const editOffer = async (req, res) => {
     const existingOffer = await OfferModel.findById(offerId);
     if (!existingOffer) {
       return res
-        .status(404)
-        .json({ success: false, message: "Offer not found" });
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({
+          success: false,
+          message: HttpResponseMessage.ERROR.OFFER_NOT_FOUND,
+        });
     }
 
     const updatedOffer = await OfferModel.findByIdAndUpdate(
@@ -149,16 +166,16 @@ const editOffer = async (req, res) => {
       );
     }
 
-    return res.status(200).json({
+    return res.status(HttpStatusCode.OK).json({
       success: true,
-      message: "The offer is updated successfully and associated with products",
+      message: HttpResponseMessage.SUCCESS.OFFER_UPDATE,
       updatedOffer,
     });
   } catch (err) {
-    console.error("Error updating offer:", err.message);
+    // console.error("Error updating offer:", err.message);
     return res.status(500).json({
       success: false,
-      message: "Server error!!!",
+      message: HttpStatus.ERROR,
       error: err.message,
     });
   }
@@ -175,7 +192,7 @@ const fetchOffer = async (req, res) => {
     const categories = await CategoryModel.find({ isListed: true }, "name");
     const products = await ProductModel.find({ isListed: true }, "name");
 
-    console.log(products, categories);
+    // console.log(products, categories);
 
     res.json({
       success: true,
@@ -185,7 +202,12 @@ const fetchOffer = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching offer details:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({
+        success: false,
+        message: HttpResponseMessage.ERROR.SERVER_ERROR,
+      });
   }
 };
 
@@ -200,16 +222,23 @@ const getApplicableItems = async (req, res) => {
       items = await CategoryModel.find({ isListed: true });
     } else {
       return res
-        .status(400)
-        .json({ success: false, message: "Invalid applicable type" });
+        .status(HttpStatusCode.BAD_REQUEST)
+        .json({
+          success: false,
+          message: HttpResponseMessage.ERROR.OFFER_TYPE,
+        });
     }
 
-    return res.status(200).json({ success: true, items });
+    return res.status(HttpStatusCode.OK).json({ success: true, items });
   } catch (err) {
-    console.error("Error fetching applicable items:", err.message);
+    // console.error("Error fetching applicable items:", err.message);
     return res
-      .status(500)
-      .json({ success: false, message: "Server error!!!", error: err.message });
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({
+        success: false,
+        message: HttpResponseMessage.ERROR.SERVER_ERROR,
+        error: err.message,
+      });
   }
 };
 
@@ -230,7 +259,9 @@ const toggleOffer = async (req, res) => {
       return res.json({ success: false });
     }
   } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
+    return res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, error: error.message });
   }
 };
 
@@ -239,9 +270,9 @@ const getOffer = async (req, res) => {
     const { offerId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(offerId)) {
-      return res.status(400).json({
+      return res.status(HttpStatusCode.BAD_REQUEST).json({
         success: false,
-        message: "Invalid offer ID",
+        message: HttpResponseMessage.ERROR.OFFER_ID,
       });
     }
 
@@ -251,21 +282,21 @@ const getOffer = async (req, res) => {
     );
 
     if (!offer) {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         success: false,
-        message: "Offer not found",
+        message: HttpResponseMessage.ERROR.OFFER_NOT_FOUND,
       });
     }
 
-    return res.status(200).json({
+    return res.status(HttpStatusCode.OK).json({
       success: true,
       offer,
     });
   } catch (err) {
-    console.error("Error fetching offer details:", err.message);
-    return res.status(500).json({
+    // console.error("Error fetching offer details:", err.message);
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Server error!!!",
+      message: HttpStatus.ERROR,
       error: err.message,
     });
   }
@@ -284,21 +315,21 @@ const updateOffer = async (req, res) => {
     );
 
     if (!updatedOffer) {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         success: false,
-        message: "The offer is not found",
+        message: HttpResponseMessage.ERROR.OFFER_NOT_FOUND,
       });
     }
 
-    return res.status(200).json({
+    return res.status(HttpStatusCode.OK).json({
       success: true,
-      message: "category status updated successfully",
+      message: HttpResponseMessage.SUCCESS.OFFER_UPDATE,
       updatedOffer,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "The server error",
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
     });
   }
 };
