@@ -181,9 +181,9 @@ document.addEventListener("DOMContentLoaded", function () {
               const netSales = totalSales - discount;
               return [
                 label, // Date-wise data for daily report
-                `$${totalSales.toFixed(2)}`,
-                `$${discount.toFixed(2)}`,
-                `$${netSales.toFixed(2)}`,
+                `INR${totalSales.toFixed(2)}`,
+                `INR${discount.toFixed(2)}`,
+                `INR${netSales.toFixed(2)}`,
               ];
             });
 
@@ -197,9 +197,9 @@ document.addEventListener("DOMContentLoaded", function () {
               const netSales = totalSales - discount;
               return [
                 `Week of ${label}`, // Week-wise data for weekly report
-                `$${totalSales.toFixed(2)}`,
-                `$${discount.toFixed(2)}`,
-                `$${netSales.toFixed(2)}`,
+                `INR${totalSales.toFixed(2)}`,
+                `INR${discount.toFixed(2)}`,
+                `INR${netSales.toFixed(2)}`,
               ];
             });
 
@@ -213,9 +213,9 @@ document.addEventListener("DOMContentLoaded", function () {
               const netSales = totalSales - discount;
               return [
                 `Month of ${label}`, // Month-wise data for monthly report
-                `$${totalSales.toFixed(2)}`,
-                `$${discount.toFixed(2)}`,
-                `$${netSales.toFixed(2)}`,
+                `INR${totalSales.toFixed(2)}`,
+                `INR${discount.toFixed(2)}`,
+                `INR${netSales.toFixed(2)}`,
               ];
             });
 
@@ -229,9 +229,9 @@ document.addEventListener("DOMContentLoaded", function () {
               const netSales = totalSales - discount;
               return [
                 `Year ${label}`, // Year-wise data for yearly report
-                `$${totalSales.toFixed(2)}`,
-                `$${discount.toFixed(2)}`,
-                `$${netSales.toFixed(2)}`,
+                `INR${totalSales.toFixed(2)}`,
+                `INR${discount.toFixed(2)}`,
+                `INR${netSales.toFixed(2)}`,
               ];
             });
 
@@ -245,9 +245,9 @@ document.addEventListener("DOMContentLoaded", function () {
               const netSales = totalSales - discount;
               return [
                 label, // Custom date range
-                `$${totalSales.toFixed(2)}`,
-                `$${discount.toFixed(2)}`,
-                `$${netSales.toFixed(2)}`,
+                `INR${totalSales.toFixed(2)}`,
+                `INR${discount.toFixed(2)}`,
+                `INR${netSales.toFixed(2)}`,
               ];
             });
 
@@ -281,12 +281,12 @@ document.addEventListener("DOMContentLoaded", function () {
           doc.previousAutoTable.finalY + 30
         );
         doc.text(
-          `Overall Order Amount: $${overall.orderAmount.toFixed(2)}`,
+          `Overall Order Amount: INR${overall.orderAmount.toFixed(2)}`,
           14,
           doc.previousAutoTable.finalY + 40
         );
         doc.text(
-          `Overall Discount: $${overall.discount.toFixed(2)}`,
+          `Overall Discount: INR${overall.discount.toFixed(2)}`,
           14,
           doc.previousAutoTable.finalY + 50
         );

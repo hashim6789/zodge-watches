@@ -126,7 +126,7 @@
           </div>
           <div class="col-md-6 text-md-right">
             <p>
-              <strong>Total Amount:</strong> $<%= order.totalPrice.toFixed(2) %>
+              <strong>Total Amount:</strong> ₹<%= order.totalPrice.toFixed(2) %>
             </p>
           </div>
         </div>
@@ -160,7 +160,7 @@
             <h6><%= item.productId.name %></h6>
             <p>Quantity: <%= item.quantity %></p>
           </div>
-          <div class="product-price">$<%= item.price.toFixed(2) %></div>
+          <div class="product-price">₹<%= item.price.toFixed(2) %></div>
         </div>
         <% }) %>
       </div>
@@ -294,8 +294,8 @@
             <tr>
               <td><%= item.productId.name %></td>
               <td><%= item.quantity %></td>
-              <td>$<%= item.price.toFixed(2) %></td>
-              <td>$<%= (item.quantity * item.price).toFixed(2) %></td>
+              <td>₹<%= item.price.toFixed(2) %></td>
+              <td>₹<%= (item.quantity * item.price).toFixed(2) %></td>
             </tr>
             <% }) %>
           </tbody>
@@ -304,21 +304,21 @@
             product.price ,0) %>
             <tr>
               <td colspan="3" class="text-right">Subtotal:</td>
-              <td>$<%= subTotal.toFixed(2) %></td>
+              <td>₹<%= subTotal.toFixed(2) %></td>
             </tr>
             <tr>
               <td colspan="3" class="text-right">Delivery Charge:</td>
-              <td>$<%= order.deliveryCharge.toFixed(2) %></td>
+              <td>₹<%= order.deliveryCharge.toFixed(2) %></td>
             </tr>
             <% if(order.couponDiscount) {%>
             <tr>
               <td colspan="3" class="text-right">Coupon Discount:</td>
-              <td>-$<%= order.couponDiscount.toFixed(2) %></td>
+              <td>-₹<%= order.couponDiscount.toFixed(2) %></td>
             </tr>
             <% } %>
             <tr>
               <td colspan="3" class="text-right"><strong>Total:</strong></td>
-              <td><strong>$<%= order.totalPrice.toFixed(2) %></strong></td>
+              <td><strong>₹<%= order.totalPrice.toFixed(2) %></strong></td>
             </tr>
           </tfoot>
         </table>
@@ -655,8 +655,8 @@
         order.products.forEach((item) => {
           doc.text(item.productId.name, 20, yPos);
           doc.text(item.quantity.toString(), 100, yPos);
-          doc.text(`$${item.price.toFixed(2)}`, 130, yPos);
-          doc.text(`$${(item.quantity * item.price).toFixed(2)}`, 160, yPos);
+          doc.text(`₹${item.price.toFixed(2)}`, 130, yPos);
+          doc.text(`₹${(item.quantity * item.price).toFixed(2)}`, 160, yPos);
           yPos += 10;
         });
 
@@ -667,22 +667,22 @@
         );
         yPos += 10;
         doc.text("Subtotal:", 130, yPos);
-        doc.text(`$${subTotal.toFixed(2)}`, 160, yPos);
+        doc.text(`₹${subTotal.toFixed(2)}`, 160, yPos);
 
         yPos += 10;
         doc.text("Delivery Charge:", 130, yPos);
-        doc.text(`$${order.deliveryCharge.toFixed(2)}`, 160, yPos);
+        doc.text(`₹${order.deliveryCharge.toFixed(2)}`, 160, yPos);
 
         if (order.couponDiscount) {
           yPos += 10;
           doc.text("Coupon Discount:", 130, yPos);
-          doc.text(`-$${order.couponDiscount.toFixed(2)}`, 160, yPos);
+          doc.text(`-₹${order.couponDiscount.toFixed(2)}`, 160, yPos);
         }
 
         yPos += 10;
         doc.setFont("helvetica", "bold");
         doc.text("Total:", 130, yPos);
-        doc.text(`$${order.totalPrice.toFixed(2)}`, 160, yPos);
+        doc.text(`₹${order.totalPrice.toFixed(2)}`, 160, yPos);
 
         // Save the PDF
         doc.save(`Invoice-${order.orderId.slice(-6)}.pdf`);

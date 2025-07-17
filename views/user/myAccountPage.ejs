@@ -27,8 +27,7 @@
           <button class="close-button" id="closeModal">&times;</button>
         </div>
         <div class="modal-body">
-          <p class="instruction">Enter the 6-digit code sent to</p>
-          <p class="phone-number">+1 (302) 678-2810</p>
+          <p class="instruction">Enter the 6-digit code sent to email</p>
           <form id="otpForm">
             <div class="otp-inputs">
               <input
@@ -311,7 +310,7 @@
               <h3 class="mb-4">My Wallet</h3>
               <div class="card">
                 <div class="card-body">
-                  <h5>Wallet Balance: $<%= wallet.balance.toFixed(2) %></h5>
+                  <h5>Wallet Balance: ₹<%= wallet.balance.toFixed(2) %></h5>
                   <div class="mt-4">
                     <h6>Transaction History</h6>
                     <% if (wallet.transactions.length === 0) { %>
@@ -334,7 +333,7 @@
                             %>
                           </td>
                           <td><%= transaction.description %></td>
-                          <td>$<%= transaction.amount.toFixed(2) %></td>
+                          <td>₹<%= transaction.amount.toFixed(2) %></td>
                           <td>
                             <%= transaction.type === 'credit' ? 'Credit' :
                             'Debit' %>
