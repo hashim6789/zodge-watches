@@ -1,5 +1,8 @@
 const CouponModel = require("../../models/Coupon");
 const CartModel = require("../../models/Cart");
+const HttpStatusCode = require("../../constants/httpStatusCode");
+const HttpStatus = require("../../constants/httpStatus");
+const HttpResponseMessage = require("../../constants/httpResponseMessage");
 
 //for get all coupons
 const getCoupons = async (req, res) => {
@@ -13,7 +16,7 @@ const getCoupons = async (req, res) => {
       .skip((page - 1) * perPage)
       .limit(perPage);
 
-    console.log(coupons);
+    // console.log(coupons);
     if (!coupons) {
       return res.render("admin/couponManagementPage", {
         coupons: null,
@@ -31,7 +34,10 @@ const getCoupons = async (req, res) => {
       pages: Math.ceil(count / perPage),
     });
   } catch (err) {
-    res.status(500).json({ status: "Error", message: "The server error" });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -55,9 +61,9 @@ const createCoupon = async (req, res) => {
     const existingCoupon = await CouponModel.findOne({ code: couponCode });
 
     if (existingCoupon) {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         success: false,
-        message: "The coupon already exists",
+        message: HttpResponseMessage.ERROR.COUPON_EXIST,
       });
     }
 
@@ -73,17 +79,17 @@ const createCoupon = async (req, res) => {
 
     await newCoupon.save();
 
-    return res.status(200).json({
+    return res.status(HttpStatusCode.OK).json({
       success: true,
-      message: "Coupon created successfully",
+      message: HttpResponseMessage.SUCCESS.COUPON_CREATION,
       coupon: newCoupon,
     });
   } catch (error) {
-    console.error("Error creating coupon:", error);
+    // console.error("Error creating coupon:", error);
 
-    return res.status(500).json({
-      status: "error",
-      message: "Server error occurred while creating the coupon",
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.COUPON_CREATION,
     });
   }
 };
@@ -117,21 +123,21 @@ const updateCoupon = async (req, res) => {
     console.log("updated = ", updatedCoupon);
 
     if (!updatedCoupon) {
-      return res.status(404).json({
-        status: "Failed",
-        message: "The coupon is not found",
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.COUPON_NOT_FOUND,
       });
     }
 
-    res.status(200).json({
-      status: "success",
-      message: "coupon updated successfully",
+    res.status(HttpStatusCode.OK).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.SUCCESS.COUPON_UPDATE,
       updatedCoupon,
     });
   } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: "server error",
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
     });
   }
 };
@@ -154,13 +160,23 @@ const unlistCoupon = async (req, res) => {
 
     if (!updatedCoupon) {
       return res
-        .status(404)
-        .json({ success: false, message: "The coupon is not found" });
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({
+          success: false,
+          message: HttpResponseMessage.ERROR.COUPON_NOT_FOUND,
+        });
     }
 
-    res.status(200).json({ success: true, coupon: updatedCoupon });
+    res
+      .status(HttpStatusCode.OK)
+      .json({ success: true, coupon: updatedCoupon });
   } catch (error) {
-    res.status(500).json({ success: false, message: "server error." });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({
+        success: false,
+        message: HttpResponseMessage.ERROR.SERVER_ERROR,
+      });
   }
 };
 

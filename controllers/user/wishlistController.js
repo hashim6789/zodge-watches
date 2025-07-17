@@ -2,6 +2,7 @@ const WishlistModel = require("../../models/Wishlist");
 const ProductModel = require("../../models/Product");
 const OfferModel = require("../../models/Offer");
 const CartModel = require("../../models/Cart");
+const HttpStatusCode = require("../../constants/httpStatusCode");
 
 //for adding a product into a wishlist
 const addToWishlist = async (req, res) => {
@@ -12,7 +13,7 @@ const addToWishlist = async (req, res) => {
     const product = await ProductModel.findById(productId);
     if (!product) {
       return res
-        .status(404)
+        .status(HttpStatusCode.NOT_FOUND)
         .json({ status: "Error", message: "Product not found!" });
     }
 
@@ -27,13 +28,13 @@ const addToWishlist = async (req, res) => {
     if (!wishlist.productIds.includes(productId)) {
       wishlist.productIds.push(productId);
     } else {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         success: false,
         message: "Product already in wishlist",
       });
     }
     wishlist.save();
-    return res.status(201).json({
+    return res.status(HttpStatusCode.CREATED).json({
       success: true,
       message: "The product is added to the wishlist successfully",
       data: {
@@ -41,7 +42,7 @@ const addToWishlist = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Server Error!!!",
     });
@@ -57,7 +58,7 @@ const removeFromWishlist = async (req, res) => {
     const product = await ProductModel.findById(productId);
     // console.log(product);
     if (!product) {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         success: false,
         message: "Product not found!",
       });
@@ -65,7 +66,7 @@ const removeFromWishlist = async (req, res) => {
 
     const wishlist = await WishlistModel.findOne({ userId });
     if (!wishlist) {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         success: false,
         message: "The wishlist is not found",
       });
@@ -82,7 +83,7 @@ const removeFromWishlist = async (req, res) => {
     }
 
     wishlist.save();
-    res.status(200).json({
+    res.status(HttpStatusCode.OK).json({
       success: true,
       message: "The product is removed from the wishlist",
       data: {
@@ -90,7 +91,7 @@ const removeFromWishlist = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Server Error!!!",
     });
@@ -106,7 +107,7 @@ const addToCartFromWishlist = async (req, res) => {
     const product = await ProductModel.findById(productId).populate("offers");
 
     if (!product) {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         success: false,
         message: "Product not found!",
       });
@@ -114,7 +115,7 @@ const addToCartFromWishlist = async (req, res) => {
 
     const wishlist = await WishlistModel.findOne({ userId });
     if (!wishlist) {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         success: false,
         message: "The wishlist is not found",
       });
@@ -165,7 +166,7 @@ const addToCartFromWishlist = async (req, res) => {
     cart.totalPrice += discountedPrice;
     await cart.save();
 
-    res.status(200).json({
+    res.status(HttpStatusCode.OK).json({
       success: true,
       message: "The product is removed from the wishlist and added to the cart",
       data: {
@@ -177,7 +178,7 @@ const addToCartFromWishlist = async (req, res) => {
     });
   } catch (err) {
     console.error("Error in addToCartFromWishlist:", err);
-    res.status(500).json({
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Server Error!",
     });
@@ -198,7 +199,9 @@ const fetchWishlist = async (req, res) => {
     });
 
     if (!wishlist) {
-      return res.status(404).json({ message: "Wishlist not found" });
+      return res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({ message: "Wishlist not found" });
     }
 
     const productsWithDiscounts = wishlist.productIds.map((product) => {
@@ -225,10 +228,12 @@ const fetchWishlist = async (req, res) => {
       };
     });
 
-    res.status(200).json({ wishlist: productsWithDiscounts });
+    res.status(HttpStatusCode.OK).json({ wishlist: productsWithDiscounts });
   } catch (error) {
     console.error("Error fetching wishlist:", error);
-    res.status(500).json({ error: "Failed to fetch wishlist" });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch wishlist" });
   }
 };
 

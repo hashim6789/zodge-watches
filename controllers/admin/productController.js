@@ -1,5 +1,8 @@
 const ProductModel = require("../../models/Product");
 const CategoryModel = require("../../models/Category");
+const HttpStatusCode = require("../../constants/httpStatusCode");
+const HttpResponseMessage = require("../../constants/httpResponseMessage");
+const HttpStatus = require("../../constants/httpStatus");
 
 // for create new product creation
 const createProduct = async (req, res) => {
@@ -26,20 +29,22 @@ const createProduct = async (req, res) => {
 
       const category = await CategoryModel.findById(newProduct._id);
 
-      return res.status(200).json({
-        status: "success",
-        message: "Product created successfully",
+      return res.status(HttpStatusCode.OK).json({
+        status: HttpStatus.SUCCESS,
+        message: HttpResponseMessage.SUCCESS.PRODUCT_CREATION,
         data: { newProduct, category },
       });
     } else {
-      return res.status(404).json({
-        status: "error",
-        message: "The product already exists",
+      return res.status(HttpStatusCode.BAD_REQUEST).json({
+        status: HttpStatus.ERROR,
+        message: HttpResponseMessage.ERROR.PRODUCT_EXIST,
       });
     }
   } catch (error) {
-    console.error("Error creating product:", error);
-    res.status(500).json({ message: "Product creation failed" });
+    // console.error("Error creating product:", error);
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: HttpResponseMessage.ERROR.PRODUCT_CREATION });
   }
 };
 
@@ -76,7 +81,10 @@ const getProducts = async (req, res) => {
       pages: Math.ceil(count / perPage),
     });
   } catch (err) {
-    res.status(500).json({ status: "Error", message: "Server error!!!" });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -93,21 +101,21 @@ const unlistProduct = async (req, res) => {
     );
 
     if (!product) {
-      return res.status(404).json({
-        status: "error",
-        message: "product not found",
+      return res.status(HttpStatusCode.BAD_REQUEST).json({
+        status: HttpStatus.ERROR,
+        message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND,
       });
     }
 
-    return res.status(200).json({
-      status: "success",
-      message: "product status updated successfully",
+    return res.status(HttpStatusCode.OK).json({
+      status: HttpStatus.SUCCESS,
+      message: HttpResponseMessage.SUCCESS.PRODUCT_STATUS_UPDATE,
       data: product,
     });
   } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: "Error updating product status",
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.PRODUCT_STATUS_UPDATE,
     });
   }
 };
@@ -134,20 +142,22 @@ const updateProduct = async (req, res) => {
 
       await product.save();
 
-      return res.status(200).json({
-        status: "success",
-        message: "Product updated successfully",
+      return res.status(HttpStatusCode.OK).json({
+        status: HttpStatus.SUCCESS,
+        message: HttpResponseMessage.SUCCESS.PRODUCT_UPDATE,
         data: product,
       });
     } else {
-      return res.status(404).json({
-        status: "error",
-        message: "Product not found",
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.ERROR,
+        message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND,
       });
     }
   } catch (error) {
-    console.error("Error updating product:", error);
-    res.status(500).json({ message: "Product update failed" });
+    // console.error("Error updating product:", error);
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: HttpResponseMessage.ERROR.PRODUCT_UPDATE });
   }
 };
 
@@ -158,13 +168,17 @@ const getProductDetails = async (req, res) => {
     const product = await ProductModel.findById(productId);
 
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({ message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND });
     }
 
     res.json(product);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: HttpResponseMessage.ERROR.SERVER_ERROR });
   }
 };
 
@@ -175,9 +189,9 @@ const searchProducts = (req, res) => {
     console.log(query);
     res.redirect(`/admin/products?query=${query}`);
   } catch (err) {
-    res.status(500).json({
-      status: "Error",
-      message: "The server error",
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
     });
   }
 };
@@ -187,7 +201,9 @@ const getAllProductsAPI = async (req, res) => {
     const products = await ProductModel.find({ isListed: true }); // Fetch all categories from the database
     res.json(products);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching categories", error });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: HttpResponseMessage.ERROR.PRODUCT_FETCH, error });
   }
 };
 

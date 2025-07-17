@@ -1,3 +1,6 @@
+const HttpResponseMessage = require("../../constants/httpResponseMessage");
+const HttpStatus = require("../../constants/httpStatus");
+const HttpStatusCode = require("../../constants/httpStatusCode");
 const CategoryModel = require("../../models/Category");
 const ProductModel = require("../../models/Product");
 
@@ -30,7 +33,10 @@ const getCategory = async (req, res) => {
       pages: Math.ceil(count / perPage),
     });
   } catch (err) {
-    res.status(404).json({ status: "Success", message: "Server error!!!" });
+    res.status(HttpStatusCode.NOT_FOUND).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -49,23 +55,23 @@ const createCategory = async (req, res) => {
         updatedAt: Date.now(),
       });
       await category.save();
-      return res.status(200).json({
-        status: "success",
-        message: "category created successfully",
+      return res.status(HttpStatusCode.OK).json({
+        status: HttpStatus.SUCCESS,
+        message: HttpResponseMessage.SUCCESS.CATEGORY_CREATION,
         data: {
           category,
         },
       });
     } else {
-      return res.status(404).json({
-        status: "Failed",
-        message: "The category is already exists",
+      return res.status(HttpStatusCode.OK).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.CATEGORY_EXIST,
       });
     }
   } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: "Error creating the category",
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.CATEGORY_CREATION,
     });
   }
 };
@@ -82,9 +88,9 @@ const editCategory = async (req, res) => {
     });
 
     if (existingCategory && existingCategory._id.toString() !== categoryId) {
-      return res.status(400).json({
-        status: "error",
-        message: "Category name already exists",
+      return res.status(HttpStatusCode.BAD_REQUEST).json({
+        status: HttpStatus.ERROR,
+        message: HttpResponseMessage.ERROR.CATEGORY_EXIST,
       });
     }
 
@@ -95,21 +101,21 @@ const editCategory = async (req, res) => {
     );
 
     if (!category) {
-      return res.status(404).json({
-        status: "error",
-        message: "category not found",
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.ERROR,
+        message: HttpResponseMessage.ERROR.CATEGORY_NOT_FOUND,
       });
     }
 
-    return res.status(200).json({
-      status: "success",
-      message: "category status updated successfully",
+    return res.status(HttpStatusCode.OK).json({
+      status: HttpStatus.SUCCESS,
+      message: HttpResponseMessage.ERROR.CATEGORY_UPDATE,
       data: category,
     });
   } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: "Error updating category status",
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.CATEGORY_UPDATE,
     });
   }
 };
@@ -127,9 +133,9 @@ const unlistCategory = async (req, res) => {
     );
 
     if (!category) {
-      return res.status(404).json({
-        status: "error",
-        message: "category not found",
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.ERROR,
+        message: HttpResponseMessage.ERROR.CATEGORY_NOT_FOUND,
       });
     } else {
       const products = await ProductModel.updateMany(
@@ -138,15 +144,15 @@ const unlistCategory = async (req, res) => {
       );
     }
 
-    return res.status(200).json({
-      status: "success",
-      message: "category status updated successfully",
+    return res.status(HttpStatusCode.OK).json({
+      status: HttpStatus.SUCCESS,
+      message: HttpResponseMessage.SUCCESS.CATEGORY_STATUS_UPDATE,
       data: category,
     });
   } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: "Error updating category status",
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.CATEGORY_STATUS_UPDATE,
     });
   }
 };
@@ -163,7 +169,9 @@ const getAllCategoriesAPI = async (req, res) => {
     const categories = await CategoryModel.find({ isListed: true }); // Fetch all categories from the database
     res.json(categories);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching categories", error });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: HttpResponseMessage.ERROR.CATEGORY_FETCH, error });
   }
 };
 

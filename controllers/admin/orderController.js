@@ -1,6 +1,9 @@
+const HttpResponseMessage = require("../../constants/httpResponseMessage");
+const HttpStatus = require("../../constants/httpStatus");
+const HttpStatusCode = require("../../constants/httpStatusCode");
 const OrderModel = require("../../models/Order");
 const WalletModel = require("../../models/Wallet");
-const UserModel = require("../../models/User");
+// const UserModel = require("../../models/User");
 const getOrders = async (req, res) => {
   try {
     const query = req.query.query || "";
@@ -28,7 +31,10 @@ const getOrders = async (req, res) => {
       pages: Math.ceil(count / perPage),
     });
   } catch (err) {
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -44,21 +50,24 @@ const getOrderDetails = async (req, res) => {
     console.log(order);
 
     if (!order) {
-      return res.status(404).json({
-        status: "Failed",
-        message: "The order is doesn't exist in the database",
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.ORDER_NOT_FOUND,
       });
     }
 
-    res.status(200).json({
-      status: "Success",
-      message: "The order is fetched successfully",
+    res.status(HttpStatusCode.OK).json({
+      status: HttpStatus.SUCCESS,
+      message: HttpResponseMessage.SUCCESS.ORDER_FETCH,
       data: {
         order,
       },
     });
   } catch (err) {
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -74,7 +83,9 @@ const updateOrderStatus = async (req, res) => {
     );
 
     if (!updatedOrder) {
-      return res.status(404).json({ message: "Order not found" });
+      return res
+        .status(HttpStatusCode.BAD_REQUEST)
+        .json({ message: HttpResponseMessage.ERROR.ORDER_NOT_FOUND });
     }
 
     if (updatedOrder.orderStatus === "delivered") {
@@ -111,8 +122,10 @@ const updateOrderStatus = async (req, res) => {
 
     res.json({ status: updatedOrder.orderStatus });
   } catch (error) {
-    console.error("Error updating order status:", error);
-    res.status(500).json({ message: "Server error" });
+    // console.error("Error updating order status:", error);
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: HttpResponseMessage.ERROR.SERVER_ERROR });
   }
 };
 
@@ -138,20 +151,23 @@ const handleReturnRequest = async (req, res) => {
     );
 
     if (!order) {
-      return res.status(404).json({
-        status: "Failed",
-        message: "The order is not found",
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.ORDER_NOT_FOUND,
       });
     }
 
-    res.status(200).json({
-      status: "Success",
-      message: "The return request is handled successfully",
+    res.status(HttpStatusCode.OK).json({
+      status: HttpStatus.SUCCESS,
+      message: HttpResponseMessage.SUCCESS.ORDER_RETURN_REQUEST,
       order,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ status: "Error", message: "Server Error!!!" });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -161,9 +177,9 @@ const refundToWallet = async (req, res, orderId) => {
     const order = await OrderModel.findById(orderId);
 
     if (!order || order.returnDetails.returnStatus === "completed") {
-      return res.status(400).json({
+      return res.status(HttpStatusCode.BAD_REQUEST).json({
         success: false,
-        message: "Invalid or already completed return",
+        message: HttpResponseMessage.ERROR.ORDER_RETURN_COMPLETED,
       });
     }
 
@@ -193,15 +209,18 @@ const refundToWallet = async (req, res, orderId) => {
     order.orderStatus = "returned";
     await order.save();
 
-    return res.status(200).json({
+    return res.status(HttpStatusCode.OK).json({
       success: true,
-      message: "Return approved and amount credited to wallet",
+      message: HttpResponseMessage.SUCCESS.ORDER_RETURN_APPROVED,
       order,
       wallet,
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -213,7 +232,10 @@ const searchOrders = (req, res) => {
     res.redirect(`/admin/orders?query=${query}`);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 

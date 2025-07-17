@@ -9,6 +9,9 @@ const {
   sendVerificationMail,
   sendForgotPasswordMail,
 } = require("../../utils/emailSender");
+const HttpStatusCode = require("../../constants/httpStatusCode");
+const HttpResponseMessage = require("../../constants/httpResponseMessage");
+const HttpStatus = require("../../constants/httpStatus");
 
 require("dotenv").config();
 
@@ -20,7 +23,9 @@ const postLocalLogin = async (req, res, next) => {
       return next(err);
     }
     if (!user) {
-      return res.status(404).json({ success: false, message: info.message });
+      return res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({ success: false, message: info.message });
     }
 
     req.logIn(user, async (err) => {
@@ -32,9 +37,9 @@ const postLocalLogin = async (req, res, next) => {
         const wishlist = await WishlistModel.findOne({ userId: user._id });
         const cart = await CartModel.findOne({ userId: user._id });
 
-        return res.status(200).json({
+        return res.status(HttpStatusCode.OK).json({
           success: true,
-          message: "User login successfully",
+          message: HttpResponseMessage.SUCCESS.USER_LOGIN,
           wishlist: wishlist ? wishlist.productIds : [],
           cart,
         });
@@ -51,7 +56,9 @@ const postLocalSignup = async (req, res, next) => {
       return next(err);
     }
     if (!user) {
-      return res.status(404).json({ success: false, message: info.message });
+      return res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({ success: false, message: info.message });
     }
 
     req.logIn(user, async (err) => {
@@ -73,9 +80,9 @@ const postLocalSignup = async (req, res, next) => {
           totalPrice: 0,
         });
 
-        return res.status(200).json({
+        return res.status(HttpStatusCode.OK).json({
           success: true,
-          message: "User signup successful",
+          message: HttpResponseMessage.SUCCESS.USER_SIGNUP,
           wishlist: wishlist.productIds,
           cart,
         });
@@ -94,20 +101,25 @@ const verifyOtp = async (req, res) => {
     console.log(otp);
     const user = await UserModel.findById(userId);
     if (!user) {
-      return res
-        .status(404)
-        .json({ succes: false, message: "User not found." });
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        succes: false,
+        message: HttpResponseMessage.ERROR.USER_NOT_FOUND,
+      });
     }
 
     if (user.otpExpires < Date.now()) {
-      return res
-        .status(400)
-        .json({ success: false, message: "OTP has expired." });
+      return res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: HttpResponseMessage.ERROR.OTP_EXPIRED,
+      });
     }
 
     const isOtpValid = await bcrypt.compare(otp, user.otp);
     if (!isOtpValid) {
-      return res.status(400).json({ success: false, message: "Invalid OTP" });
+      return res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: HttpResponseMessage.ERROR.INVALID_OTP,
+      });
     }
 
     user.isVerified = true;
@@ -115,12 +127,15 @@ const verifyOtp = async (req, res) => {
     user.otpExpires = undefined;
     await user.save();
 
-    res
-      .status(200)
-      .json({ success: true, message: "the user verified successful" });
+    res.status(HttpStatusCode.OK).json({
+      success: true,
+      message: HttpResponseMessage.SUCCESS.USER_VERIFY,
+    });
   } catch (error) {
-    console.error("Error in verifyOtp:", error);
-    res.status(500).json({ message: "Server error. Please try again later." });
+    // console.error("Error in verifyOtp:", error);
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: HttpResponseMessage.ERROR.SERVER_ERROR });
   }
 };
 
@@ -130,9 +145,9 @@ const getSignup = (req, res) => {
     const error = req.query.error;
     res.render("user/signup", { msg: error });
   } catch (err) {
-    res.status(500).json({
-      status: "Error",
-      message: "The server error",
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
     });
   }
 };
@@ -144,9 +159,9 @@ const getOtpPage = (req, res) => {
     const { email, _id } = req.user;
     res.render("user/otpGeneratePage", { email, userId: _id, msg: message });
   } catch (err) {
-    res.status(500).json({
-      status: "Error",
-      message: "The server error",
+    res.status(HttpStatusCode, HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
     });
   }
 };
@@ -158,15 +173,15 @@ const resendOtp = async (req, res) => {
     const email = req.user?.email;
     await sendVerificationMail({ _id, email }, res);
 
-    return res.status(200).json({
+    return res.status(HttpStatusCode.OK).json({
       success: true,
-      message: "OTP resend successfully",
+      message: HttpResponseMessage.SUCCESS.OTP_RESEND,
       data: { userId: _id, email: email },
     });
   } catch (error) {
-    res.status(500).json({
-      status: "Failed",
-      message: "Failed to resend OTP. Please try again.",
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.FAILED,
+      message: HttpResponseMessage.ERROR.OTP_RESEND,
     });
   }
 };
@@ -178,9 +193,9 @@ const getLogin = (req, res) => {
     const error = req.query.error || "";
     res.render("user/login", { msg: error });
   } catch (err) {
-    res.status(500).json({
-      status: "Error",
-      message: "The server error",
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
     });
   }
 };
@@ -215,9 +230,9 @@ const redirectToProfile = (req, res) => {
     console.log("HI", req.session.returnTo);
     res.redirect("/");
   } catch (err) {
-    res.status(500).json({
-      status: "Error",
-      message: "The server error",
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
     });
   }
 };
@@ -229,14 +244,21 @@ const forgotPassword = async (req, res) => {
     const user = await UserModel.findOne({ email });
     if (user) {
       await sendForgotPasswordMail(user, email);
-      return res
-        .status(200)
-        .json({ success: true, message: "The mail is sent successfully" });
+      return res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: HttpResponseMessage.SUCCESS.EMAIL_SENT,
+      });
     } else {
-      res.status(404).json({ success: false, message: "Email not found" });
+      res.status(HttpStatusCode.NOT_FOUND).json({
+        success: false,
+        message: HttpResponseMessage.ERROR.EMAIL_NOT_FOUND,
+      });
     }
   } catch (err) {
-    res.status(500).json({ success: false, message: "Server error !!!" });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -246,14 +268,16 @@ const getResetPasswordPage = async (req, res) => {
     const token = req.params.token;
     const user = await UserModel.findOne({ resetPasswordToken: token });
     if (user) {
-      res.status(200).render("user/resetPassword", { token });
+      res.status(HttpStatusCode.OK).render("user/resetPassword", { token });
     } else {
-      res.status(404).json("Invalid or expired token");
+      res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json(HttpResponseMessage.ERROR.TOKEN_EXPIRED);
     }
   } catch (err) {
-    res.status(500).json({
-      status: "Failure",
-      message: "Server error!!!",
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.FAILED,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
     });
   }
 };
@@ -274,12 +298,15 @@ const changePassword = async (req, res) => {
 
       res.render("user/password_success");
     } else {
-      res.status(404).json({ status: "Failure", message: "User not found" });
+      res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.USER_NOT_FOUND,
+      });
     }
   } catch (err) {
-    res.status(500).json({
-      status: "Failed",
-      message: "server error!!!",
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.FAILED,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
     });
   }
 };
@@ -292,24 +319,36 @@ const validateCurrentPassword = async (req, res) => {
     const user = await UserModel.findById(userId);
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.USER_NOT_FOUND,
+      });
+      return res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: HttpResponseMessage.ERROR.USER_NOT_FOUND,
+      });
     }
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
 
     if (isMatch) {
-      return res
-        .status(200)
-        .json({ success: true, message: "Password is correct" });
+      return res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: HttpResponseMessage.SUCCESS.PASSWORD_CORRECT,
+      });
     } else {
-      return res
-        .status(400)
-        .json({ success: false, message: "Incorrect current password" });
+      return res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: HttpResponseMessage.ERROR.PASSWORD_INCORRECT,
+      });
     }
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({
+        success: false,
+        message: HttpResponseMessage.ERROR.SERVER_ERROR,
+      });
   }
 };
 
@@ -319,7 +358,9 @@ const changeUserPassword = async (req, res) => {
 
     const user = await UserModel.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res
+        .status(HttpStatusCode.NOT_FOUND)
+        .json({ message: HttpResponseMessage.ERROR.USER_NOT_FOUND });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -328,9 +369,13 @@ const changeUserPassword = async (req, res) => {
     user.password = hashedPassword;
     await user.save();
 
-    return res.status(200).json({ message: "Password updated successfully" });
+    return res
+      .status(HttpStatusCode.OK)
+      .json({ message: HttpResponseMessage.SUCCESS.PASSWORD_UPDATE });
   } catch (error) {
-    return res.status(500).json({ message: "Server error" });
+    return res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ message: HttpResponseMessage.ERROR.SERVER_ERROR });
   }
 };
 
@@ -353,9 +398,9 @@ const logout = (req, res) => {
       });
     });
   } catch (err) {
-    res.status(500).json({
-      status: "Error",
-      message: "The server error",
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
     });
   }
 };

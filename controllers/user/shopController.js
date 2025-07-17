@@ -8,6 +8,7 @@ const WishlistModel = require("../../models/Wishlist");
 const OfferModel = require("../../models/Offer");
 
 const { v4: uuidv4 } = require("uuid");
+const HttpStatusCode = require("../../constants/httpStatusCode");
 
 const getShop = async (req, res) => {
   try {
@@ -104,7 +105,7 @@ const getShop = async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching shop data:", err);
-    res.status(500).json({
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       status: "Error",
       message: "The server encountered an error",
     });
@@ -122,7 +123,7 @@ const getProductDetails = async (req, res) => {
     });
 
     if (!product) {
-      return res.status(404).send("Product not found");
+      return res.status(HttpStatusCode.NOT_FOUND).send("Product not found");
     }
 
     let discountedPrice = product.price;
@@ -158,7 +159,7 @@ const getProductDetails = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching product details:", error);
-    res.status(500).send("Server error");
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send("Server error");
   }
 };
 
@@ -170,19 +171,21 @@ const getImage = async (req, res) => {
     const product = await ProductModel.findById(productId);
     if (product) {
       if (isNaN(index) || index < 0 || index >= product.images.length) {
-        return res.status(400).json({ error: "Invalid index" });
+        return res
+          .status(HttpStatusCode.BAD_REQUEST)
+          .json({ error: "Invalid index" });
       }
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ src: `/public/uploads/${product.images[index]}` });
     } else {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         status: "Failed",
         message: "The product doesn't exist",
       });
     }
   } catch (err) {
-    res.status(500).json({
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       status: "Error",
       message: "Server error!!!",
     });
@@ -200,19 +203,19 @@ const filterCategoryProduct = async (req, res) => {
       console.log("products");
 
       if (products) {
-        return res.status(200).json({
+        return res.status(HttpStatusCode.OK).json({
           status: "Success",
           message: "The products successfully fetched...",
           data: products,
         });
       }
     }
-    res.status(404).json({
+    res.status(HttpStatusCode.NOT_FOUND).json({
       status: "Failure",
       message: " The category doesn't exists",
     });
   } catch (err) {
-    res.status(500).json({
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       status: "Error",
       message: "The server error!!!",
     });
@@ -257,19 +260,19 @@ const filterAllProducts = async (req, res) => {
     }
 
     if (products.length > 0) {
-      res.status(200).json({
+      res.status(HttpStatusCode.OK).json({
         status: "Success",
         message: "The products successfully fetched...",
         data: { products, wishlist },
       });
     } else {
-      res.status(404).json({
+      res.status(HttpStatusCode.NOT_FOUND).json({
         status: "Failure",
         message: " The products exists",
       });
     }
   } catch (err) {
-    res.status(500).json({
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       status: "Error",
       message: "The serverrrr error!!!",
     });
@@ -285,11 +288,11 @@ const searchProducts = async (req, res) => {
       name: { $regex: query, $options: "i" },
     });
 
-    res.status(200).json({ success: true, data: products });
+    res.status(HttpStatusCode.OK).json({ success: true, data: products });
   } catch (error) {
     console.error("Error searching products:", error);
     res
-      .status(500)
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
       .json({ success: false, message: "Error searching products" });
   }
 };

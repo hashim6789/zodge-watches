@@ -4,6 +4,7 @@ const OrderModel = require("../../models/Order");
 const WishlistModel = require("../../models/Wishlist");
 const CartModel = require("../../models/Cart");
 const WalletModel = require("../../models/Wallet");
+const HttpStatusCode = require("../../constants/httpStatusCode");
 
 //get the account profile page
 const getAccountPage = async (req, res) => {
@@ -16,7 +17,7 @@ const getAccountPage = async (req, res) => {
     const user = await UserModel.findById(userId);
     if (!user) {
       return res
-        .status(404)
+        .status(HttpStatusCode.NOT_FOUND)
         .json({ success: false, message: "User not found" });
     }
 
@@ -81,7 +82,9 @@ const getAccountPage = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ success: false, message: "Server error" });
   }
 };
 
@@ -101,19 +104,19 @@ const updatePersonalInfo = async (req, res) => {
     console.log(userId, firstName, lastName, user);
 
     if (!user) {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         success: false,
         message: "user not found",
       });
     }
 
-    return res.status(200).json({
+    return res.status(HttpStatusCode.OK).json({
       success: true,
       message: "user updated successfully",
       data: user,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Error updating user filed",
     });
@@ -136,19 +139,19 @@ const createAddress = async (req, res) => {
       console.log(address);
 
       const savedAddress = await address.save();
-      return res.status(201).json({
+      return res.status(HttpStatusCode.CREATED).json({
         success: true,
         message: "user updated successfully",
         data: savedAddress,
       });
     } else {
-      res.status(404).json({
+      res.status(HttpStatusCode.NOT_FOUND).json({
         success: false,
         message: "the Address is already exist!!!",
       });
     }
   } catch (error) {
-    return res.status(500).json({
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Error creating the address",
     });
@@ -166,18 +169,18 @@ const updateAddress = async (req, res) => {
       { new: true }
     );
     if (!address) {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         success: false,
         message: "The address is not found",
       });
     }
-    return res.status(200).json({
+    return res.status(HttpStatusCode.OK).json({
       success: true,
       message: "the addresses of the user is got successfully",
       address,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Error updating user filed",
     });
@@ -190,18 +193,18 @@ const deleteAddress = async (req, res) => {
     const addressId = req.params.addressId;
     const deletedAddress = await AddressModel.findByIdAndDelete(addressId);
     if (!deletedAddress) {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         success: false,
         message: "The address is not found",
       });
     }
-    return res.status(200).json({
+    return res.status(HttpStatusCode.OK).json({
       success: true,
       message: "the addresses of the user is got successfully",
       deletedAddress,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Server Error",
     });
@@ -220,7 +223,7 @@ const cancelOrder = async (req, res) => {
   );
   if (!order) {
     return res
-      .status(404)
+      .status(HttpStatusCode.NOT_FOUND)
       .json({ success: false, message: "The order is not found!!!" });
   }
 
@@ -248,7 +251,7 @@ const cancelOrder = async (req, res) => {
     await wallet.save();
   }
 
-  res.status(200).json({
+  res.status(HttpStatusCode.OK).json({
     success: true,
     message: "the order is cancelled successfully...",
     order,
@@ -273,7 +276,7 @@ const viewOrderDetail = async (req, res) => {
     );
     console.log("order = ", wishlist);
     if (!order) {
-      return res.status(404).json({
+      return res.status(HttpStatusCode.NOT_FOUND).json({
         status: "Failed",
         message: "The order is not found",
       });
@@ -288,7 +291,7 @@ const viewOrderDetail = async (req, res) => {
       trackingSteps = ["placed", "shipped", "delivered"];
     }
 
-    res.status(200).render("user/orderDetailsPage", {
+    res.status(HttpStatusCode.OK).render("user/orderDetailsPage", {
       cart,
       order,
       user,
@@ -296,7 +299,7 @@ const viewOrderDetail = async (req, res) => {
       wishlist,
     });
   } catch (err) {
-    return res.status(500).json({
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       status: "error",
       message: "Error updating address status",
     });
@@ -322,11 +325,11 @@ const sendReturnRequest = async (req, res) => {
   console.log(order);
   if (!order) {
     return res
-      .status(404)
+      .status(HttpStatusCode.NOT_FOUND)
       .json({ success: false, message: "The order is not found!!!" });
   }
 
-  res.status(200).json({
+  res.status(HttpStatusCode.OK).json({
     success: true,
     message: "the user send the return request to the user successfully...",
     order,
@@ -356,7 +359,9 @@ const getOrdersList = async (req, res) => {
       currentPage: page,
     });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch orders" });
+    res
+      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch orders" });
   }
 };
 
