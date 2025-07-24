@@ -22,31 +22,26 @@ const getCart = async (req, res) => {
     );
     res.render("user/cartPage", { cart, user, wishlist });
   } catch (err) {
-    res
-      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        status: HttpStatus.ERROR,
-        message: HttpResponseMessage.ERROR.SERVER_ERROR,
-      });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
 //for add to cart the product
 const addToCart = async (req, res) => {
   try {
-    console.log("testing");
     const userId = req.user?._id;
     const { quantity, productId } = req.body;
 
     const product = await ProductModel.findById(productId).populate("offers");
 
     if (!product) {
-      return res
-        .status(HttpStatusCode.NOT_FOUND)
-        .json({
-          success: false,
-          message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND,
-        });
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        success: false,
+        message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND,
+      });
     }
 
     let discountedPrice = product.price;
@@ -91,12 +86,9 @@ const addToCart = async (req, res) => {
       cart.totalPrice += discountedPrice * quantity;
     }
 
-    // console.log(cart.totalPrice);
-
     await cart.save();
     req.session.cart = cart;
 
-    // console.log("Product added to cart successfully");
     res.status(HttpStatusCode.OK).json({
       success: true,
       message: HttpResponseMessage.SUCCESS.PRODUCT_ADDED_TO_CART,
@@ -104,13 +96,10 @@ const addToCart = async (req, res) => {
       product: { ...product.toObject(), discountedPrice },
     });
   } catch (err) {
-    // console.error("Error in addToCart:", err);
-    res
-      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        success: false,
-        message: HttpResponseMessage.ERROR.SERVER_ERROR,
-      });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -119,38 +108,45 @@ const updateQuantity = async (req, res) => {
     const { productId, changeQuantity } = req.body;
     const userId = req.user?._id;
 
+    if (changeQuantity !== 1 && changeQuantity !== -1) {
+      return res.status(HttpStatusCode.BAD_REQUEST).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.INVALID_CREDENTIALS,
+      });
+    }
+
     const cart = await CartModel.findOne({ userId });
     if (!cart) {
-      return res
-        .status(HttpStatusCode.NOT_FOUND)
-        .json({
-          status: HttpStatus.FAILED,
-          message: HttpResponseMessage.ERROR.CART_NOT_FOUND,
-        });
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.CART_NOT_FOUND,
+      });
     }
 
     const productIdx = cart.products.findIndex(
       (p) => p.productId.toString() === productId
     );
     if (productIdx === -1) {
-      return res
-        .status(HttpStatusCode.NOT_FOUND)
-        .json({
-          status: HttpStatus.FAILED,
-          message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND_ON_CART,
-        });
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND_ON_CART,
+      });
     }
 
     const newQuantity = cart.products[productIdx].quantity + changeQuantity;
 
+    if (newQuantity > 3) {
+      return res.status(HttpStatusCode.BAD_REQUEST).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.MAXIMUM_QUANTITY_OVER,
+      });
+    }
     const product = await ProductModel.findById(productId).populate("offers");
     if (!product) {
-      return res
-        .status(HttpStatusCode.NOT_FOUND)
-        .json({
-          status: HttpStatus.FAILED,
-          message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND,
-        });
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND,
+      });
     }
 
     let discountedPrice = product.price;
@@ -174,9 +170,6 @@ const updateQuantity = async (req, res) => {
     } else {
       cart.products[productIdx].quantity = newQuantity;
     }
-    // console.log("quantity = ", newQuantity);
-
-    // console.log("total = ", cart.totalPrice);
     await cart.save();
 
     return res.status(HttpStatusCode.OK).json({
@@ -186,13 +179,10 @@ const updateQuantity = async (req, res) => {
       cartTotal: cart.totalPrice,
     });
   } catch (err) {
-    // console.error("Error updating quantity:", err);
-    res
-      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        status: HttpStatus.ERROR,
-        message: HttpResponseMessage.ERROR.SERVER_ERROR,
-      });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -203,24 +193,20 @@ const deleteCartProduct = async (req, res) => {
 
     const cart = await CartModel.findOne({ userId });
     if (!cart) {
-      return res
-        .status(HttpStatusCode.NOT_FOUND)
-        .json({
-          status: HttpStatus.FAILED,
-          message: HttpResponseMessage.ERROR.CART_NOT_FOUND,
-        });
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.CART_NOT_FOUND,
+      });
     }
 
     const productToDelete = cart.products.find(
       (product) => product.productId.toString() === productId
     );
     if (!productToDelete) {
-      return res
-        .status(HttpStatusCode.NOT_FOUND)
-        .json({
-          status: HttpStatus.FAILED,
-          message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND_ON_CART,
-        });
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        status: HttpStatus.FAILED,
+        message: HttpResponseMessage.ERROR.PRODUCT_NOT_FOUND_ON_CART,
+      });
     }
 
     cart.products = cart.products.filter(
@@ -251,8 +237,6 @@ const deleteCartProduct = async (req, res) => {
       total += discountedPrice * currProduct.quantity;
     }
 
-    // console.log("total = ", total);
-
     cart.totalPrice = total;
 
     await cart.save();
@@ -264,13 +248,10 @@ const deleteCartProduct = async (req, res) => {
       cart,
     });
   } catch (err) {
-    // console.error("Error deleting product from cart:", err);
-    res
-      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        status: HttpStatus.ERROR,
-        message: HttpResponseMessage.ERROR.SERVER_ERROR,
-      });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -282,12 +263,10 @@ const postCart = async (req, res) => {
     req.session.cart = cart;
     res.redirect("/checkout");
   } catch (err) {
-    res
-      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        status: HttpStatus.ERROR,
-        message: HttpResponseMessage.ERROR.SERVER_ERROR,
-      });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 

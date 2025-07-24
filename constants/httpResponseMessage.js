@@ -1,5 +1,9 @@
 const HttpResponseMessage = {
   ERROR: {
+    INSUFFICIENT_STOCK: `Insufficient stock for product`,
+    FILL_REQUIRED_FIELDS: "Please fill in all required fields.",
+    MAXIMUM_QUANTITY_OVER: "Maximum 3 quantity will be allowed!",
+    INVALID_CREDENTIALS: "Invalid Credentials!",
     USER_BLOCKED_OR_NOT_EXIST:
       "User does not exist or blocked. Please sign up.",
     USER_BLOCKED: "User is blocked.",
