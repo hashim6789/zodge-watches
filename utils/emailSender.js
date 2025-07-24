@@ -105,7 +105,11 @@ const sendForgotPasswordMail = async (user, email) => {
       from: ENV.EMAIL_USER,
       to: email,
       subject: "Password Reset",
-      text: `Click the following link to reset your password: http://${ENV.DOMAIN_NAME}/auth/reset-password/${token}`,
+      text: `Click the following link to reset your password: http://${
+        ENV.DOMAIN_NAME
+      }${
+        ENV.NODE_ENV === "development" ? ":" + ENV.PORT : ""
+      }/auth/reset-password/${token}`,
     };
     user.save();
 

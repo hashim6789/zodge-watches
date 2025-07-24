@@ -17,7 +17,6 @@ require("dotenv").config();
 
 /**-------------for traditional signup and login-------------------- */
 const postLocalLogin = async (req, res, next) => {
-  console.log("signup");
   passport.authenticate("local-login", async (err, user, info) => {
     if (err) {
       return next(err);
@@ -343,12 +342,10 @@ const validateCurrentPassword = async (req, res) => {
       });
     }
   } catch (error) {
-    return res
-      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        success: false,
-        message: HttpResponseMessage.ERROR.SERVER_ERROR,
-      });
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 

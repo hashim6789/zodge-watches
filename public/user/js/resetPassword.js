@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Validate password
   function validatePassword() {
     const password = passwordInput.value;
-    if (password.length >= 6) {
+    if (password.length >= 8) {
       passwordInput.classList.remove("is-invalid");
       passwordInput.classList.add("is-valid");
     } else {
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function validateConfirmPassword() {
     const password = passwordInput.value;
     const confirmPassword = confirmPasswordInput.value;
-    if (confirmPassword === password && confirmPassword.length >= 6) {
+    if (confirmPassword === password && confirmPassword.length >= 8) {
       confirmPasswordInput.classList.remove("is-invalid");
       confirmPasswordInput.classList.add("is-valid");
     } else {
