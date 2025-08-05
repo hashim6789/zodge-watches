@@ -1,5 +1,13 @@
 const HttpResponseMessage = {
   ERROR: {
+    INSUFFICIENT_STOCK: `Insufficient stock for product`,
+    FILL_REQUIRED_FIELDS: "Please fill in all required fields.",
+    MAXIMUM_QUANTITY_OVER: "Maximum 3 quantity will be allowed!",
+    INVALID_CREDENTIALS: "Invalid Credentials!",
+    USER_BLOCKED_OR_NOT_EXIST:
+      "User does not exist or blocked. Please sign up.",
+    USER_BLOCKED: "User is blocked.",
+    INCORRECT_USERNAME_OR_PASSWORD: "Incorrect username or password.",
     ADDRESS_NOT_FOUND: "Address not found",
     PRODUCT_NOT_FOUND_ON_CART: "Product not found in the cart",
     CART_NOT_FOUND: "Cart not found",
@@ -15,6 +23,7 @@ const HttpResponseMessage = {
     USERS_NOT_FOUND: "the users are not found...",
     USERS_STATUSES: "Error get all user status",
     REPORT_GENERATE: "Error generating report",
+    USER_EXIST: "User already exists.",
     PRODUCT_STATUS_UPDATE: "Error updating product status",
     PRODUCT_FETCH: "Error fetching the product",
     PRODUCT_UPDATE: "Error updating the product",

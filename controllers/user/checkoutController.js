@@ -34,12 +34,10 @@ const getCheckout = async (req, res) => {
 
     res.render("user/checkoutPage", { cart, user, wishlist, addresses });
   } catch (err) {
-    res
-      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        status: HttpStatus.ERROR,
-        message: HttpResponseMessage.ERROR.SERVER_ERROR,
-      });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      status: HttpStatus.ERROR,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -70,40 +68,32 @@ const applyCoupon = async (req, res) => {
     const { couponCode } = req.body;
     const userId = req.user?._id;
 
-    // console.log(couponCode, userId);
-
     const coupon = await CouponModel.findOne({
       code: couponCode,
       isListed: true,
     });
 
     if (!coupon) {
-      return res
-        .status(HttpStatusCode.NOT_FOUND)
-        .json({
-          success: false,
-          message: HttpResponseMessage.ERROR.COUPON_NOT_FOUND,
-        });
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        success: false,
+        message: HttpResponseMessage.ERROR.COUPON_NOT_FOUND,
+      });
     }
 
     if (coupon.expiryDate < new Date()) {
-      return res
-        .status(HttpStatusCode.BAD_REQUEST)
-        .json({
-          success: false,
-          message: HttpResponseMessage.ERROR.COUPON_EXPIRED,
-        });
+      return res.status(HttpStatusCode.BAD_REQUEST).json({
+        success: false,
+        message: HttpResponseMessage.ERROR.COUPON_EXPIRED,
+      });
     }
 
     const cart = await CartModel.findOne({ userId });
 
     if (!cart) {
-      return res
-        .status(HttpStatusCode.NOT_FOUND)
-        .json({
-          success: false,
-          message: HttpResponseMessage.ERROR.CART_NOT_FOUND,
-        });
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        success: false,
+        message: HttpResponseMessage.ERROR.CART_NOT_FOUND,
+      });
     }
     console.log(cart.totalPrice, coupon.minPurchaseAmount);
 
@@ -143,13 +133,10 @@ const applyCoupon = async (req, res) => {
       cart,
     });
   } catch (error) {
-    // console.error(error);
-    return res
-      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        success: false,
-        message: HttpResponseMessage.ERROR.SERVER_ERROR,
-      });
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -159,12 +146,10 @@ const removeCoupon = async (req, res) => {
 
     const cart = await CartModel.findOne({ userId });
     if (!cart) {
-      return res
-        .status(HttpStatusCode.NOT_FOUND)
-        .json({
-          success: false,
-          message: HttpResponseMessage.ERROR.CART_NOT_FOUND,
-        });
+      return res.status(HttpStatusCode.NOT_FOUND).json({
+        success: false,
+        message: HttpResponseMessage.ERROR.CART_NOT_FOUND,
+      });
     }
 
     if (!cart.coupon || !cart.coupon.code) {
@@ -192,12 +177,10 @@ const removeCoupon = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res
-      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        success: false,
-        message: HttpResponseMessage.ERROR.SERVER_ERROR,
-      });
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -219,7 +202,7 @@ const postCheckout = async (req, res) => {
     ) {
       return res
         .status(HttpStatusCode.BAD_REQUEST)
-        .json({ message: "Please fill in all required fields." });
+        .json({ message: HttpResponseMessage.ERROR.FILL_REQUIRED_FIELDS });
     }
 
     let totalPrice = 0;
@@ -232,7 +215,7 @@ const postCheckout = async (req, res) => {
 
       if (!foundProduct || foundProduct.stock < product.quantity) {
         return res.status(HttpStatusCode.BAD_REQUEST).json({
-          message: `Insufficient stock for product ${product.productId}`,
+          message: HttpResponseMessage.ERROR.INSUFFICIENT_STOCK,
         });
       }
 
@@ -367,12 +350,10 @@ const postCheckout = async (req, res) => {
       });
     }
   } catch (err) {
-    res
-      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        success: false,
-        message: HttpResponseMessage.ERROR.SERVER_ERROR,
-      });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -451,12 +432,10 @@ const getOrderConfirmation = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching order:", error);
-    res
-      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        success: false,
-        message: HttpResponseMessage.ERROR.SERVER_ERROR,
-      });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 
@@ -469,12 +448,10 @@ const getPaymentRetryPage = (req, res) => {
       failedOrder: failedOrder,
     });
   } catch (err) {
-    res
-      .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        success: false,
-        message: HttpResponseMessage.ERROR.SERVER_ERROR,
-      });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: HttpResponseMessage.ERROR.SERVER_ERROR,
+    });
   }
 };
 

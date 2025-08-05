@@ -367,14 +367,11 @@ function submitCheckout(event) {
             data.currency,
             data.key_id
           );
-        } else {
-          Swal.fire("Error", data.message, "error");
-          window.location.href = `/profile/${userId}`;
         }
       })
       .catch((error) => {
-        Swal.fire("Error", "A server error occurred.", "error");
-        window.location.href = `/profile/${userId}`;
+        Swal.fire("Error", error.response.data.message, "error");
+        // window.location.href = `/profile/${userId}`;
       });
   }
 }
@@ -415,15 +412,13 @@ function handleOrderPlacement(paymentMethod, address, userId) {
         });
       } else {
         Swal.fire("Error", "Payment verification failed.", "error").then(() => {
-          console.log("testing");
-          window.location.href = `/profile/${userId}`;
+          // window.location.href = `/profile/${userId}`;
         });
       }
     })
     .catch((error) => {
       Swal.fire("Error", error.response.data.message, "error").then(() => {
-        console.log("testing");
-        window.location.href = `/profile/${userId}`;
+        // window.location.href = `/profile/${userId}`;
       });
     });
 }

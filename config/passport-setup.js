@@ -5,6 +5,7 @@ const User = require("../models/User");
 const authRoute = require("../routes/user/authRoute");
 const bcrypt = require("bcryptjs");
 const { ENV } = require("./env.config");
+const HttpResponseMessage = require("../constants/httpResponseMessage");
 require("dotenv").config();
 
 /**----------------------USER SERIALIZERS------------------ */
@@ -53,7 +54,7 @@ passport.use(
             return done(null, existingUser);
           } else {
             return done(null, false, {
-              message: "User already exists. Please log in.",
+              message: HttpResponseMessage.ERROR.USER_EXIST,
             });
           }
         } else {
@@ -109,7 +110,7 @@ passport.use(
           return done(null, existingUser);
         } else {
           return done(null, false, {
-            message: "User does not exist or blocked. Please sign up.",
+            message: HttpResponseMessage.ERROR.USER_BLOCKED_OR_NOT_EXIST,
           });
         }
       } catch (error) {
@@ -134,7 +135,9 @@ passport.use(
       try {
         let user = await User.findOne({ email });
         if (user) {
-          return done(null, false, { message: "User already exists." });
+          return done(null, false, {
+            message: HttpResponseMessage.ERROR.USER_EXIST,
+          });
         }
 
         const hashPassword = await bcrypt.hash(password, 10);
@@ -168,19 +171,21 @@ passport.use(
         let user = await User.findOne({ email });
         if (!user) {
           return done(null, false, {
-            message: "Incorrect username or password.",
+            message: HttpResponseMessage.ERROR.INCORRECT_USERNAME_OR_PASSWORD,
           });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
           return done(null, false, {
-            message: "Incorrect username or password.",
+            message: HttpResponseMessage.ERROR.INCORRECT_USERNAME_OR_PASSWORD,
           });
         }
 
         if (user.isBlocked) {
-          return done(null, false, { message: "User is blocked." });
+          return done(null, false, {
+            message: HttpResponseMessage.ERROR.USER_BLOCKED,
+          });
         }
 
         return done(null, user);
